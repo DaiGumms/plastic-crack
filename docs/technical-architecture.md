@@ -249,6 +249,7 @@ Plastic Crack follows a modern cross-platform architecture supporting mobile app
          │   (Graph)       │
          └─────────────────┘
 ```
+```
 ├── components/           # Reusable UI components
 │   ├── ui/              # Basic UI elements (Button, Input, etc.)
 │   ├── forms/           # Form components
