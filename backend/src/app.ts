@@ -9,6 +9,8 @@ import { config } from './config/config';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { requestValidator } from './middleware/requestValidator';
+import { initializeSession } from './lib/session';
+import { isRedisConnected, checkRedisHealth } from './lib/redis';
 import { v1Routes } from './routes/v1';
 
 // Load environment variables
@@ -53,17 +55,31 @@ if (config.nodeEnv !== 'test') {
   app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
 }
 
+// Session middleware (only if Redis is connected)
+try {
+  if (isRedisConnected()) {
+    app.use(initializeSession());
+  }
+} catch {
+  // Continue without sessions if Redis is not available
+}
+
 // Request validation middleware
 app.use(requestValidator);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const redisHealth = await checkRedisHealth();
+  
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || '0.1.0',
     environment: config.nodeEnv,
     uptime: process.uptime(),
+    services: {
+      redis: redisHealth,
+    },
   });
 });
 

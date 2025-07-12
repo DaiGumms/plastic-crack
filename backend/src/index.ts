@@ -1,8 +1,14 @@
 import { app } from './app';
 import { config } from './config/config';
+import { connectRedis, disconnectRedis } from './lib/redis';
 
 const startServer = async (): Promise<void> => {
   try {
+    // Initialize Redis connection
+    console.log('🔄 Connecting to Redis...');
+    await connectRedis();
+    console.log('✅ Redis connected successfully');
+
     const server = app.listen(config.port, () => {
       console.log(`🚀 Server running on port ${config.port}`);
       console.log(`📱 Environment: ${config.nodeEnv}`);
@@ -12,11 +18,17 @@ const startServer = async (): Promise<void> => {
     });
 
     // Graceful shutdown handling
-    const gracefulShutdown = (signal: string) => {
+    const gracefulShutdown = async (signal: string) => {
       console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
       
-      server.close(() => {
+      server.close(async () => {
         console.log('✅ HTTP server closed.');
+        
+        // Disconnect from Redis
+        console.log('🔄 Disconnecting from Redis...');
+        await disconnectRedis();
+        console.log('✅ Redis disconnected');
+        
         process.exit(0);
       });
 
