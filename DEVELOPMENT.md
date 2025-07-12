@@ -19,6 +19,32 @@ This guide will help you set up the development environment for Plastic Crack.
 
 1. **Clone the repository**
    ```bash
+   git clone https://github.com/DaiGumms/plastic-crack.git
+   cd plastic-crack
+   ```
+
+2. **Validate your environment**
+   ```bash
+   npm run validate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   npm run install:all
+   ```
+
+4. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Start development services**
+   ```bash
+   npm run docker:dev    # Start PostgreSQL, Redis, etc.
+   npm run dev          # Start all development servers
+   ```
+   ```bash
    git clone https://github.com/YOUR_USERNAME/plastic-crack.git
    cd plastic-crack
    ```

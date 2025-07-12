@@ -1,0 +1,51 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "./"
+    },
+    {
+      "name": "Backend",
+      "path": "./backend"
+    },
+    {
+      "name": "Frontend", 
+      "path": "./frontend"
+    },
+    {
+      "name": "Mobile",
+      "path": "./mobile"
+    },
+    {
+      "name": "Shared",
+      "path": "./shared"
+    }
+  ],
+  "settings": {
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "eslint.workingDirectories": [
+      "./backend",
+      "./frontend", 
+      "./mobile",
+      "./shared"
+    ],
+    "prettier.requireConfig": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-json",
+      "redhat.vscode-yaml"
+    ]
+  }
+}
