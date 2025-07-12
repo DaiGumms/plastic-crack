@@ -1,6 +1,7 @@
 # Security Documentation - Plastic Crack
 
 ## Table of Contents
+
 1. [Security Overview](#1-security-overview)
 2. [Data Classification](#2-data-classification)
 3. [Authentication & Authorization](#3-authentication--authorization)
@@ -16,7 +17,8 @@
 
 ### 1.1 Security Architecture Principles
 
-The Plastic Crack platform implements a defense-in-depth security model with multiple layers of protection:
+The Plastic Crack platform implements a defense-in-depth security model with multiple layers of
+protection:
 
 - **Zero Trust Architecture**: Never trust, always verify
 - **Principle of Least Privilege**: Minimal access rights
@@ -27,6 +29,7 @@ The Plastic Crack platform implements a defense-in-depth security model with mul
 ### 1.2 Threat Model
 
 #### Primary Threats
+
 1. **Data Breaches**: Unauthorized access to user collections and personal data
 2. **Account Takeover**: Malicious access to user accounts
 3. **Data Manipulation**: Unauthorized modification of collection data
@@ -34,6 +37,7 @@ The Plastic Crack platform implements a defense-in-depth security model with mul
 5. **Privacy Violations**: Exposure of personal information
 
 #### Attack Vectors
+
 - Web application vulnerabilities (OWASP Top 10)
 - Mobile application security flaws
 - API security weaknesses
@@ -52,10 +56,10 @@ graph TD
     E --> G[Identity Provider]
     F --> H[Database Layer]
     F --> I[File Storage]
-    
+
     J[Security Monitoring] --> K[SIEM]
     K --> L[Incident Response]
-    
+
     style B fill:#ff9999
     style D fill:#ff9999
     style E fill:#ff9999
@@ -69,36 +73,42 @@ graph TD
 ### 2.1 Data Categories
 
 #### Highly Sensitive Data (RED)
+
 - User authentication credentials
 - Payment information
 - Personal identifiable information (PII)
 - Private messages between users
 
 **Protection Requirements:**
+
 - Encryption at rest with customer-managed keys
 - Encryption in transit with TLS 1.3
 - Access logging and monitoring
 - Data residency compliance
 
 #### Sensitive Data (AMBER)
+
 - User profile information
 - Collection data marked as private
 - User preferences and settings
 - Purchase history
 
 **Protection Requirements:**
+
 - Encryption at rest with platform-managed keys
 - Encryption in transit with TLS 1.2+
 - Access controls and authorization
 - Regular backup and recovery testing
 
 #### Internal Data (GREEN)
+
 - Public collection data
 - Product catalog information
 - Aggregated analytics data
 - Public forum posts
 
 **Protection Requirements:**
+
 - Standard encryption in transit
 - Basic access controls
 - Standard backup procedures
@@ -121,14 +131,14 @@ const userProfileData: DataClassification = {
   encryption_required: true,
   access_logging: true,
   retention_period: '7_years',
-  geographic_restrictions: ['EU', 'US']
+  geographic_restrictions: ['EU', 'US'],
 };
 
 const publicCollectionData: DataClassification = {
   level: 'GREEN',
   encryption_required: false,
   access_logging: false,
-  retention_period: 'indefinite'
+  retention_period: 'indefinite',
 };
 ```
 
@@ -137,6 +147,7 @@ const publicCollectionData: DataClassification = {
 ### 3.1 Multi-Factor Authentication
 
 #### Implementation Strategy
+
 ```typescript
 // MFA configuration
 const mfaConfig = {
@@ -148,42 +159,40 @@ const mfaConfig = {
       issuer: 'Plastic Crack',
       algorithm: 'SHA1',
       digits: 6,
-      period: 30
+      period: 30,
     },
     sms: {
       enabled: true,
       provider: 'firebase_auth',
-      rate_limit: '5_per_hour'
+      rate_limit: '5_per_hour',
     },
     email: {
       enabled: true,
       template: 'mfa_verification',
-      expiry: '5_minutes'
+      expiry: '5_minutes',
     },
     backup_codes: {
       enabled: true,
       count: 10,
-      one_time_use: true
-    }
-  }
+      one_time_use: true,
+    },
+  },
 };
 
 // MFA enforcement middleware
 const requireMFA = async (req, res, next) => {
   const user = req.user;
   const operation = req.route.operation_type;
-  
-  if (mfaConfig.required_for.includes(user.role) || 
-      sensitiveOperations.includes(operation)) {
-    
+
+  if (mfaConfig.required_for.includes(user.role) || sensitiveOperations.includes(operation)) {
     if (!req.session.mfa_verified) {
       return res.status(403).json({
         error: 'MFA_REQUIRED',
-        redirect: '/auth/mfa/challenge'
+        redirect: '/auth/mfa/challenge',
       });
     }
   }
-  
+
   next();
 };
 ```
@@ -191,53 +200,51 @@ const requireMFA = async (req, res, next) => {
 ### 3.2 Session Management
 
 #### Secure Session Configuration
+
 ```typescript
 // Session security settings
 const sessionConfig = {
   cookie: {
     name: 'plastic_crack_session',
-    secure: true,              // HTTPS only
-    httpOnly: true,           // No JavaScript access
-    sameSite: 'strict',       // CSRF protection
-    maxAge: 15 * 60 * 1000,   // 15 minutes
+    secure: true, // HTTPS only
+    httpOnly: true, // No JavaScript access
+    sameSite: 'strict', // CSRF protection
+    maxAge: 15 * 60 * 1000, // 15 minutes
     path: '/',
-    domain: process.env.NODE_ENV === 'production' 
-      ? '.plasticcrack.com' 
-      : 'localhost'
+    domain: process.env.NODE_ENV === 'production' ? '.plasticcrack.com' : 'localhost',
   },
-  rolling: true,              // Reset expiry on activity
+  rolling: true, // Reset expiry on activity
   resave: false,
   saveUninitialized: false,
-  store: new RedisStore({     // Secure session storage
+  store: new RedisStore({
+    // Secure session storage
     client: redisClient,
     prefix: 'sess:',
-    ttl: 15 * 60             // Match cookie maxAge
-  })
+    ttl: 15 * 60, // Match cookie maxAge
+  }),
 };
 
 // Session validation middleware
 const validateSession = async (req, res, next) => {
   const session = req.session;
-  
+
   // Check session age
-  if (session.created_at && 
-      Date.now() - session.created_at > MAX_SESSION_AGE) {
+  if (session.created_at && Date.now() - session.created_at > MAX_SESSION_AGE) {
     await req.session.destroy();
     return res.status(401).json({ error: 'SESSION_EXPIRED' });
   }
-  
+
   // Check for session hijacking
-  if (session.ip_address !== req.ip ||
-      session.user_agent !== req.get('User-Agent')) {
+  if (session.ip_address !== req.ip || session.user_agent !== req.get('User-Agent')) {
     await logSecurityEvent('SESSION_HIJACKING_ATTEMPT', {
       user_id: session.user_id,
       original_ip: session.ip_address,
-      current_ip: req.ip
+      current_ip: req.ip,
     });
     await req.session.destroy();
     return res.status(401).json({ error: 'SESSION_INVALID' });
   }
-  
+
   next();
 };
 ```
@@ -245,6 +252,7 @@ const validateSession = async (req, res, next) => {
 ### 3.3 Role-Based Access Control (RBAC)
 
 #### Permission System
+
 ```typescript
 // Permission definitions
 const permissions = {
@@ -254,7 +262,7 @@ const permissions = {
   'collection.share': 'Share collection publicly',
   'admin.users': 'Manage user accounts',
   'admin.content': 'Moderate user content',
-  'admin.system': 'System administration'
+  'admin.system': 'System administration',
 };
 
 // Role definitions
@@ -262,7 +270,7 @@ const roles = {
   user: ['collection.read', 'collection.write', 'collection.share'],
   premium_user: ['collection.read', 'collection.write', 'collection.share'],
   moderator: ['collection.read', 'admin.content'],
-  admin: Object.keys(permissions)
+  admin: Object.keys(permissions),
 };
 
 // Authorization middleware
@@ -270,21 +278,21 @@ const authorize = (requiredPermission: string) => {
   return async (req, res, next) => {
     const user = req.user;
     const userPermissions = roles[user.role] || [];
-    
+
     if (!userPermissions.includes(requiredPermission)) {
       await logSecurityEvent('UNAUTHORIZED_ACCESS_ATTEMPT', {
         user_id: user.id,
         required_permission: requiredPermission,
         user_role: user.role,
-        endpoint: req.path
+        endpoint: req.path,
       });
-      
+
       return res.status(403).json({
         error: 'INSUFFICIENT_PERMISSIONS',
-        required: requiredPermission
+        required: requiredPermission,
       });
     }
-    
+
     next();
   };
 };
@@ -295,6 +303,7 @@ const authorize = (requiredPermission: string) => {
 ### 4.1 Encryption at Rest
 
 #### Database Encryption
+
 ```typescript
 // Field-level encryption for sensitive data
 import crypto from 'crypto';
@@ -313,9 +322,9 @@ class FieldEncryption {
     const [result] = await this.kmsClient.encrypt({
       name: this.keyName,
       plaintext: Buffer.from(plaintext),
-      additionalAuthenticatedData: Buffer.from(context)
+      additionalAuthenticatedData: Buffer.from(context),
     });
-    
+
     return result.ciphertext.toString('base64');
   }
 
@@ -323,9 +332,9 @@ class FieldEncryption {
     const [result] = await this.kmsClient.decrypt({
       name: this.keyName,
       ciphertext: Buffer.from(ciphertext, 'base64'),
-      additionalAuthenticatedData: Buffer.from(context)
+      additionalAuthenticatedData: Buffer.from(context),
     });
-    
+
     return result.plaintext.toString();
   }
 }
@@ -335,22 +344,22 @@ class UserModel {
   async saveUser(userData: UserData): Promise<void> {
     const encryption = new FieldEncryption();
     const context = `user:${userData.id}`;
-    
+
     const encryptedData = {
       id: userData.id,
       username: userData.username,
       email: await encryption.encryptField(userData.email, context),
-      phone: userData.phone ? 
-        await encryption.encryptField(userData.phone, context) : null,
-      created_at: new Date()
+      phone: userData.phone ? await encryption.encryptField(userData.phone, context) : null,
+      created_at: new Date(),
     };
-    
+
     await db.table('users').insert(encryptedData);
   }
 }
 ```
 
 #### File Storage Encryption
+
 ```typescript
 // Firebase Storage with encryption
 import { Storage } from '@google-cloud/storage';
@@ -362,22 +371,18 @@ class SecureFileStorage {
   constructor() {
     this.storage = new Storage({
       projectId: 'plastic-crack-prod',
-      keyFilename: './service-account-key.json'
+      keyFilename: './service-account-key.json',
     });
     this.bucketName = 'plastic-crack-secure-uploads';
   }
 
-  async uploadSecureFile(
-    file: Buffer, 
-    fileName: string, 
-    userId: string
-  ): Promise<string> {
+  async uploadSecureFile(file: Buffer, fileName: string, userId: string): Promise<string> {
     const bucket = this.storage.bucket(this.bucketName);
     const fileObject = bucket.file(`users/${userId}/${fileName}`);
-    
+
     // Client-side encryption before upload
     const encryptedBuffer = await this.encryptFile(file, userId);
-    
+
     await fileObject.save(encryptedBuffer, {
       metadata: {
         contentType: 'application/octet-stream',
@@ -385,13 +390,13 @@ class SecureFileStorage {
           userId: userId,
           originalName: fileName,
           encrypted: 'true',
-          uploadedAt: new Date().toISOString()
-        }
+          uploadedAt: new Date().toISOString(),
+        },
       },
       // Server-side encryption
-      encryptionKey: await this.getFileEncryptionKey(userId)
+      encryptionKey: await this.getFileEncryptionKey(userId),
     });
-    
+
     return fileObject.publicUrl();
   }
 
@@ -399,14 +404,14 @@ class SecureFileStorage {
     const key = await this.getFileEncryptionKey(userId);
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipher('aes-256-gcm', key);
-    
+
     const encrypted = Buffer.concat([
       iv,
       cipher.update(buffer),
       cipher.final(),
-      cipher.getAuthTag()
+      cipher.getAuthTag(),
     ]);
-    
+
     return encrypted;
   }
 }
@@ -415,6 +420,7 @@ class SecureFileStorage {
 ### 4.2 Encryption in Transit
 
 #### TLS Configuration
+
 ```typescript
 // Express.js TLS configuration
 import https from 'https';
@@ -423,34 +429,35 @@ import fs from 'fs';
 const tlsOptions = {
   key: fs.readFileSync('./certs/private-key.pem'),
   cert: fs.readFileSync('./certs/certificate.pem'),
-  
+
   // TLS 1.3 only
   secureProtocol: 'TLSv1_3_method',
-  
+
   // Strong cipher suites
   ciphers: [
     'TLS_AES_256_GCM_SHA384',
     'TLS_CHACHA20_POLY1305_SHA256',
-    'TLS_AES_128_GCM_SHA256'
+    'TLS_AES_128_GCM_SHA256',
   ].join(':'),
-  
+
   // Security headers
   honorCipherOrder: true,
-  
+
   // Client certificate validation (for admin endpoints)
   requestCert: false,
   rejectUnauthorized: false,
-  
+
   // HSTS
   maxAge: 31536000,
   includeSubDomains: true,
-  preload: true
+  preload: true,
 };
 
 const server = https.createServer(tlsOptions, app);
 ```
 
 #### API Communication Security
+
 ```typescript
 // Secure API client
 class SecureAPIClient {
@@ -465,14 +472,11 @@ class SecureAPIClient {
   async makeSecureRequest(endpoint: string, data?: any): Promise<any> {
     const timestamp = Date.now().toString();
     const nonce = crypto.randomBytes(16).toString('hex');
-    
+
     // Create message signature
     const message = `${endpoint}${timestamp}${nonce}${JSON.stringify(data || {})}`;
-    const signature = crypto
-      .createHmac('sha256', this.apiKey)
-      .update(message)
-      .digest('hex');
-    
+    const signature = crypto.createHmac('sha256', this.apiKey).update(message).digest('hex');
+
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       method: 'POST',
       headers: {
@@ -480,15 +484,15 @@ class SecureAPIClient {
         'X-API-Timestamp': timestamp,
         'X-API-Nonce': nonce,
         'X-API-Signature': signature,
-        'User-Agent': 'PlasticCrack/1.0'
+        'User-Agent': 'PlasticCrack/1.0',
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
     }
-    
+
     return response.json();
   }
 }
@@ -499,10 +503,11 @@ class SecureAPIClient {
 ### 5.1 Cloud Armor Security Policies
 
 #### DDoS Protection Configuration
+
 ```yaml
 # Cloud Armor security policy
 name: plastic-crack-security-policy
-description: "Comprehensive security policy for Plastic Crack"
+description: 'Comprehensive security policy for Plastic Crack'
 
 rules:
   # Rate limiting for API endpoints
@@ -510,7 +515,7 @@ rules:
     match:
       expr:
         expression: "request.path.startsWith('/api/')"
-    action: "rate_based_ban"
+    action: 'rate_based_ban'
     rateLimitOptions:
       rateLimitThreshold:
         count: 100
@@ -519,16 +524,16 @@ rules:
         count: 1000
         intervalSec: 600
       banDurationSec: 3600
-    
+
   # Block known malicious IPs
   - priority: 2000
     match:
       versionedExpr: SRC_IPS_V1
       config:
         srcIpRanges:
-          - "198.51.100.0/24"  # Example malicious range
-    action: "deny-403"
-    
+          - '198.51.100.0/24' # Example malicious range
+    action: 'deny-403'
+
   # Geographic restrictions for admin endpoints
   - priority: 3000
     match:
@@ -537,8 +542,8 @@ rules:
           request.path.startsWith('/admin/') && 
           !inIpRange(origin.ip, '192.168.1.0/24') &&
           !origin.region_code in ['US', 'GB', 'CA']
-    action: "deny-403"
-    
+    action: 'deny-403'
+
   # Bot detection and rate limiting
   - priority: 4000
     match:
@@ -547,7 +552,7 @@ rules:
           request.headers['user-agent'].contains('bot') ||
           request.headers['user-agent'].contains('crawler') ||
           request.headers['user-agent'].contains('spider')
-    action: "rate_based_ban"
+    action: 'rate_based_ban'
     rateLimitOptions:
       rateLimitThreshold:
         count: 10
@@ -557,6 +562,7 @@ rules:
 ### 5.2 Web Application Firewall (WAF)
 
 #### OWASP Rule Set Implementation
+
 ```typescript
 // Custom WAF rules for application-specific protection
 const wafRules = {
@@ -565,35 +571,30 @@ const wafRules = {
     patterns: [
       /(\s|^)(union|select|insert|update|delete|drop|create|alter)(\s|$)/i,
       /(\'|\")(\s)*(or|and)(\s)*(\d|\')(\s)*=(\s)*(\d|\')/i,
-      /(\-\-|\#|\/\*|\*\/)/
+      /(\-\-|\#|\/\*|\*\/)/,
     ],
     action: 'block',
-    severity: 'high'
+    severity: 'high',
   },
-  
+
   // XSS protection
   xss_protection: {
     patterns: [
       /<script[^>]*>.*?<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /<iframe[^>]*>.*?<\/iframe>/gi
+      /<iframe[^>]*>.*?<\/iframe>/gi,
     ],
     action: 'sanitize',
-    severity: 'medium'
+    severity: 'medium',
   },
-  
+
   // Path traversal protection
   path_traversal: {
-    patterns: [
-      /\.\.\//g,
-      /\.\.\\/g,
-      /%2e%2e%2f/gi,
-      /%2e%2e%5c/gi
-    ],
+    patterns: [/\.\.\//g, /\.\.\\/g, /%2e%2e%2f/gi, /%2e%2e%5c/gi],
     action: 'block',
-    severity: 'high'
-  }
+    severity: 'high',
+  },
 };
 
 // WAF middleware implementation
@@ -601,9 +602,9 @@ const wafMiddleware = (req, res, next) => {
   const userInput = {
     ...req.query,
     ...req.body,
-    ...req.params
+    ...req.params,
   };
-  
+
   for (const [ruleName, rule] of Object.entries(wafRules)) {
     for (const [key, value] of Object.entries(userInput)) {
       if (typeof value === 'string') {
@@ -614,13 +615,13 @@ const wafMiddleware = (req, res, next) => {
               severity: rule.severity,
               input: value,
               ip: req.ip,
-              user_agent: req.get('User-Agent')
+              user_agent: req.get('User-Agent'),
             });
-            
+
             if (rule.action === 'block') {
               return res.status(400).json({
                 error: 'Request blocked by security policy',
-                reference: generateIncidentId()
+                reference: generateIncidentId(),
               });
             } else if (rule.action === 'sanitize') {
               req.body[key] = value.replace(pattern, '');
@@ -630,7 +631,7 @@ const wafMiddleware = (req, res, next) => {
       }
     }
   }
-  
+
   next();
 };
 ```
@@ -640,6 +641,7 @@ const wafMiddleware = (req, res, next) => {
 ### 6.1 Input Validation and Sanitization
 
 #### Comprehensive Validation Framework
+
 ```typescript
 import joi from 'joi';
 import DOMPurify from 'dompurify';
@@ -648,84 +650,82 @@ import validator from 'validator';
 // Custom validation schemas
 const validationSchemas = {
   userRegistration: joi.object({
-    email: joi.string()
+    email: joi
+      .string()
       .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'org'] } })
       .required(),
-    password: joi.string()
+    password: joi
+      .string()
       .min(12)
       .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
       .required(),
-    username: joi.string()
-      .alphanum()
-      .min(3)
-      .max(30)
-      .required()
+    username: joi.string().alphanum().min(3).max(30).required(),
   }),
-  
+
   modelEntry: joi.object({
-    name: joi.string()
+    name: joi
+      .string()
       .trim()
       .max(255)
       .pattern(/^[a-zA-Z0-9\s\-\'\.\,]+$/)
       .required(),
-    faction: joi.string()
+    faction: joi
+      .string()
       .valid('space_marines', 'chaos', 'orks', 'eldar', 'tau', 'necrons', 'tyranids')
       .required(),
-    game_system: joi.string()
+    game_system: joi
+      .string()
       .valid('40k', 'aos', 'kill_team', 'necromunda', 'blood_bowl')
       .required(),
-    points_value: joi.number()
-      .integer()
-      .min(0)
-      .max(9999),
-    notes: joi.string()
-      .max(5000)
-      .allow('')
-  })
+    points_value: joi.number().integer().min(0).max(9999),
+    notes: joi.string().max(5000).allow(''),
+  }),
 };
 
 // Advanced sanitization service
 class InputSanitizer {
   static sanitizeText(input: string): string {
     // Remove potentially dangerous characters
-    let sanitized = input.replace(/[<>\"'&]/g, (match) => {
+    let sanitized = input.replace(/[<>\"'&]/g, match => {
       const entityMap = {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#39;',
-        '&': '&amp;'
+        '&': '&amp;',
       };
       return entityMap[match];
     });
-    
+
     // Remove control characters
     sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
-    
+
     // Normalize whitespace
     sanitized = sanitized.replace(/\s+/g, ' ').trim();
-    
+
     return sanitized;
   }
-  
+
   static sanitizeHTML(input: string): string {
     return DOMPurify.sanitize(input, {
       ALLOWED_TAGS: [],
       ALLOWED_ATTR: [],
       RETURN_DOM: false,
-      RETURN_DOM_FRAGMENT: false
+      RETURN_DOM_FRAGMENT: false,
     });
   }
-  
+
   static validateAndSanitizeURL(input: string): string | null {
-    if (!validator.isURL(input, {
-      protocols: ['http', 'https'],
-      require_protocol: true,
-      allow_underscores: false
-    })) {
+    if (
+      !validator.isURL(input, {
+        protocols: ['http', 'https'],
+        require_protocol: true,
+        allow_underscores: false,
+      })
+    ) {
       return null;
     }
-    
+
     return validator.escape(input);
   }
 }
@@ -734,54 +734,52 @@ class InputSanitizer {
 ### 6.2 Cross-Site Scripting (XSS) Prevention
 
 #### Content Security Policy Implementation
+
 ```typescript
 // CSP configuration
 const cspConfig = {
   directives: {
     defaultSrc: ["'self'"],
-    
+
     scriptSrc: [
       "'self'",
       "'unsafe-inline'", // Only for specific inline scripts with nonces
-      "https://apis.google.com",
-      "https://www.googletagmanager.com"
+      'https://apis.google.com',
+      'https://www.googletagmanager.com',
     ],
-    
+
     styleSrc: [
       "'self'",
       "'unsafe-inline'", // For CSS-in-JS libraries
-      "https://fonts.googleapis.com"
+      'https://fonts.googleapis.com',
     ],
-    
+
     imgSrc: [
       "'self'",
-      "data:",
-      "https://storage.googleapis.com",
-      "https://firebasestorage.googleapis.com"
+      'data:',
+      'https://storage.googleapis.com',
+      'https://firebasestorage.googleapis.com',
     ],
-    
+
     connectSrc: [
       "'self'",
-      "https://api.plasticcrack.com",
-      "https://identitytoolkit.googleapis.com",
-      "wss://plastic-crack-websocket.com"
+      'https://api.plasticcrack.com',
+      'https://identitytoolkit.googleapis.com',
+      'wss://plastic-crack-websocket.com',
     ],
-    
-    fontSrc: [
-      "'self'",
-      "https://fonts.gstatic.com"
-    ],
-    
+
+    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+
     objectSrc: ["'none'"],
-    
+
     mediaSrc: ["'self'"],
-    
+
     frameSrc: ["'none'"],
-    
+
     // Report violations
-    reportUri: "/api/csp-violation-report"
+    reportUri: '/api/csp-violation-report',
   },
-  reportOnly: false
+  reportOnly: false,
 };
 
 // CSP nonce generation for inline scripts
@@ -793,7 +791,7 @@ const generateCSPNonce = (): string => {
 const cspMiddleware = (req, res, next) => {
   const nonce = generateCSPNonce();
   req.cspNonce = nonce;
-  
+
   // Add nonce to script-src
   const cspHeader = Object.entries(cspConfig.directives)
     .map(([directive, sources]) => {
@@ -803,7 +801,7 @@ const cspMiddleware = (req, res, next) => {
       return `${directive.replace(/[A-Z]/g, '-$&').toLowerCase()} ${sources.join(' ')}`;
     })
     .join('; ');
-  
+
   res.setHeader('Content-Security-Policy', cspHeader);
   next();
 };
@@ -812,6 +810,7 @@ const cspMiddleware = (req, res, next) => {
 ### 6.3 Cross-Site Request Forgery (CSRF) Protection
 
 #### CSRF Token Implementation
+
 ```typescript
 import csrf from 'csurf';
 
@@ -822,15 +821,17 @@ const csrfProtection = csrf({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 3600000 // 1 hour
+    maxAge: 3600000, // 1 hour
   },
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
-  value: (req) => {
-    return req.body._csrf || 
-           req.query._csrf || 
-           req.headers['x-csrf-token'] ||
-           req.headers['x-xsrf-token'];
-  }
+  value: req => {
+    return (
+      req.body._csrf ||
+      req.query._csrf ||
+      req.headers['x-csrf-token'] ||
+      req.headers['x-xsrf-token']
+    );
+  },
 });
 
 // Custom CSRF validation for API requests
@@ -838,23 +839,23 @@ const validateCSRFToken = async (req, res, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     return next();
   }
-  
+
   const token = req.headers['x-csrf-token'];
   const sessionToken = req.session.csrfToken;
-  
+
   if (!token || !sessionToken || token !== sessionToken) {
     await logSecurityEvent('CSRF_TOKEN_MISMATCH', {
       user_id: req.user?.id,
       provided_token: token,
       ip: req.ip,
-      endpoint: req.path
+      endpoint: req.path,
     });
-    
+
     return res.status(403).json({
-      error: 'CSRF token validation failed'
+      error: 'CSRF token validation failed',
     });
   }
-  
+
   next();
 };
 ```
@@ -864,6 +865,7 @@ const validateCSRFToken = async (req, res, next) => {
 ### 7.1 Container Security
 
 #### Docker Security Best Practices
+
 ```dockerfile
 # Secure Dockerfile for Node.js application
 FROM node:18-alpine AS base
@@ -906,6 +908,7 @@ CMD ["node", "dist/index.js"]
 ```
 
 #### Kubernetes Security Configuration
+
 ```yaml
 # k8s-security-policy.yaml
 apiVersion: networking.k8s.io/v1
@@ -917,28 +920,28 @@ spec:
     matchLabels:
       app: plastic-crack
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: load-balancer
-    ports:
-    - protocol: TCP
-      port: 3000
+    - from:
+        - podSelector:
+            matchLabels:
+              app: load-balancer
+      ports:
+        - protocol: TCP
+          port: 3000
   egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          app: postgres
-    ports:
-    - protocol: TCP
-      port: 5432
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443  # HTTPS only
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443 # HTTPS only
 
 ---
 apiVersion: v1
@@ -953,26 +956,27 @@ spec:
     seccompProfile:
       type: RuntimeDefault
   containers:
-  - name: app
-    image: plastic-crack:latest
-    securityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      capabilities:
-        drop:
-        - ALL
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
+    - name: app
+      image: plastic-crack:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
 ```
 
 ### 7.2 Database Security
 
 #### PostgreSQL Security Configuration
+
 ```sql
 -- Database security setup
 -- Create read-only user for analytics
@@ -1015,19 +1019,19 @@ ALTER SYSTEM SET ssl_min_protocol_version = 'TLSv1.2';
 ### 8.1 GDPR Compliance Implementation
 
 #### Data Subject Rights Management
+
 ```typescript
 // GDPR compliance service
 class GDPRComplianceService {
-  
   // Right to Access (Article 15)
   async exportUserData(userId: string): Promise<GDPRDataExport> {
     const userData = await this.collectAllUserData(userId);
-    
+
     return {
       personal_data: {
         profile: userData.profile,
         preferences: userData.preferences,
-        authentication_data: userData.auth_data
+        authentication_data: userData.auth_data,
       },
       collection_data: userData.models,
       social_interactions: userData.social_data,
@@ -1035,34 +1039,34 @@ class GDPRComplianceService {
       export_metadata: {
         exported_at: new Date().toISOString(),
         export_format: 'JSON',
-        legal_basis: 'Article 15 - Right of Access'
-      }
+        legal_basis: 'Article 15 - Right of Access',
+      },
     };
   }
-  
+
   // Right to Rectification (Article 16)
   async updateUserData(userId: string, corrections: any): Promise<void> {
     await this.validateDataCorrections(corrections);
-    
-    await db.transaction(async (trx) => {
+
+    await db.transaction(async trx => {
       // Log the data change for audit purposes
       await trx('data_change_log').insert({
         user_id: userId,
         change_type: 'rectification',
         legal_basis: 'Article 16 - Right to Rectification',
         changes: JSON.stringify(corrections),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      
+
       // Apply corrections
       await this.applyDataCorrections(userId, corrections, trx);
     });
   }
-  
+
   // Right to Erasure (Article 17)
   async deleteUserData(userId: string, reason: string): Promise<void> {
     const retentionPeriod = await this.getDataRetentionPeriod(userId);
-    
+
     if (retentionPeriod.has_legal_obligation) {
       // Anonymize instead of delete
       await this.anonymizeUserData(userId);
@@ -1070,36 +1074,36 @@ class GDPRComplianceService {
       // Complete deletion
       await this.permanentlyDeleteUserData(userId);
     }
-    
+
     // Log deletion for compliance
     await this.logGDPRAction('data_deletion', userId, {
       reason: reason,
-      method: retentionPeriod.has_legal_obligation ? 'anonymization' : 'deletion'
+      method: retentionPeriod.has_legal_obligation ? 'anonymization' : 'deletion',
     });
   }
-  
+
   // Right to Data Portability (Article 20)
   async exportPortableData(userId: string, format: 'json' | 'csv'): Promise<Buffer> {
     const portableData = await this.getPortableUserData(userId);
-    
+
     if (format === 'csv') {
       return this.convertToCSV(portableData);
     }
-    
+
     return Buffer.from(JSON.stringify(portableData, null, 2));
   }
-  
+
   // Privacy by Design implementation
   async processNewUserData(userData: any): Promise<any> {
     // Data minimization
     const minimizedData = this.minimizeDataCollection(userData);
-    
+
     // Purpose limitation
     await this.validateDataPurpose(minimizedData);
-    
+
     // Storage limitation
     await this.setDataRetentionSchedule(minimizedData);
-    
+
     return minimizedData;
   }
 }
@@ -1108,28 +1112,29 @@ class GDPRComplianceService {
 ### 8.2 Data Retention Policies
 
 #### Automated Data Lifecycle Management
+
 ```typescript
 // Data retention configuration
 const retentionPolicies = {
   user_profiles: {
     active_users: '7_years',
     inactive_users: '3_years',
-    deleted_accounts: '30_days_anonymized'
+    deleted_accounts: '30_days_anonymized',
   },
   collection_data: {
     active_collections: 'indefinite_with_consent',
-    orphaned_data: '1_year'
+    orphaned_data: '1_year',
   },
   audit_logs: {
     security_logs: '7_years',
     access_logs: '1_year',
-    error_logs: '6_months'
+    error_logs: '6_months',
   },
   communication_data: {
     messages: '3_years',
     notifications: '1_year',
-    support_tickets: '5_years'
-  }
+    support_tickets: '5_years',
+  },
 };
 
 // Automated cleanup service
@@ -1139,35 +1144,33 @@ class DataRetentionService {
       this.cleanupInactiveUsers(),
       this.cleanupOldAuditLogs(),
       this.cleanupOrphanedData(),
-      this.cleanupExpiredSessions()
+      this.cleanupExpiredSessions(),
     ];
-    
+
     await Promise.all(cleanupTasks);
   }
-  
+
   private async cleanupInactiveUsers(): Promise<void> {
     const threeYearsAgo = new Date();
     threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
-    
+
     const inactiveUsers = await db('users')
       .where('last_login_at', '<', threeYearsAgo)
       .whereNull('deletion_scheduled_at');
-    
+
     for (const user of inactiveUsers) {
       await this.scheduleUserDataDeletion(user.id, '30_days');
     }
   }
-  
+
   private async scheduleUserDataDeletion(userId: string, delay: string): Promise<void> {
     const deletionDate = this.calculateDeletionDate(delay);
-    
-    await db('users')
-      .where('id', userId)
-      .update({
-        deletion_scheduled_at: deletionDate,
-        retention_notice_sent: false
-      });
-    
+
+    await db('users').where('id', userId).update({
+      deletion_scheduled_at: deletionDate,
+      retention_notice_sent: false,
+    });
+
     // Send retention notice to user
     await this.sendDataRetentionNotice(userId, deletionDate);
   }
@@ -1179,12 +1182,13 @@ class DataRetentionService {
 ### 9.1 Security Incident Classification
 
 #### Incident Severity Levels
+
 ```typescript
 enum IncidentSeverity {
-  CRITICAL = 'critical',    // Active data breach, system compromise
-  HIGH = 'high',           // Potential data exposure, service disruption
-  MEDIUM = 'medium',       // Security policy violation, suspicious activity
-  LOW = 'low'              // Minor security events, policy warnings
+  CRITICAL = 'critical', // Active data breach, system compromise
+  HIGH = 'high', // Potential data exposure, service disruption
+  MEDIUM = 'medium', // Security policy violation, suspicious activity
+  LOW = 'low', // Minor security events, policy warnings
 }
 
 interface SecurityIncident {
@@ -1205,19 +1209,19 @@ class IncidentResponseService {
   async handleSecurityIncident(incident: SecurityIncident): Promise<void> {
     // Immediate automated response
     await this.executeImmediateResponse(incident);
-    
+
     // Notify response team
     await this.notifyResponseTeam(incident);
-    
+
     // Begin investigation
     await this.initiateInvestigation(incident);
-    
+
     // Compliance reporting if required
     if (this.requiresRegulatoryReporting(incident)) {
       await this.scheduleComplianceReporting(incident);
     }
   }
-  
+
   private async executeImmediateResponse(incident: SecurityIncident): Promise<void> {
     switch (incident.severity) {
       case IncidentSeverity.CRITICAL:
@@ -1226,28 +1230,28 @@ class IncidentResponseService {
         await this.revokeCompromisedSessions(incident.affected_users);
         await this.enableEnhancedMonitoring();
         break;
-        
+
       case IncidentSeverity.HIGH:
         // Enhanced monitoring and user notification
         await this.enhanceMonitoring(incident.affected_systems);
         await this.notifyAffectedUsers(incident.affected_users);
         break;
-        
+
       case IncidentSeverity.MEDIUM:
         // Standard investigation procedures
         await this.collectForensicEvidence(incident);
         break;
     }
   }
-  
+
   private async isolateAffectedSystems(systems: string[]): Promise<void> {
     for (const system of systems) {
       // Disable affected services
       await this.disableService(system);
-      
+
       // Block network access
       await this.updateFirewallRules(system, 'block_all');
-      
+
       // Preserve forensic evidence
       await this.createSystemSnapshot(system);
     }
@@ -1258,6 +1262,7 @@ class IncidentResponseService {
 ### 9.2 Incident Communication Plan
 
 #### Stakeholder Notification Matrix
+
 ```typescript
 // Communication escalation matrix
 const communicationMatrix = {
@@ -1266,29 +1271,26 @@ const communicationMatrix = {
       immediate: ['security_team', 'cto', 'ceo', 'legal_team'],
       within_1_hour: ['all_engineers', 'customer_support'],
       within_4_hours: ['affected_customers'],
-      within_24_hours: ['all_customers', 'regulators', 'media']
+      within_24_hours: ['all_customers', 'regulators', 'media'],
     },
     high: {
       immediate: ['security_team', 'engineering_lead'],
       within_2_hours: ['cto', 'affected_customers'],
-      within_24_hours: ['legal_team']
+      within_24_hours: ['legal_team'],
     },
     medium: {
       immediate: ['security_team'],
       within_8_hours: ['engineering_lead'],
-      within_24_hours: ['cto']
-    }
-  }
+      within_24_hours: ['cto'],
+    },
+  },
 };
 
 // Automated notification service
 class IncidentCommunicationService {
-  async sendIncidentNotification(
-    incident: SecurityIncident,
-    audience: string[]
-  ): Promise<void> {
+  async sendIncidentNotification(incident: SecurityIncident, audience: string[]): Promise<void> {
     const message = this.generateIncidentMessage(incident);
-    
+
     for (const recipient of audience) {
       switch (recipient) {
         case 'affected_customers':
@@ -1305,7 +1307,7 @@ class IncidentCommunicationService {
       }
     }
   }
-  
+
   private generateIncidentMessage(incident: SecurityIncident): IncidentMessage {
     return {
       subject: `Security Incident ${incident.id} - ${incident.severity.toUpperCase()}`,
@@ -1326,7 +1328,7 @@ class IncidentCommunicationService {
         
         For questions or concerns, please contact our security team at security@plasticcrack.com
       `,
-      priority: incident.severity === IncidentSeverity.CRITICAL ? 'urgent' : 'normal'
+      priority: incident.severity === IncidentSeverity.CRITICAL ? 'urgent' : 'normal',
     };
   }
 }
@@ -1337,24 +1339,21 @@ class IncidentCommunicationService {
 ### 10.1 Security Information and Event Management (SIEM)
 
 #### Log Aggregation and Analysis
+
 ```typescript
 // Security event logging service
 class SecurityEventLogger {
   private logStream: LogStream;
-  
+
   constructor() {
     this.logStream = new LogStream({
       destination: 'google_cloud_logging',
       format: 'json',
-      level: 'info'
+      level: 'info',
     });
   }
-  
-  async logSecurityEvent(
-    eventType: string,
-    severity: string,
-    details: any
-  ): Promise<void> {
+
+  async logSecurityEvent(eventType: string, severity: string, details: any): Promise<void> {
     const securityEvent = {
       timestamp: new Date().toISOString(),
       event_type: eventType,
@@ -1365,29 +1364,29 @@ class SecurityEventLogger {
       user_agent: details.user_agent,
       endpoint: details.endpoint,
       details: details,
-      correlation_id: generateCorrelationId()
+      correlation_id: generateCorrelationId(),
     };
-    
+
     // Log to SIEM
     await this.logStream.write(securityEvent);
-    
+
     // Real-time alerting for high severity events
     if (['critical', 'high'].includes(severity)) {
       await this.triggerRealTimeAlert(securityEvent);
     }
-    
+
     // Update security metrics
     await this.updateSecurityMetrics(eventType, severity);
   }
-  
+
   private async triggerRealTimeAlert(event: SecurityEvent): Promise<void> {
     // Check for attack patterns
     const isAttackPattern = await this.detectAttackPattern(event);
-    
+
     if (isAttackPattern) {
       // Create security incident
       const incident = await this.createSecurityIncident(event);
-      
+
       // Trigger incident response
       await incidentResponseService.handleSecurityIncident(incident);
     }
@@ -1400,31 +1399,31 @@ class SecurityMetricsService {
     const metrics = {
       [`security_events_${eventType}_total`]: 1,
       [`security_events_${severity}_total`]: 1,
-      'security_events_total': 1
+      security_events_total: 1,
     };
-    
+
     for (const [metricName, value] of Object.entries(metrics)) {
       await this.incrementMetric(metricName, value);
     }
   }
-  
+
   async checkSecurityThresholds(): Promise<void> {
     const thresholds = {
       failed_logins_per_hour: 100,
       sql_injection_attempts_per_hour: 10,
       brute_force_attempts_per_hour: 50,
-      data_exfiltration_attempts_per_hour: 5
+      data_exfiltration_attempts_per_hour: 5,
     };
-    
+
     for (const [threshold, limit] of Object.entries(thresholds)) {
       const currentValue = await this.getMetricValue(threshold);
-      
+
       if (currentValue > limit) {
         await this.triggerSecurityAlert({
           type: 'threshold_exceeded',
           threshold: threshold,
           current_value: currentValue,
-          limit: limit
+          limit: limit,
         });
       }
     }
@@ -1435,36 +1434,37 @@ class SecurityMetricsService {
 ### 10.2 Automated Threat Detection
 
 #### Machine Learning-Based Anomaly Detection
+
 ```typescript
 // Behavioral anomaly detection
 class BehavioralAnomalyDetector {
   private mlModel: MLModel;
-  
+
   constructor() {
     this.mlModel = new MLModel('user_behavior_anomaly_detection');
   }
-  
+
   async analyzeUserBehavior(userId: string, activity: UserActivity): Promise<AnomalyScore> {
     // Extract behavioral features
     const features = await this.extractBehavioralFeatures(userId, activity);
-    
+
     // Get anomaly score from ML model
     const anomalyScore = await this.mlModel.predict(features);
-    
+
     // Check against threshold
     if (anomalyScore.confidence > 0.8) {
       await this.handleAnomalousActivity(userId, activity, anomalyScore);
     }
-    
+
     return anomalyScore;
   }
-  
+
   private async extractBehavioralFeatures(
-    userId: string, 
+    userId: string,
     activity: UserActivity
   ): Promise<BehavioralFeatures> {
     const userHistory = await this.getUserActivityHistory(userId, '30d');
-    
+
     return {
       login_frequency: userHistory.login_frequency,
       typical_login_times: userHistory.typical_login_times,
@@ -1475,11 +1475,11 @@ class BehavioralAnomalyDetector {
         time_of_day: activity.timestamp.getHours(),
         ip_address: activity.ip_address,
         device_fingerprint: activity.device_fingerprint,
-        api_endpoints: activity.api_endpoints
-      }
+        api_endpoints: activity.api_endpoints,
+      },
     };
   }
-  
+
   private async handleAnomalousActivity(
     userId: string,
     activity: UserActivity,
@@ -1490,9 +1490,9 @@ class BehavioralAnomalyDetector {
       user_id: userId,
       anomaly_score: anomalyScore.confidence,
       activity_details: activity,
-      detected_anomalies: anomalyScore.anomaly_types
+      detected_anomalies: anomalyScore.anomaly_types,
     });
-    
+
     // Adaptive security response
     if (anomalyScore.confidence > 0.95) {
       // High confidence anomaly - trigger additional verification
@@ -1505,4 +1505,7 @@ class BehavioralAnomalyDetector {
 }
 ```
 
-This comprehensive security documentation provides a robust framework for protecting the Plastic Crack platform and its users' data throughout all phases of development and operation. The security measures are designed to scale with the application and provide multiple layers of protection against various threat vectors.
+This comprehensive security documentation provides a robust framework for protecting the Plastic
+Crack platform and its users' data throughout all phases of development and operation. The security
+measures are designed to scale with the application and provide multiple layers of protection
+against various threat vectors.

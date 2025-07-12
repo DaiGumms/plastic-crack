@@ -1,10 +1,14 @@
 # Plastic Crack - Warhammer Collection Management Platform
 
-Plastic Crack is a comprehensive cross-platform application designed for Warhammer enthusiasts to catalog, manage, and showcase their miniature collections. Available as both a mobile app (iOS/Android) and web application, the platform provides tools for inventory management, collection tracking, AI-powered recommendations, price comparison, and rich social community features.
+Plastic Crack is a comprehensive cross-platform application designed for Warhammer enthusiasts to
+catalog, manage, and showcase their miniature collections. Available as both a mobile app
+(iOS/Android) and web application, the platform provides tools for inventory management, collection
+tracking, AI-powered recommendations, price comparison, and rich social community features.
 
 ## Project Overview
 
 Plastic Crack enables users to:
+
 - Create detailed inventories of their Warhammer miniatures across all platforms
 - Track painting progress and completion status with photo documentation
 - Organize collections by armies, factions, and game systems
@@ -39,6 +43,7 @@ Plastic Crack enables users to:
 ## Technology Stack
 
 ### Mobile Applications
+
 - React Native for cross-platform mobile development
 - Expo for development workflow and app distribution
 - React Navigation for mobile navigation
@@ -46,6 +51,7 @@ Plastic Crack enables users to:
 - React Native Camera for barcode scanning and photo capture
 
 ### Web Application
+
 - React 18+ with TypeScript
 - Progressive Web App (PWA) capabilities
 - Tailwind CSS for styling
@@ -54,12 +60,14 @@ Plastic Crack enables users to:
 - Axios for API communication
 
 ### AI & Machine Learning
+
 - TensorFlow.js for client-side model inference
 - OpenAI GPT API for natural language processing
 - Custom recommendation engine for purchase suggestions
 - Computer vision for model recognition and categorization
 
 ### Backend Services
+
 - Node.js with Express.js
 - TypeScript
 - JWT for authentication
@@ -68,18 +76,21 @@ Plastic Crack enables users to:
 - WebSocket support for real-time features
 
 ### Price Intelligence
+
 - Web scraping services for retailer price monitoring
 - Price history tracking and trend analysis
 - Deal aggregation and alert systems
 - Affiliate link management
 
 ### Database & Storage
+
 - PostgreSQL for primary data storage
 - Redis for caching and sessions
 - Amazon S3 for image and file storage
 - ElasticSearch for search functionality
 
 ### Infrastructure
+
 - Docker for containerization
 - Nginx as reverse proxy
 - GitHub Actions for CI/CD

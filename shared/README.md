@@ -1,6 +1,7 @@
 # Shared Code
 
-This directory contains shared TypeScript types, utilities, and configurations used across the backend, frontend, and mobile applications.
+This directory contains shared TypeScript types, utilities, and configurations used across the
+backend, frontend, and mobile applications.
 
 ## Contents
 

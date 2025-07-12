@@ -2,9 +2,12 @@
 
 ## 1. Database Overview
 
-Plastic Crack uses a multi-database architecture with PostgreSQL as the primary database, Redis for caching and real-time features, ElasticSearch for search functionality, and specialized time-series storage for pricing data.
+Plastic Crack uses a multi-database architecture with PostgreSQL as the primary database, Redis for
+caching and real-time features, ElasticSearch for search functionality, and specialized time-series
+storage for pricing data.
 
 ### 1.1 Design Principles
+
 - **Cross-Platform Support**: Optimized for mobile and web applications
 - **Real-Time Features**: Support for live updates and social interactions
 - **AI Integration**: Structured data for machine learning algorithms
@@ -15,6 +18,7 @@ Plastic Crack uses a multi-database architecture with PostgreSQL as the primary 
 - **Audit Trail**: Complete audit logging for all entities
 
 ### 1.2 Database Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   PostgreSQL    │    │   Redis         │    │  ElasticSearch  │
@@ -31,6 +35,7 @@ Plastic Crack uses a multi-database architecture with PostgreSQL as the primary 
 ```
 
 ### 1.3 Database Configuration
+
 - **PostgreSQL 15+**: Primary relational data
 - **Redis 7+**: Caching, sessions, real-time features
 - **ElasticSearch 8+**: Full-text search and analytics
@@ -41,6 +46,7 @@ Plastic Crack uses a multi-database architecture with PostgreSQL as the primary 
 ## 2. User Management Tables
 
 ### 2.1 Enhanced Users Table
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -82,6 +88,7 @@ CREATE INDEX idx_users_game_systems ON users USING GIN(preferred_game_systems);
 ```
 
 ### 2.2 OAuth Providers Table
+
 ```sql
 CREATE TABLE oauth_providers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -101,6 +108,7 @@ CREATE INDEX idx_oauth_provider ON oauth_providers(provider, provider_user_id);
 ```
 
 ### 2.3 Device Management Table
+
 ```sql
 CREATE TABLE user_devices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -124,6 +132,7 @@ CREATE INDEX idx_devices_platform ON user_devices(platform);
 ## 3. Enhanced Collection Management
 
 ### 3.1 Models Catalog with Pricing
+
 ```sql
 CREATE TABLE models_catalog (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -153,7 +162,7 @@ CREATE TABLE models_catalog (
 );
 
 CREATE TYPE model_type_enum AS ENUM (
-    'character', 'troop', 'elite', 'fast_attack', 'heavy_support', 
+    'character', 'troop', 'elite', 'fast_attack', 'heavy_support',
     'dedicated_transport', 'lord_of_war', 'fortification'
 );
 
@@ -168,6 +177,7 @@ CREATE INDEX idx_models_barcode ON models_catalog(barcode);
 ```
 
 ### 3.2 User Collections with AI Metadata
+
 ```sql
 CREATE TABLE user_models (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -199,7 +209,7 @@ CREATE TABLE user_models (
 );
 
 CREATE TYPE painting_status_enum AS ENUM (
-    'unpainted', 'primed', 'basecoated', 'shaded', 'highlighted', 
+    'unpainted', 'primed', 'basecoated', 'shaded', 'highlighted',
     'detailed', 'finished', 'showcase_ready'
 );
 
@@ -216,6 +226,7 @@ CREATE INDEX idx_user_models_wishlist ON user_models(user_id, is_wishlist) WHERE
 ## 4. AI and Recommendation Tables
 
 ### 4.1 AI Color Schemes
+
 ```sql
 CREATE TABLE ai_color_schemes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -248,6 +259,7 @@ CREATE INDEX idx_color_schemes_popularity ON ai_color_schemes(popularity_score D
 ```
 
 ### 4.2 Purchase Recommendations
+
 ```sql
 CREATE TABLE ai_recommendations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -267,19 +279,20 @@ CREATE TABLE ai_recommendations (
 );
 
 CREATE TYPE recommendation_type_enum AS ENUM (
-    'army_completion', 'similar_interest', 'price_drop', 
+    'army_completion', 'similar_interest', 'price_drop',
     'trending', 'seasonal', 'skill_progression'
 );
 
 CREATE INDEX idx_recommendations_user ON ai_recommendations(user_id);
 CREATE INDEX idx_recommendations_type ON ai_recommendations(recommendation_type);
-CREATE INDEX idx_recommendations_active ON ai_recommendations(user_id, expires_at) 
+CREATE INDEX idx_recommendations_active ON ai_recommendations(user_id, expires_at)
     WHERE expires_at > CURRENT_TIMESTAMP AND dismissed = FALSE;
 ```
 
 ## 5. Price Intelligence Tables
 
 ### 5.1 Retailers and Price Data
+
 ```sql
 CREATE TABLE retailers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -320,6 +333,7 @@ CREATE INDEX idx_current_prices_sale ON current_prices(is_on_sale) WHERE is_on_s
 ```
 
 ### 5.2 Price Alerts
+
 ```sql
 CREATE TABLE price_alerts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -339,13 +353,14 @@ CREATE TYPE alert_operator AS ENUM ('lte', 'gte', 'eq');
 
 CREATE INDEX idx_price_alerts_user ON price_alerts(user_id);
 CREATE INDEX idx_price_alerts_model ON price_alerts(model_id);
-CREATE INDEX idx_price_alerts_active ON price_alerts(is_active, expires_at) 
+CREATE INDEX idx_price_alerts_active ON price_alerts(is_active, expires_at)
     WHERE is_active = TRUE;
 ```
 
 ## 6. Enhanced Social Features
 
 ### 6.1 Social Relationships
+
 ```sql
 CREATE TABLE user_relationships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -365,6 +380,7 @@ CREATE INDEX idx_relationships_type ON user_relationships(relationship_type);
 ```
 
 ### 6.2 Battle Reports
+
 ```sql
 CREATE TABLE battle_reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -402,6 +418,7 @@ CREATE INDEX idx_battle_reports_visibility ON battle_reports(visibility);
 ```
 
 ### 6.3 Community Help System
+
 ```sql
 CREATE TABLE help_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -434,6 +451,7 @@ CREATE INDEX idx_help_requests_tags ON help_requests USING GIN(tags);
 ```
 
 ### 6.4 Real-Time Messaging
+
 ```sql
 CREATE TABLE conversations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -484,6 +502,7 @@ CREATE INDEX idx_messages_user ON messages(user_id);
 ## 7. Collection Management Tables
 
 ### 7.1 Models Table
+
 ```sql
 CREATE TABLE models (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -506,11 +525,11 @@ CREATE TABLE models (
 
 -- Custom enum for painting status
 CREATE TYPE painting_status AS ENUM (
-    'unpainted', 
-    'primed', 
-    'basecoated', 
-    'detailed', 
-    'finished', 
+    'unpainted',
+    'primed',
+    'basecoated',
+    'detailed',
+    'finished',
     'display_ready'
 );
 
@@ -530,6 +549,7 @@ CREATE INDEX idx_models_search ON models USING GIN(
 ```
 
 ### 7.2 Model Photos Table
+
 ```sql
 CREATE TABLE model_photos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -550,6 +570,7 @@ CREATE INDEX idx_model_photos_sort_order ON model_photos(model_id, sort_order);
 ```
 
 ### 7.3 Custom Fields Table
+
 ```sql
 CREATE TABLE custom_fields (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -564,11 +585,11 @@ CREATE TABLE custom_fields (
 
 -- Custom enum for field types
 CREATE TYPE custom_field_type AS ENUM (
-    'text', 
-    'number', 
-    'date', 
-    'boolean', 
-    'dropdown', 
+    'text',
+    'number',
+    'date',
+    'boolean',
+    'dropdown',
     'multiselect'
 );
 
@@ -584,6 +605,7 @@ CREATE TABLE model_custom_fields (
 ## 8. Army and List Management
 
 ### 8.1 Armies Table
+
 ```sql
 CREATE TABLE armies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -605,6 +627,7 @@ CREATE INDEX idx_armies_public ON armies(is_public) WHERE is_public = TRUE;
 ```
 
 ### 8.2 Army Models Table
+
 ```sql
 CREATE TABLE army_models (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -624,6 +647,7 @@ CREATE INDEX idx_army_models_model_id ON army_models(model_id);
 ## 9. Social Features Tables
 
 ### 9.1 User Relationships Table
+
 ```sql
 CREATE TABLE user_relationships (
     follower_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -639,6 +663,7 @@ CREATE INDEX idx_relationships_following ON user_relationships(following_id);
 ```
 
 ### 9.2 Model Likes Table
+
 ```sql
 CREATE TABLE model_likes (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -653,6 +678,7 @@ CREATE INDEX idx_model_likes_created_at ON model_likes(created_at);
 ```
 
 ### 9.3 Comments Table
+
 ```sql
 CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -675,6 +701,7 @@ CREATE INDEX idx_comments_created_at ON comments(created_at);
 ## 10. Wishlist and Shopping
 
 ### 10.1 Wishlist Table
+
 ```sql
 CREATE TABLE wishlists (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -693,6 +720,7 @@ CREATE INDEX idx_wishlists_default ON wishlists(user_id, is_default) WHERE is_de
 ```
 
 ### 10.2 Wishlist Items Table
+
 ```sql
 CREATE TABLE wishlist_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -719,6 +747,7 @@ CREATE INDEX idx_wishlist_items_priority ON wishlist_items(priority);
 ## 11. Activity and Notifications
 
 ### 11.1 Activities Table
+
 ```sql
 CREATE TABLE activities (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -752,6 +781,7 @@ CREATE INDEX idx_activities_created_at ON activities(created_at);
 ```
 
 ### 11.2 Notifications Table
+
 ```sql
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -784,6 +814,7 @@ CREATE INDEX idx_notifications_created_at ON notifications(created_at);
 ## 12. Authentication and Security
 
 ### 12.1 Refresh Tokens Table
+
 ```sql
 CREATE TABLE refresh_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -802,6 +833,7 @@ CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens(expires_at);
 ```
 
 ### 12.2 OAuth Providers Table
+
 ```sql
 CREATE TABLE oauth_providers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -821,6 +853,7 @@ CREATE INDEX idx_oauth_providers_provider ON oauth_providers(provider, provider_
 ## 13. Gamification Tables
 
 ### 13.1 Achievements Table
+
 ```sql
 CREATE TABLE achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -844,6 +877,7 @@ CREATE TYPE achievement_category AS ENUM (
 ```
 
 ### 13.2 User Achievements Table
+
 ```sql
 CREATE TABLE user_achievements (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -861,6 +895,7 @@ CREATE INDEX idx_user_achievements_earned_at ON user_achievements(earned_at);
 ## 14. System Tables
 
 ### 14.1 Application Settings Table
+
 ```sql
 CREATE TABLE app_settings (
     key VARCHAR(100) PRIMARY KEY,
@@ -877,6 +912,7 @@ INSERT INTO app_settings (key, value, description) VALUES
 ```
 
 ### 14.2 Audit Log Table
+
 ```sql
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -899,9 +935,10 @@ CREATE TABLE audit_logs_2025_07 PARTITION OF audit_logs
 ## 15. Views and Functions
 
 ### 15.1 User Statistics View
+
 ```sql
 CREATE VIEW user_stats AS
-SELECT 
+SELECT
     u.id,
     u.username,
     COUNT(m.id) as total_models,
@@ -920,9 +957,10 @@ GROUP BY u.id, u.username;
 ```
 
 ### 15.2 Popular Models View
+
 ```sql
 CREATE VIEW popular_models AS
-SELECT 
+SELECT
     m.*,
     u.username as owner_username,
     COUNT(ml.user_id) as like_count,
@@ -937,6 +975,7 @@ ORDER BY like_count DESC, comment_count DESC;
 ```
 
 ### 15.3 Update Timestamp Function
+
 ```sql
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -947,23 +986,24 @@ END;
 $$ language 'plpgsql';
 
 -- Apply to all tables with updated_at column
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users 
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_models_updated_at BEFORE UPDATE ON models 
+CREATE TRIGGER update_models_updated_at BEFORE UPDATE ON models
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_armies_updated_at BEFORE UPDATE ON armies 
+CREATE TRIGGER update_armies_updated_at BEFORE UPDATE ON armies
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 ## 16. Performance Optimizations
 
 ### 16.1 Materialized Views
+
 ```sql
 -- Materialized view for faction statistics
 CREATE MATERIALIZED VIEW faction_stats AS
-SELECT 
+SELECT
     f.id,
     f.name,
     f.game_system_id,
@@ -979,6 +1019,7 @@ CREATE INDEX idx_faction_stats_game_system ON faction_stats(game_system_id);
 ```
 
 ### 16.2 Partitioning Strategy
+
 ```sql
 -- Partition large tables by date
 -- Activities table (already partitioned above)
@@ -991,24 +1032,29 @@ CREATE INDEX idx_faction_stats_game_system ON faction_stats(game_system_id);
 ## 17. Data Integrity Constraints
 
 ### 17.1 Check Constraints
+
 ```sql
 -- Ensure positive values
-ALTER TABLE models ADD CONSTRAINT chk_models_positive_quantity 
+ALTER TABLE models ADD CONSTRAINT chk_models_positive_quantity
     CHECK (quantity > 0);
 
-ALTER TABLE models ADD CONSTRAINT chk_models_positive_price 
+ALTER TABLE models ADD CONSTRAINT chk_models_positive_price
     CHECK (purchase_price >= 0);
 
 -- Ensure valid dates
-ALTER TABLE models ADD CONSTRAINT chk_models_valid_purchase_date 
+ALTER TABLE models ADD CONSTRAINT chk_models_valid_purchase_date
     CHECK (purchase_date <= CURRENT_DATE);
 
 -- Ensure valid email format
-ALTER TABLE users ADD CONSTRAINT chk_users_valid_email 
+ALTER TABLE users ADD CONSTRAINT chk_users_valid_email
     CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 ```
 
 ### 17.2 Foreign Key Constraints
-All foreign key relationships are defined with appropriate CASCADE or RESTRICT actions to maintain referential integrity while allowing for proper data cleanup when records are deleted.
 
-This database design provides a solid foundation for the Plastic Crack application, ensuring data integrity, performance, and scalability while supporting all the functional requirements outlined in the application specification.
+All foreign key relationships are defined with appropriate CASCADE or RESTRICT actions to maintain
+referential integrity while allowing for proper data cleanup when records are deleted.
+
+This database design provides a solid foundation for the Plastic Crack application, ensuring data
+integrity, performance, and scalability while supporting all the functional requirements outlined in
+the application specification.

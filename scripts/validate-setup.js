@@ -24,86 +24,97 @@ const checks = [
       if (major >= 18) {
         return { success: true, message: `✅ Node.js ${version}` };
       }
-      return { success: false, message: `❌ Node.js ${version} (requires v18+)` };
-    }
+      return {
+        success: false,
+        message: `❌ Node.js ${version} (requires v18+)`,
+      };
+    },
   },
   {
     name: 'Package.json exists',
     check: () => {
       const exists = fs.existsSync('package.json');
-      return { 
-        success: exists, 
-        message: exists ? '✅ package.json found' : '❌ package.json missing' 
+      return {
+        success: exists,
+        message: exists ? '✅ package.json found' : '❌ package.json missing',
       };
-    }
+    },
   },
   {
     name: 'TypeScript configuration',
     check: () => {
       const exists = fs.existsSync('tsconfig.json');
-      return { 
-        success: exists, 
-        message: exists ? '✅ tsconfig.json configured' : '❌ tsconfig.json missing' 
+      return {
+        success: exists,
+        message: exists
+          ? '✅ tsconfig.json configured'
+          : '❌ tsconfig.json missing',
       };
-    }
+    },
   },
   {
     name: 'ESLint configuration',
     check: () => {
-      const exists = fs.existsSync('.eslintrc.js');
-      return { 
-        success: exists, 
-        message: exists ? '✅ ESLint configured' : '❌ ESLint configuration missing' 
+      const exists = fs.existsSync('eslint.config.js');
+      return {
+        success: exists,
+        message: exists
+          ? '✅ ESLint configured'
+          : '❌ ESLint configuration missing',
       };
-    }
+    },
   },
   {
     name: 'Prettier configuration',
     check: () => {
       const exists = fs.existsSync('.prettierrc.json');
-      return { 
-        success: exists, 
-        message: exists ? '✅ Prettier configured' : '❌ Prettier configuration missing' 
+      return {
+        success: exists,
+        message: exists
+          ? '✅ Prettier configured'
+          : '❌ Prettier configuration missing',
       };
-    }
+    },
   },
   {
     name: 'Docker Compose',
     check: () => {
       const exists = fs.existsSync('docker-compose.yml');
-      return { 
-        success: exists, 
-        message: exists ? '✅ Docker Compose configured' : '❌ docker-compose.yml missing' 
+      return {
+        success: exists,
+        message: exists
+          ? '✅ Docker Compose configured'
+          : '❌ docker-compose.yml missing',
       };
-    }
+    },
   },
   {
     name: 'Environment template',
     check: () => {
       const exists = fs.existsSync('.env.example');
-      return { 
-        success: exists, 
-        message: exists ? '✅ Environment template exists' : '❌ .env.example missing' 
+      return {
+        success: exists,
+        message: exists
+          ? '✅ Environment template exists'
+          : '❌ .env.example missing',
       };
-    }
+    },
   },
   {
     name: 'Workspace folders',
     check: () => {
       const folders = ['backend', 'frontend', 'mobile', 'shared'];
-      const missing = folders.filter(folder => 
-        !fs.existsSync(folder)
-      );
-      
+      const missing = folders.filter(folder => !fs.existsSync(folder));
+
       if (missing.length === 0) {
         return { success: true, message: '✅ All workspace folders exist' };
       }
-      return { 
-        success: false, 
-        message: `❌ Missing folders: ${missing.join(', ')}` 
+      return {
+        success: false,
+        message: `❌ Missing folders: ${missing.join(', ')}`,
       };
-    }
-  }
+    },
+  },
 ];
 
 let allPassed = true;
