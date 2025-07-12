@@ -1,0 +1,197 @@
+// Plastic Crack MVP Database Schema
+// Phase 1: Core Foundation Tables for MVP
+// Estimated Implementation: 6-8 days
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== CORE USER MANAGEMENT =====
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String   @unique
+  displayName       String?
+  firstName         String?
+  lastName          String?
+  profileImageUrl   String?
+  bio               String?
+  location          String?
+  website           String?
+  
+  // Authentication
+  passwordHash      String
+  emailVerified     Boolean  @default(false)
+  emailVerifiedAt   DateTime?
+  
+  // Account Status
+  isActive          Boolean  @default(true)
+  lastLoginAt       DateTime?
+  
+  // Privacy Settings
+  isProfilePublic   Boolean  @default(true)
+  allowFollowers    Boolean  @default(true)
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  collections       Collection[]
+  models            Model[]
+  modelLikes        ModelLike[]
+  followers         UserRelationship[] @relation("UserFollowers")
+  following         UserRelationship[] @relation("UserFollowing")
+  
+  @@map("users")
+}
+
+// ===== SOCIAL FEATURES =====
+
+model UserRelationship {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  follower    User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId])
+  @@map("user_relationships")
+}
+
+// ===== GAME SYSTEM FOUNDATION =====
+
+model GameSystem {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  shortName   String   @unique
+  description String?
+  publisher   String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  factions    Faction[]
+  models      Model[]
+  
+  @@map("game_systems")
+}
+
+model Faction {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  gameSystemId String
+  isActive     Boolean    @default(true)
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Relations
+  gameSystem   GameSystem @relation(fields: [gameSystemId], references: [id])
+  models       Model[]
+  
+  @@unique([name, gameSystemId])
+  @@map("factions")
+}
+
+// ===== COLLECTION MANAGEMENT =====
+
+model Collection {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(true)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  models      Model[]
+  
+  @@map("collections")
+}
+
+// ===== MODEL MANAGEMENT =====
+
+enum PaintingStatus {
+  UNPAINTED
+  PRIMED
+  BASE_COATED
+  IN_PROGRESS
+  COMPLETED
+  SHOWCASE
+}
+
+model Model {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  gameSystemId  String
+  factionId     String?
+  collectionId  String
+  userId        String
+  
+  // Model Details
+  paintingStatus PaintingStatus @default(UNPAINTED)
+  pointsCost     Int?
+  notes          String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  gameSystem    GameSystem   @relation(fields: [gameSystemId], references: [id])
+  faction       Faction?     @relation(fields: [factionId], references: [id])
+  collection    Collection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos        ModelPhoto[]
+  likes         ModelLike[]
+  
+  @@map("models")
+}
+
+model ModelPhoto {
+  id          String   @id @default(cuid())
+  modelId     String
+  fileName    String
+  originalUrl String
+  thumbnailUrl String?
+  description String?
+  isPrimary   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  model       Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  
+  @@map("model_photos")
+}
+
+model ModelLike {
+  id        String   @id @default(cuid())
+  modelId   String
+  userId    String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  model     Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([modelId, userId])
+  @@map("model_likes")
+}
