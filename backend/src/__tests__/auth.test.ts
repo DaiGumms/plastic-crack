@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/triple-slash-reference */
 import request from 'supertest';
 import { app } from '../app';
 import { prisma } from '../lib/database';
@@ -322,6 +321,7 @@ describe('AuthService', () => {
         userId: 'user123',
         username: 'testuser',
         email: 'test@example.com',
+        role: UserRole.USER,
       };
 
       const token = AuthService.generateToken(payload);

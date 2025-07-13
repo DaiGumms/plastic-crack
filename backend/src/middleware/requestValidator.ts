@@ -90,7 +90,7 @@ export const validate = (schema: ValidationSchema) => {
       }
 
       next();
-    } catch (_err) {
+    } catch {
       res.status(500).json({
         success: false,
         error: {

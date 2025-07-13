@@ -238,7 +238,6 @@ export class AuthService {
   }
 
   // Verify email address
-  // eslint-disable-next-line unused-imports/no-unused-vars
   static async verifyEmail(_token: string): Promise<boolean> {
     // This would typically verify against a token stored in the database
     // For now, this is a placeholder for future implementation

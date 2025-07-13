@@ -210,9 +210,9 @@ export const requireResourcePermission = (resource: string, action: string) => {
 /**
  * Check if user can access own resource or has admin permissions
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const requireOwnershipOrAdmin = (
-  getResourceUserId: (req: AuthenticatedRequest) => string // eslint-disable-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars
+  getResourceUserId: (req: AuthenticatedRequest) => string
 ) => {
   return (
     req: AuthenticatedRequest,

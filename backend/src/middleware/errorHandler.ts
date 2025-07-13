@@ -18,7 +18,6 @@ export class AppError extends Error implements ApiError {
   }
 }
 
-// eslint-disable-next-line unused-imports/no-unused-vars
 export const errorHandler = (
   err: ApiError,
   _req: Request,
