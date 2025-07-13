@@ -39,7 +39,9 @@ const checks = [
       const exists = fs.existsSync('package.json');
       return {
         success: exists,
-        message: exists ? '✅ Root package.json found' : '❌ Root package.json missing',
+        message: exists
+          ? '✅ Root package.json found'
+          : '❌ Root package.json missing',
       };
     },
   },
@@ -51,8 +53,8 @@ const checks = [
         const hasWorkspaces = pkg.workspaces && Array.isArray(pkg.workspaces);
         return {
           success: hasWorkspaces,
-          message: hasWorkspaces 
-            ? '✅ NPM workspaces configured' 
+          message: hasWorkspaces
+            ? '✅ NPM workspaces configured'
             : '❌ NPM workspaces not configured',
         };
       } catch (error) {
@@ -63,15 +65,20 @@ const checks = [
   {
     name: 'TypeScript configuration',
     check: () => {
-      const folders = ['backend', 'frontend', 'mobile', 'shared'];  
-      const missingConfigs = folders.filter(folder => !fs.existsSync(path.join(folder, 'tsconfig.json')));  
+      const folders = ['backend', 'frontend', 'mobile', 'shared'];
+      const missingConfigs = folders.filter(
+        folder => !fs.existsSync(path.join(folder, 'tsconfig.json'))
+      );
 
-      if (missingConfigs.length === 0) {  
-        return { success: true, message: '✅ All workspace tsconfig.json files are configured' };  
-      }  
-      return {  
-        success: false,  
-        message: `❌ Missing tsconfig.json in: ${missingConfigs.join(', ')}`, 
+      if (missingConfigs.length === 0) {
+        return {
+          success: true,
+          message: '✅ All workspace tsconfig.json files are configured',
+        };
+      }
+      return {
+        success: false,
+        message: `❌ Missing tsconfig.json in: ${missingConfigs.join(', ')}`,
       };
     },
   },
@@ -142,10 +149,15 @@ const checks = [
     name: 'Workspace package.json files',
     check: () => {
       const workspaces = ['backend', 'frontend', 'mobile', 'shared'];
-      const missing = workspaces.filter(ws => !fs.existsSync(path.join(ws, 'package.json')));
+      const missing = workspaces.filter(
+        ws => !fs.existsSync(path.join(ws, 'package.json'))
+      );
 
       if (missing.length === 0) {
-        return { success: true, message: '✅ All workspace package.json files exist' };
+        return {
+          success: true,
+          message: '✅ All workspace package.json files exist',
+        };
       }
       return {
         success: false,
@@ -166,7 +178,10 @@ const checks = [
       const missing = checks.filter(check => !fs.existsSync(check.file));
 
       if (missing.length === 0) {
-        return { success: true, message: '✅ Backend workspace properly configured' };
+        return {
+          success: true,
+          message: '✅ Backend workspace properly configured',
+        };
       }
       return {
         success: false,
@@ -187,7 +202,10 @@ const checks = [
       const missing = checks.filter(check => !fs.existsSync(check.file));
 
       if (missing.length === 0) {
-        return { success: true, message: '✅ Frontend workspace properly configured' };
+        return {
+          success: true,
+          message: '✅ Frontend workspace properly configured',
+        };
       }
       return {
         success: false,
@@ -207,7 +225,10 @@ const checks = [
       const missing = checks.filter(check => !fs.existsSync(check.file));
 
       if (missing.length === 0) {
-        return { success: true, message: '✅ Mobile workspace properly configured' };
+        return {
+          success: true,
+          message: '✅ Mobile workspace properly configured',
+        };
       }
       return {
         success: false,
@@ -236,7 +257,9 @@ const checks = [
       const gitExists = fs.existsSync('.git');
       return {
         success: gitExists,
-        message: gitExists ? '✅ Git repository initialized' : '❌ Not a git repository',
+        message: gitExists
+          ? '✅ Git repository initialized'
+          : '❌ Not a git repository',
       };
     },
   },
@@ -246,7 +269,9 @@ const checks = [
       const ciExists = fs.existsSync('.github/workflows/ci.yml');
       return {
         success: ciExists,
-        message: ciExists ? '✅ GitHub Actions CI configured' : '❌ CI workflow missing',
+        message: ciExists
+          ? '✅ GitHub Actions CI configured'
+          : '❌ CI workflow missing',
       };
     },
   },
