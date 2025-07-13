@@ -4,13 +4,9 @@
  * Creates and migrates the test database using Prisma
  */
 
-import { execSync } from 'child_process';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { execSync } = require('child_process');
+const dotenv = require('dotenv');
+const path = require('path');
 
 // Load test environment variables
 dotenv.config({ path: path.join(__dirname, '..', '.env.test') });
