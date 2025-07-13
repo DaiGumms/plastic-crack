@@ -9,11 +9,12 @@ process.env.SKIP_RATE_LIMIT = 'true';
 
 // Test utilities
 const createTestUser = async (overrides: Partial<any> = {}) => {
+  const timestamp = Date.now();
   const userData = {
-    username: 'testuser',
-    email: 'test@example.com',
+    username: `authuser${timestamp}`,
+    email: `auth-test-${timestamp}@example.com`,
     password: 'TestPassword123!',
-    displayName: 'Test User',
+    displayName: 'Auth Test User',
     ...overrides,
   };
   
@@ -26,15 +27,49 @@ const createTestUser = async (overrides: Partial<any> = {}) => {
 };
 
 describe('Authentication System', () => {
+  let testUser: any;
+  let testEmail: string;
+  let testUsername: string;
+  let testDisplayName: string;
+  let testPassword: string;
+
   beforeEach(async () => {
-    // Clean up database before each test
-    await prisma.user.deleteMany();
+    // Generate unique test data for each test
+    const timestamp = Date.now();
+    testEmail = `auth-test-${timestamp}@example.com`;
+    testUsername = `authuser${timestamp}`;
+    testDisplayName = `Auth Test User ${timestamp}`;
+    testPassword = 'TestPassword123!';
+
+    // Clean up any existing test data
+    await prisma.user.deleteMany({
+      where: {
+        OR: [
+          { email: { contains: 'auth-test' } },
+          { email: { contains: 'register-test' } },
+          { email: { contains: 'login-test' } },
+          { username: { contains: 'authuser' } },
+          { username: { contains: 'testuser' } },
+          { username: { contains: 'reguser' } }
+        ]
+      }
+    });
   });
 
   afterAll(async () => {
-    // Clean up database after all tests
-    await prisma.user.deleteMany();
-    await prisma.$disconnect();
+    // Clean up only auth test data
+    await prisma.user.deleteMany({
+      where: {
+        OR: [
+          { email: { contains: 'auth-test' } },
+          { email: { contains: 'register-test' } },
+          { email: { contains: 'login-test' } },
+          { username: { contains: 'authuser' } },
+          { username: { contains: 'testuser' } },
+          { username: { contains: 'reguser' } }
+        ]
+      }
+    });
   });
 
   describe('POST /api/v1/auth/register', () => {
@@ -91,11 +126,13 @@ describe('Authentication System', () => {
     });
 
     it('should reject registration with duplicate email', async () => {
-      await createTestUser();
+      // First create a user with our test email
+      await createTestUser({ email: testEmail, username: testUsername });
 
+      // Try to register again with same email but different username
       const duplicateUser = {
-        username: 'differentuser',
-        email: 'test@example.com', // Same email as test user
+        username: `different${testUsername}`,
+        email: testEmail, // Same email as test user
         password: 'SecurePassword123!',
         displayName: 'Different User',
       };
@@ -109,11 +146,13 @@ describe('Authentication System', () => {
     });
 
     it('should reject registration with duplicate username', async () => {
-      await createTestUser();
+      // First create a user with our test username  
+      await createTestUser({ email: testEmail, username: testUsername });
 
+      // Try to register again with same username but different email
       const duplicateUser = {
-        username: 'testuser', // Same username as test user
-        email: 'different@example.com',
+        username: testUsername, // Same username as test user
+        email: `different-${testEmail}`,
         password: 'SecurePassword123!',
         displayName: 'Different User',
       };
@@ -129,13 +168,14 @@ describe('Authentication System', () => {
 
   describe('POST /api/v1/auth/login', () => {
     it('should login with valid credentials', async () => {
-      await createTestUser();
+      // Create a test user first  
+      await createTestUser({ email: testEmail, username: testUsername, password: testPassword });
 
       const response = await request(app)
         .post('/api/v1/auth/login')
         .send({
-          email: 'test@example.com',
-          password: 'TestPassword123!',
+          email: testEmail,
+          password: testPassword,
         });
 
       expect(response.status).toBe(200);
@@ -175,7 +215,7 @@ describe('Authentication System', () => {
 
   describe('GET /api/v1/auth/me', () => {
     it('should return user data for authenticated user', async () => {
-      const { token } = await createTestUser();
+      const { token } = await createTestUser({ email: testEmail, username: testUsername });
 
       const response = await request(app)
         .get('/api/v1/auth/me')
@@ -183,8 +223,8 @@ describe('Authentication System', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.user).toBeDefined();
-      expect(response.body.user.email).toBe('test@example.com');
-      expect(response.body.user.username).toBe('testuser');
+      expect(response.body.user.email).toBe(testEmail);
+      expect(response.body.user.username).toBe(testUsername);
     });
 
     it('should reject request without token', async () => {

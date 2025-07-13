@@ -79,3 +79,24 @@ export const generalRateLimit = rateLimit({
     });
   },
 });
+
+// Generic rate limiter factory function
+export const rateLimiter = (max: number, windowMs: number) => {
+  return rateLimit({
+    windowMs,
+    max,
+    message: {
+      error: 'Too many requests, please try again later.',
+      retryAfter: `${Math.ceil(windowMs / 60000)} minutes`
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip,
+    handler: (req: Request, res: Response) => {
+      res.status(429).json({
+        error: 'Too many requests, please try again later.',
+        retryAfter: `${Math.ceil(windowMs / 60000)} minutes`
+      });
+    },
+  });
+};

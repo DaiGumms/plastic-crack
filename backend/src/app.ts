@@ -1,3 +1,5 @@
+import path from 'path';
+
 import compression from 'compression';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -66,6 +68,9 @@ try {
 
 // Request validation middleware
 app.use(requestValidator);
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/health', async (req, res) => {

@@ -7,21 +7,34 @@ process.env.SKIP_RATE_LIMIT = 'false';
 
 describe('Rate Limiting', () => {
   beforeEach(async () => {
-    // Clean up database before each test
-    await prisma.user.deleteMany();
+    // Clean up only rate limiting test data
+    await prisma.user.deleteMany({
+      where: {
+        OR: [
+          { email: { contains: 'ratelimit' } },
+          { email: { contains: 'rate-limit-test' } }
+        ]
+      }
+    });
   });
 
   afterAll(async () => {
-    // Clean up database after all tests
-    await prisma.user.deleteMany();
-    await prisma.$disconnect();
+    // Clean up only rate limiting test data
+    await prisma.user.deleteMany({
+      where: {
+        OR: [
+          { email: { contains: 'ratelimit' } },
+          { email: { contains: 'rate-limit-test' } }
+        ]
+      }
+    });
   });
 
   describe('Auth endpoints rate limiting', () => {
     it('should enforce rate limiting on registration endpoint', async () => {
       const userData = {
         username: 'ratelimituser',
-        email: 'ratelimit@example.com',
+        email: 'rate-limit-test@plastic-crack-test.com',
         password: 'SecurePassword123!',
         displayName: 'Rate Limit User',
       };
@@ -51,7 +64,7 @@ describe('Rate Limiting', () => {
       // First create a user to attempt login with
       const testUser = {
         username: 'logintest',
-        email: 'logintest@example.com',
+        email: 'login-rate-limit-test@plastic-crack-test.com',
         password: 'TestPassword123!',
         displayName: 'Login Test User',
       };

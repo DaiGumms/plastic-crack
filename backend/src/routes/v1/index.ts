@@ -1,8 +1,10 @@
 import { Router } from 'express';
 
 import authRoutes from '../auth.routes';
+
 import { healthRoutes } from './health';
 import { redisRoutes } from './redis';
+import { userRoutes } from './user.routes';
 
 const router = Router();
 
@@ -17,6 +19,9 @@ if (process.env.NODE_ENV === 'development') {
 // Authentication routes
 router.use('/auth', authRoutes);
 
+// User profile routes
+router.use('/users', userRoutes);
+
 // Placeholder for future routes
 router.get('/', (req, res) => {
   res.json({
@@ -27,6 +32,7 @@ router.get('/', (req, res) => {
     endpoints: {
       health: '/api/v1/health',
       auth: '/api/v1/auth',
+      users: '/api/v1/users',
       ...(process.env.NODE_ENV === 'development' && { redis: '/api/v1/redis' }),
       // Future endpoints will be listed here
     },
