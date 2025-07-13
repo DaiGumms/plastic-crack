@@ -142,6 +142,7 @@ router.post(
 // GET /api/auth/me
 router.get(
   '/me',
+  authRateLimit,
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
