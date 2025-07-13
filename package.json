@@ -74,6 +74,10 @@
     "url": "https://github.com/DaiGumms/plastic-crack/issues"
   },
   "homepage": "https://github.com/DaiGumms/plastic-crack#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "devDependencies": {
     "npm-run-all2": "^6.2.3",
     "concurrently": "^9.1.0",
