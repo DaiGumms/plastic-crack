@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 
 // Skip rate limiting if explicitly disabled for testing
-const skip = () => process.env.SKIP_RATE_LIMIT === 'true';
+const skip = () => process.env.SKIP_RATE_LIMITING === 'true';
 
 // Rate limiter for authentication endpoints
 export const authRateLimit = rateLimit({

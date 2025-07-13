@@ -3,7 +3,7 @@ import { app } from '../app';
 import { prisma } from '../lib/database';
 
 // Ensure rate limiting is enabled for these tests
-process.env.SKIP_RATE_LIMIT = 'false';
+process.env.SKIP_RATE_LIMITING = 'false';
 
 describe('Rate Limiting', () => {
   beforeEach(async () => {
