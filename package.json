@@ -9,7 +9,7 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:mobile": "cd mobile && npm run start",
-    "build": "run-s build:backend build:frontend",
+    "build": "npm run db:generate && run-s build:backend build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "build:mobile": "cd mobile && npm run build",
