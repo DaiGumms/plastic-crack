@@ -2,9 +2,12 @@
 
 ## 1. Overview
 
-This guide covers the deployment and infrastructure setup for the Plastic Crack cross-platform application using Google Cloud Platform and Firebase, including mobile apps (iOS/Android), web application, AI services, price intelligence, and real-time social features.
+This guide covers the deployment and infrastructure setup for the Plastic Crack cross-platform
+application using Google Cloud Platform and Firebase, including mobile apps (iOS/Android), web
+application, AI services, price intelligence, and real-time social features.
 
 ### 1.1 Google Cloud Firebase Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   App Store     │    │  Google Play    │    │  Firebase       │
@@ -41,6 +44,7 @@ This guide covers the deployment and infrastructure setup for the Plastic Crack 
 ```
 
 ### 1.2 Environment Requirements
+
 - **Development**: Firebase Emulator Suite with local development
 - **Staging**: Firebase projects with Cloud Run staging instances
 - **Production**: Multi-region Firebase deployment with global CDN
@@ -49,6 +53,7 @@ This guide covers the deployment and infrastructure setup for the Plastic Crack 
 ## 2. Prerequisites
 
 ### 2.1 Google Cloud Setup
+
 - **Google Cloud Project**: Create a new GCP project with billing enabled
 - **Firebase Project**: Initialize Firebase for the same GCP project
 - **Service Account**: Create service account with appropriate permissions
@@ -56,6 +61,7 @@ This guide covers the deployment and infrastructure setup for the Plastic Crack 
 - **Firebase CLI**: Install Firebase CLI for deployment
 
 ### 2.2 Required Google Cloud Services
+
 - **Firebase Hosting**: For web application (PWA) hosting
 - **Firebase Authentication**: User management and OAuth
 - **Cloud Run**: Serverless containers for API services
@@ -70,12 +76,14 @@ This guide covers the deployment and infrastructure setup for the Plastic Crack 
 - **BigQuery**: Analytics and data warehousing
 
 ### 2.3 Mobile Development Tools
+
 - **iOS**: Xcode 14+, iOS Simulator, Apple Developer account
 - **Android**: Android Studio, Android SDK 33+, Google Play Console
 - **React Native**: React Native CLI, Expo CLI
 - **Firebase SDKs**: iOS and Android Firebase SDKs
 
 ### 2.4 Development Tools
+
 - **Node.js 18+**: For local development and Cloud Functions
 - **Python 3.9+**: For AI services and data processing
 - **Firebase CLI**: Project management and deployment
@@ -85,6 +93,7 @@ This guide covers the deployment and infrastructure setup for the Plastic Crack 
 ## 3. Firebase Project Setup
 
 ### 3.1 Initialize Firebase Project
+
 ```bash
 # Install Firebase CLI
 npm install -g firebase-tools
@@ -107,15 +116,12 @@ firebase init
 ### 3.2 Firebase Configuration Files
 
 #### firebase.json
+
 ```json
 {
   "hosting": {
     "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "/api/**",
@@ -194,6 +200,7 @@ firebase init
 ```
 
 #### .firebaserc
+
 ```json
 {
   "projects": {
@@ -215,6 +222,7 @@ firebase init
 ### 3.3 Environment Configuration
 
 #### Development (.env.development)
+
 ```bash
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=your_dev_api_key
@@ -247,6 +255,7 @@ FIREBASE_STORAGE_EMULATOR_HOST=localhost:9199
 ```
 
 #### Production (.env.production)
+
 ```bash
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
@@ -286,6 +295,7 @@ FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
 ## 4. Cloud Run Configuration
 
 ### 4.1 Main API Service Dockerfile
+
 ```dockerfile
 # /backend/Dockerfile
 FROM node:18-alpine AS builder
@@ -320,6 +330,7 @@ CMD ["npm", "start"]
 ```
 
 ### 4.2 AI Services Dockerfile
+
 ```dockerfile
 # /ai-services/Dockerfile
 FROM python:3.9-slim
@@ -347,16 +358,17 @@ CMD ["python", "main.py"]
 ### 4.3 Cloud Run Service Configuration
 
 #### cloudbuild.yaml
+
 ```yaml
 steps:
   # Build main API
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/plastic-crack-api:$COMMIT_SHA', './backend']
-  
+
   # Build AI services
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/plastic-crack-ai:$COMMIT_SHA', './ai-services']
-  
+
   # Build price intelligence service
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/plastic-crack-price:$COMMIT_SHA', './price-service']
@@ -395,6 +407,7 @@ images:
 ### 4.4 Cloud Run Deployment Scripts
 
 #### deploy-services.sh
+
 ```bash
 #!/bin/bash
 
@@ -446,6 +459,7 @@ gcloud run deploy plastic-crack-price \
 ## 5. Nginx Configuration
 
 ### 5.1 Development Configuration
+
 ```nginx
 # nginx/nginx.conf
 events {
@@ -485,6 +499,7 @@ http {
 ```
 
 ### 5.2 Production Configuration
+
 ```nginx
 # nginx/nginx.prod.conf
 events {
@@ -585,7 +600,7 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Cache static assets
             location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
@@ -601,6 +616,7 @@ http {
 ### 6.1 Cloud Functions Configuration
 
 #### functions/package.json
+
 ```json
 {
   "name": "plastic-crack-functions",
@@ -634,6 +650,7 @@ http {
 ```
 
 #### functions/src/index.ts
+
 ```typescript
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
@@ -657,21 +674,21 @@ export const priceAlertTrigger = functions.firestore
   .onUpdate(async (change, context) => {
     const before = change.before.data();
     const after = change.after.data();
-    
+
     if (!before.triggered && after.triggered) {
       // Send notification
       const userId = after.user_id;
       const tokens = await getUserFCMTokens(userId);
-      
+
       if (tokens.length > 0) {
         const message = {
           notification: {
             title: 'Price Alert!',
-            body: `${after.model_name} is now ${after.current_price}!`
+            body: `${after.model_name} is now ${after.current_price}!`,
           },
-          tokens: tokens
+          tokens: tokens,
         };
-        
+
         await admin.messaging().sendMulticast(message);
       }
     }
@@ -682,57 +699,55 @@ export const sendMessage = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
-  
+
   const { conversationId, message } = data;
   const userId = context.auth.uid;
-  
+
   // Add message to Firestore
-  const messageRef = await admin.firestore()
-    .collection('messages')
-    .add({
-      conversation_id: conversationId,
-      user_id: userId,
-      content: message,
-      created_at: admin.firestore.FieldValue.serverTimestamp()
-    });
-  
+  const messageRef = await admin.firestore().collection('messages').add({
+    conversation_id: conversationId,
+    user_id: userId,
+    content: message,
+    created_at: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
   // Notify conversation participants
-  const conversation = await admin.firestore()
+  const conversation = await admin
+    .firestore()
     .collection('conversations')
     .doc(conversationId)
     .get();
-    
+
   if (conversation.exists) {
     const participants = conversation.data()?.participants || [];
     const otherParticipants = participants.filter((p: string) => p !== userId);
-    
+
     for (const participantId of otherParticipants) {
       const tokens = await getUserFCMTokens(participantId);
       if (tokens.length > 0) {
         await admin.messaging().sendMulticast({
           notification: {
             title: 'New Message',
-            body: message
+            body: message,
           },
-          tokens: tokens
+          tokens: tokens,
         });
       }
     }
   }
-  
+
   return { messageId: messageRef.id };
 });
 
 async function getUserFCMTokens(userId: string): Promise<string[]> {
-  const devicesSnapshot = await admin.firestore()
+  const devicesSnapshot = await admin
+    .firestore()
     .collection('user_devices')
     .where('user_id', '==', userId)
     .where('push_enabled', '==', true)
     .get();
-    
-  return devicesSnapshot.docs
-    .map(doc => doc.data().push_token)
-    .filter(token => token);
+
+  return devicesSnapshot.docs.map(doc => doc.data().push_token).filter(token => token);
 }
 
 // Export the Express app as a Cloud Function
@@ -742,6 +757,7 @@ export const api = functions.https.onRequest(app);
 ### 6.2 AI Integration Functions
 
 #### functions/src/ai-functions.ts
+
 ```typescript
 import * as functions from 'firebase-functions';
 import { aiplatform } from '@google-cloud/aiplatform';
@@ -752,32 +768,34 @@ export const generateColorScheme = functions.https.onCall(async (data, context) 
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
-  
+
   const { modelDescription, faction, gameSystem } = data;
-  
+
   try {
     // Call Vertex AI model for color scheme generation
     const client = new PredictionServiceClient();
     const projectId = functions.config().google.project_id;
     const location = 'us-central1';
     const endpoint = `projects/${projectId}/locations/${location}/endpoints/color-scheme-model`;
-    
-    const instances = [{
-      description: modelDescription,
-      faction: faction,
-      game_system: gameSystem
-    }];
-    
+
+    const instances = [
+      {
+        description: modelDescription,
+        faction: faction,
+        game_system: gameSystem,
+      },
+    ];
+
     const request = {
       endpoint,
       instances,
     };
-    
+
     const [response] = await client.predict(request);
-    
+
     return {
       success: true,
-      colorScheme: response.predictions?.[0]
+      colorScheme: response.predictions?.[0],
     };
   } catch (error) {
     console.error('AI color scheme generation error:', error);
@@ -785,29 +803,30 @@ export const generateColorScheme = functions.https.onCall(async (data, context) 
   }
 });
 
-export const analyzeModelImage = functions.storage.object().onFinalize(async (object) => {
+export const analyzeModelImage = functions.storage.object().onFinalize(async object => {
   const filePath = object.name;
   const bucket = object.bucket;
-  
+
   if (!filePath?.includes('/models/') || !filePath.includes('.jpg')) {
     return;
   }
-  
+
   // Extract user ID and model ID from path
   const pathParts = filePath.split('/');
   const userId = pathParts[1];
   const modelId = pathParts[2];
-  
+
   try {
     // Use Vision API to analyze the image
     const vision = require('@google-cloud/vision');
     const client = new vision.ImageAnnotatorClient();
-    
+
     const [result] = await client.objectLocalization(`gs://${bucket}/${filePath}`);
     const objects = result.localizedObjectAnnotations;
-    
+
     // Update model document with AI analysis
-    await admin.firestore()
+    await admin
+      .firestore()
       .collection('user_models')
       .doc(userId)
       .collection('models')
@@ -815,10 +834,9 @@ export const analyzeModelImage = functions.storage.object().onFinalize(async (ob
       .update({
         ai_analysis: {
           detected_objects: objects,
-          analyzed_at: admin.firestore.FieldValue.serverTimestamp()
-        }
+          analyzed_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
       });
-      
   } catch (error) {
     console.error('Image analysis error:', error);
   }
@@ -830,6 +848,7 @@ export const analyzeModelImage = functions.storage.object().onFinalize(async (ob
 ### 7.1 Web App Build Configuration
 
 #### vite.config.ts
+
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -850,11 +869,11 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              }
-            }
-          }
-        ]
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'Plastic Crack',
@@ -867,36 +886,33 @@ export default defineConfig({
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
-    })
+            type: 'image/png',
+          },
+        ],
+      },
+    }),
   ],
   build: {
     outDir: 'dist',
-    sourcemap: true
-  }
+    sourcemap: true,
+  },
 });
 ```
 
 ### 7.2 Firebase Hosting Headers
 
 #### firebase.json (hosting section)
+
 ```json
 {
   "hosting": {
     "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "/api/**",
@@ -948,6 +964,7 @@ export default defineConfig({
 ### 8.1 Cloud Build Configuration
 
 #### cloudbuild.yaml
+
 ```yaml
 steps:
   # Install dependencies
@@ -973,24 +990,24 @@ steps:
 
   # Build and deploy Cloud Run services
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build',
-      '-t', 'gcr.io/${_FIREBASE_PROJECT_ID}/plastic-crack-api:${SHORT_SHA}',
-      './backend'
-    ]
+    args:
+      ['build', '-t', 'gcr.io/${_FIREBASE_PROJECT_ID}/plastic-crack-api:${SHORT_SHA}', './backend']
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/${_FIREBASE_PROJECT_ID}/plastic-crack-api:${SHORT_SHA}']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
-    args: [
-      'run', 'deploy', 'plastic-crack-api',
-      '--image=gcr.io/${_FIREBASE_PROJECT_ID}/plastic-crack-api:${SHORT_SHA}',
-      '--region=us-central1',
-      '--platform=managed',
-      '--allow-unauthenticated'
-    ]
+    args:
+      [
+        'run',
+        'deploy',
+        'plastic-crack-api',
+        '--image=gcr.io/${_FIREBASE_PROJECT_ID}/plastic-crack-api:${SHORT_SHA}',
+        '--region=us-central1',
+        '--platform=managed',
+        '--allow-unauthenticated',
+      ]
 
   # Deploy Firebase Functions
   - name: 'gcr.io/plastic-crack-prod/firebase'
@@ -1009,6 +1026,7 @@ options:
 ### 8.2 GitHub Actions Integration
 
 #### .github/workflows/deploy-firebase.yml
+
 ```yaml
 name: Deploy to Firebase
 
@@ -1029,7 +1047,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -1038,12 +1056,12 @@ jobs:
           cache-dependency-path: |
             frontend/package-lock.json
             functions/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd frontend && npm ci
           cd ../functions && npm ci
-      
+
       - name: Run tests
         run: |
           cd frontend && npm test -- --coverage --watchAll=false
@@ -1054,18 +1072,18 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment: staging
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
-      
+
       - name: Build frontend
         run: |
           cd frontend
@@ -1075,7 +1093,7 @@ jobs:
           VITE_FIREBASE_API_KEY: ${{ secrets.STAGING_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.STAGING_FIREBASE_PROJECT_ID }}
-      
+
       - name: Deploy to Firebase Staging
         run: |
           firebase use staging
@@ -1088,21 +1106,21 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
       - name: Setup Google Cloud
         uses: google-github-actions/setup-gcloud@v1
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-      
+
       - name: Trigger Cloud Build
         run: |
           gcloud builds submit --config=cloudbuild.yaml \
@@ -1114,16 +1132,19 @@ jobs:
 ### 9.1 React Native Firebase Setup
 
 #### ios/PlasticCrack/GoogleService-Info.plist
+
 ```xml
 <!-- Download from Firebase Console for iOS -->
 ```
 
 #### android/app/google-services.json
+
 ```json
 // Download from Firebase Console for Android
 ```
 
 #### firebase-config.js
+
 ```javascript
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
@@ -1152,7 +1173,7 @@ export const functions = getFunctions(app);
 // Connect to emulators in development
 if (__DEV__) {
   const localhost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-  
+
   connectAuthEmulator(auth, `http://${localhost}:9099`);
   connectFirestoreEmulator(firestore, localhost, 8080);
   connectStorageEmulator(storage, localhost, 9199);
@@ -1165,6 +1186,7 @@ export default app;
 ### 9.2 Expo Configuration
 
 #### app.json
+
 ```json
 {
   "expo": {
@@ -1182,9 +1204,7 @@ export default app;
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.plasticcrack.app",
@@ -1225,6 +1245,7 @@ export default app;
 ### 10.1 Firebase Analytics & Crashlytics
 
 #### Mobile Analytics Setup
+
 ```javascript
 // mobile/src/analytics.js
 import analytics from '@react-native-firebase/analytics';
@@ -1249,7 +1270,7 @@ export const logScreenView = async (screenName, screenClass) => {
   }
 };
 
-export const setCrashlyticUserId = async (userId) => {
+export const setCrashlyticUserId = async userId => {
   try {
     await crashlytics().setUserId(userId);
   } catch (error) {
@@ -1266,27 +1287,28 @@ export const logCrashlytics = (error, context = {}) => {
 ### 10.2 Google Cloud Monitoring
 
 #### Cloud Monitoring Dashboard
+
 ```yaml
 # monitoring-dashboard.yaml
-displayName: "Plastic Crack Dashboard"
+displayName: 'Plastic Crack Dashboard'
 mosaicLayout:
   tiles:
     - width: 6
       height: 4
       widget:
-        title: "Cloud Run Request Count"
+        title: 'Cloud Run Request Count'
         xyChart:
           dataSets:
             - timeSeriesQuery:
                 timeSeriesFilter:
                   filter: 'resource.type="cloud_run_revision"'
                   aggregation:
-                    alignmentPeriod: "60s"
+                    alignmentPeriod: '60s'
                     perSeriesAligner: ALIGN_RATE
     - width: 6
       height: 4
       widget:
-        title: "Cloud SQL Connections"
+        title: 'Cloud SQL Connections'
         xyChart:
           dataSets:
             - timeSeriesQuery:
@@ -1295,7 +1317,7 @@ mosaicLayout:
     - width: 12
       height: 4
       widget:
-        title: "Firebase Hosting Traffic"
+        title: 'Firebase Hosting Traffic'
         xyChart:
           dataSets:
             - timeSeriesQuery:
@@ -1306,6 +1328,7 @@ mosaicLayout:
 ### 10.3 Custom Metrics
 
 #### Cloud Function for Custom Metrics
+
 ```typescript
 // functions/src/metrics.ts
 import * as functions from 'firebase-functions';
@@ -1315,7 +1338,7 @@ const monitoring = new Monitoring.MetricServiceClient();
 
 export const recordCustomMetric = functions.https.onCall(async (data, context) => {
   const projectId = functions.config().google.project_id;
-  
+
   try {
     const request = {
       name: monitoring.projectPath(projectId),
@@ -1325,31 +1348,31 @@ export const recordCustomMetric = functions.https.onCall(async (data, context) =
             type: 'custom.googleapis.com/plastic_crack/user_actions',
             labels: {
               action_type: data.actionType,
-              user_tier: data.userTier || 'free'
-            }
+              user_tier: data.userTier || 'free',
+            },
           },
           resource: {
             type: 'global',
             labels: {
-              project_id: projectId
-            }
+              project_id: projectId,
+            },
           },
           points: [
             {
               interval: {
                 endTime: {
-                  seconds: Date.now() / 1000
-                }
+                  seconds: Date.now() / 1000,
+                },
               },
               value: {
-                int64Value: 1
-              }
-            }
-          ]
-        }
-      ]
+                int64Value: 1,
+              },
+            },
+          ],
+        },
+      ],
     };
-    
+
     await monitoring.createTimeSeries(request);
     return { success: true };
   } catch (error) {
@@ -1364,50 +1387,52 @@ export const recordCustomMetric = functions.https.onCall(async (data, context) =
 ### 11.1 Cloud Armor Security Policies
 
 #### security-policy.yaml
+
 ```yaml
-name: "plastic-crack-security-policy"
-description: "Security policy for Plastic Crack application"
+name: 'plastic-crack-security-policy'
+description: 'Security policy for Plastic Crack application'
 rules:
   - priority: 1000
     match:
       versionedExpr: SRC_IPS_V1
       config:
         srcIpRanges:
-          - "192.0.2.0/24"  # Example blocked IP range
-    action: "deny-403"
-    description: "Block known malicious IPs"
-  
+          - '192.0.2.0/24' # Example blocked IP range
+    action: 'deny-403'
+    description: 'Block known malicious IPs'
+
   - priority: 2000
     match:
       expr:
         expression: "origin.region_code == 'CN'"
-    action: "deny-403"
-    description: "Block traffic from specific regions"
-    
+    action: 'deny-403'
+    description: 'Block traffic from specific regions'
+
   - priority: 3000
     match:
       expr:
         expression: "request.headers['user-agent'].contains('bot')"
-    action: "rate_based_ban"
+    action: 'rate_based_ban'
     rateLimitOptions:
       rateLimitThreshold:
         count: 100
         intervalSec: 60
-    description: "Rate limit bots"
+    description: 'Rate limit bots'
 
   - priority: 10000
     match:
       versionedExpr: SRC_IPS_V1
       config:
         srcIpRanges:
-          - "*"
-    action: "allow"
-    description: "Allow all other traffic"
+          - '*'
+    action: 'allow'
+    description: 'Allow all other traffic'
 ```
 
 ### 11.2 IAM Configuration
 
 #### Cloud Run Service Account
+
 ```bash
 # Create service account for Cloud Run
 gcloud iam service-accounts create plastic-crack-api \
@@ -1432,6 +1457,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 ### 12.1 Automated Backups
 
 #### Cloud SQL Backup Configuration
+
 ```bash
 # Configure automated backups
 gcloud sql instances patch plastic-crack-main-db \
@@ -1442,6 +1468,7 @@ gcloud sql instances patch plastic-crack-main-db \
 ```
 
 #### Cloud Storage Backup Script
+
 ```bash
 #!/bin/bash
 # backup-firestore.sh
@@ -1464,6 +1491,7 @@ echo "Backup completed: ${DATE}"
 ### 12.2 Disaster Recovery Plan
 
 #### Recovery Scripts
+
 ```bash
 #!/bin/bash
 # disaster-recovery.sh
@@ -1490,6 +1518,7 @@ echo "Disaster recovery completed"
 ## 13. Deployment Commands
 
 ### 13.1 Initial Firebase Setup
+
 ```bash
 # Install Firebase CLI
 npm install -g firebase-tools
@@ -1500,7 +1529,7 @@ firebase init
 
 # Set up projects
 firebase use --add plastic-crack-dev --alias development
-firebase use --add plastic-crack-staging --alias staging  
+firebase use --add plastic-crack-staging --alias staging
 firebase use --add plastic-crack-prod --alias production
 
 # Deploy to development
@@ -1517,6 +1546,7 @@ firebase deploy --only hosting,functions
 ```
 
 ### 13.2 Cloud Run Deployment
+
 ```bash
 # Build and deploy API service
 gcloud builds submit --config cloudbuild.yaml
@@ -1535,12 +1565,13 @@ gcloud run services update plastic-crack-api \
 ```
 
 ### 13.3 Mobile App Deployment
+
 ```bash
 # Build iOS app
 cd mobile
 eas build --platform ios --profile production
 
-# Build Android app  
+# Build Android app
 eas build --platform android --profile production
 
 # Submit to app stores
@@ -1553,6 +1584,7 @@ eas submit --platform android
 ### 14.1 Common Firebase Issues
 
 #### Authentication Problems
+
 ```bash
 # Check Firebase Auth configuration
 firebase auth:export users.json --project plastic-crack-prod
@@ -1562,6 +1594,7 @@ firebase auth:import users.json --hash-algo=SCRYPT --project plastic-crack-prod
 ```
 
 #### Firestore Permission Issues
+
 ```bash
 # Test Firestore rules
 firebase firestore:rules:test --project plastic-crack-prod
@@ -1571,11 +1604,12 @@ firebase deploy --only firestore:rules
 ```
 
 ### 14.2 Cloud Run Debugging
+
 ```bash
 # View service logs
 gcloud logs tail /services/plastic-crack-api --project plastic-crack-prod
 
-# Check service configuration  
+# Check service configuration
 gcloud run services describe plastic-crack-api \
   --region us-central1 --project plastic-crack-prod
 
@@ -1585,6 +1619,7 @@ docker run -p 8080:8080 -e PORT=8080 \
 ```
 
 ### 14.3 Performance Optimization
+
 ```bash
 # Analyze Cloud SQL performance
 gcloud sql operations list --instance plastic-crack-main-db
@@ -1596,4 +1631,7 @@ gcloud run services replace service.yaml --region us-central1
 firebase firestore:indexes --project plastic-crack-prod
 ```
 
-This comprehensive Firebase and Google Cloud deployment guide provides everything needed to host the Plastic Crack platform with enterprise-grade scalability, security, and reliability. The Firebase ecosystem offers seamless integration between web, mobile, and backend services while providing real-time capabilities perfect for the social features of the application.
+This comprehensive Firebase and Google Cloud deployment guide provides everything needed to host the
+Plastic Crack platform with enterprise-grade scalability, security, and reliability. The Firebase
+ecosystem offers seamless integration between web, mobile, and backend services while providing
+real-time capabilities perfect for the social features of the application.

@@ -11,6 +11,7 @@ This guide will help you set up the development environment for Plastic Crack.
 - **Redis** (or use Docker)
 
 ### Mobile Development (Optional)
+
 - **React Native CLI**: `npm install -g @react-native-community/cli`
 - **iOS Development**: Xcode 14+ (macOS only)
 - **Android Development**: Android Studio with SDK
@@ -18,23 +19,57 @@ This guide will help you set up the development environment for Plastic Crack.
 ## Quick Start
 
 1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/DaiGumms/plastic-crack.git
+   cd plastic-crack
+   ```
+
+2. **Validate your environment**
+
+   ```bash
+   npm run validate
+   ```
+
+3. **Install dependencies**
+
+   ```bash
+   npm run install:all
+   ```
+
+4. **Set up environment variables**
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Start development services**
+
+   ```bash
+   npm run docker:dev    # Start PostgreSQL, Redis, etc.
+   npm run dev          # Start all development servers
+   ```
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/plastic-crack.git
    cd plastic-crack
    ```
 
-2. **Install dependencies**
+6. **Install dependencies**
+
    ```bash
    npm run install:all
    ```
 
-3. **Start development services**
+7. **Start development services**
+
    ```bash
    docker-compose up -d  # Start database and Redis
    npm run dev           # Start all applications
    ```
 
-4. **Access the applications**
+8. **Access the applications**
    - Backend API: http://localhost:8000
    - Web App: http://localhost:3000
    - API Documentation: http://localhost:8000/api/docs
@@ -44,6 +79,7 @@ This guide will help you set up the development environment for Plastic Crack.
 Create `.env` files in each application directory:
 
 ### Backend (.env)
+
 ```bash
 NODE_ENV=development
 PORT=8000
@@ -57,12 +93,14 @@ AWS_BUCKET_NAME="plastic-crack-dev"
 ```
 
 ### Frontend (.env)
+
 ```bash
 VITE_API_URL=http://localhost:8000/api/v1
 VITE_APP_NAME="Plastic Crack"
 ```
 
 ### Mobile (.env)
+
 ```bash
 API_URL=http://localhost:8000/api/v1
 APP_NAME="Plastic Crack"
@@ -71,6 +109,7 @@ APP_NAME="Plastic Crack"
 ## Development Workflow
 
 ### Git Workflow
+
 1. Create feature branch: `git checkout -b feature/issue-number-description`
 2. Make changes and commit: `git commit -m "feat: description"`
 3. Push branch: `git push origin feature/issue-number-description`
@@ -78,6 +117,7 @@ APP_NAME="Plastic Crack"
 5. After review and approval, merge to main
 
 ### Commit Message Convention
+
 - `feat:` New feature
 - `fix:` Bug fix
 - `docs:` Documentation changes
@@ -87,6 +127,7 @@ APP_NAME="Plastic Crack"
 - `chore:` Maintenance tasks
 
 ### Code Quality
+
 - Run linting: `npm run lint`
 - Run tests: `npm run test`
 - Format code: `npm run format`
@@ -94,11 +135,13 @@ APP_NAME="Plastic Crack"
 ## Database Setup
 
 ### Using Docker (Recommended)
+
 ```bash
 docker-compose up -d postgres redis
 ```
 
 ### Manual Setup
+
 1. Install PostgreSQL 15+
 2. Create database: `createdb plastic_crack`
 3. Update DATABASE_URL in .env

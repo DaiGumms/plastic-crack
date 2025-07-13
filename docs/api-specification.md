@@ -2,9 +2,12 @@
 
 ## 1. API Overview
 
-The Plastic Crack API follows RESTful principles and provides comprehensive endpoints for managing Warhammer collections across mobile and web platforms. The API includes AI-powered features, real-time pricing, and social functionality.
+The Plastic Crack API follows RESTful principles and provides comprehensive endpoints for managing
+Warhammer collections across mobile and web platforms. The API includes AI-powered features,
+real-time pricing, and social functionality.
 
 ### 1.1 Base Configuration
+
 - **Base URL**: `https://api.plasticcrack.com/v1`
 - **Content Type**: `application/json`
 - **Authentication**: Bearer JWT tokens + OAuth2
@@ -13,6 +16,7 @@ The Plastic Crack API follows RESTful principles and provides comprehensive endp
 - **Mobile SDK**: Native SDKs for iOS and Android with offline sync
 
 ### 1.2 Response Format
+
 ```json
 {
   "success": true,
@@ -32,6 +36,7 @@ The Plastic Crack API follows RESTful principles and provides comprehensive endp
 ```
 
 ### 1.3 Error Response Format
+
 ```json
 {
   "success": false,
@@ -51,6 +56,7 @@ The Plastic Crack API follows RESTful principles and provides comprehensive endp
 ```
 
 ### 1.4 Mobile-Specific Headers
+
 ```http
 X-Platform: ios|android|web
 X-App-Version: 1.2.3
@@ -61,11 +67,13 @@ X-Offline-Sync: true|false
 ## 2. Authentication Endpoints
 
 ### 2.1 User Registration
+
 ```http
 POST /auth/register
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -80,11 +88,13 @@ POST /auth/register
 ```
 
 ### 2.2 User Login
+
 ```http
 POST /auth/login
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -93,6 +103,7 @@ POST /auth/login
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -111,6 +122,7 @@ POST /auth/login
 ```
 
 ### 2.3 OAuth Login
+
 ```http
 POST /auth/oauth/{provider}
 ```
@@ -118,6 +130,7 @@ POST /auth/oauth/{provider}
 **Supported Providers**: `google`, `facebook`, `apple`
 
 **Request Body:**
+
 ```json
 {
   "accessToken": "oauth_access_token",
@@ -127,11 +140,13 @@ POST /auth/oauth/{provider}
 ```
 
 ### 2.4 Token Refresh
+
 ```http
 POST /auth/refresh
 ```
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "rt_abc123..."
@@ -139,6 +154,7 @@ POST /auth/refresh
 ```
 
 ### 2.5 Logout
+
 ```http
 POST /auth/logout
 Authorization: Bearer <access_token>
@@ -147,12 +163,14 @@ Authorization: Bearer <access_token>
 ## 3. User Management Endpoints
 
 ### 3.1 Get Current User Profile
+
 ```http
 GET /users/me
 Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -184,12 +202,14 @@ Authorization: Bearer <access_token>
 ```
 
 ### 3.2 Update User Profile
+
 ```http
 PUT /users/me
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "firstName": "John",
@@ -204,11 +224,13 @@ Authorization: Bearer <access_token>
 ```
 
 ### 3.3 Get User by ID
+
 ```http
 GET /users/{userId}
 ```
 
 ### 3.4 Follow/Unfollow User
+
 ```http
 POST /users/{userId}/follow
 DELETE /users/{userId}/follow
@@ -218,12 +240,14 @@ Authorization: Bearer <access_token>
 ## 4. Collection Management Endpoints
 
 ### 4.1 Get User Collections
+
 ```http
 GET /collections
 Authorization: Bearer <access_token>
 ```
 
 **Query Parameters:**
+
 - `page` (number): Page number (default: 1)
 - `limit` (number): Items per page (default: 20, max: 100)
 - `faction` (string): Filter by faction
@@ -232,6 +256,7 @@ Authorization: Bearer <access_token>
 - `search` (string): Search term
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -245,13 +270,11 @@ Authorization: Bearer <access_token>
         "pointsValue": 100,
         "paintingStatus": "finished",
         "quantity": 10,
-        "photos": [
-          "https://cdn.plasticcrack.com/models/model_456_1.jpg"
-        ],
+        "photos": ["https://cdn.plasticcrack.com/models/model_456_1.jpg"],
         "tags": ["troops", "firstborn"],
         "notes": "Blue and gold color scheme",
         "purchaseDate": "2025-03-15",
-        "purchasePrice": 35.00,
+        "purchasePrice": 35.0,
         "currency": "GBP",
         "createdAt": "2025-03-20T14:30:00Z",
         "updatedAt": "2025-07-01T09:15:00Z"
@@ -273,6 +296,7 @@ Authorization: Bearer <access_token>
 ```
 
 ### 4.2 Add New Model
+
 ```http
 POST /collections/models
 Authorization: Bearer <access_token>
@@ -280,6 +304,7 @@ Content-Type: multipart/form-data
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Space Marine Captain",
@@ -291,24 +316,27 @@ Content-Type: multipart/form-data
   "tags": ["hq", "character"],
   "notes": "Alternative build with power sword",
   "purchaseDate": "2025-07-12",
-  "purchasePrice": 22.50,
+  "purchasePrice": 22.5,
   "currency": "GBP"
 }
 ```
 
 ### 4.3 Update Model
+
 ```http
 PUT /collections/models/{modelId}
 Authorization: Bearer <access_token>
 ```
 
 ### 4.4 Delete Model
+
 ```http
 DELETE /collections/models/{modelId}
 Authorization: Bearer <access_token>
 ```
 
 ### 4.5 Upload Model Photos
+
 ```http
 POST /collections/models/{modelId}/photos
 Authorization: Bearer <access_token>
@@ -316,15 +344,18 @@ Content-Type: multipart/form-data
 ```
 
 **Request Body:**
+
 - `photos[]` (files): Image files (max 5MB each, max 10 photos per model)
 
 ### 4.6 Bulk Operations
+
 ```http
 POST /collections/models/bulk
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "action": "update_status",
@@ -338,12 +369,14 @@ Authorization: Bearer <access_token>
 ## 5. Army Management Endpoints
 
 ### 5.1 Get User Armies
+
 ```http
 GET /armies
 Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -373,12 +406,14 @@ Authorization: Bearer <access_token>
 ```
 
 ### 5.2 Create Army
+
 ```http
 POST /armies
 Authorization: Bearer <access_token>
 ```
 
 ### 5.3 Add Models to Army
+
 ```http
 POST /armies/{armyId}/models
 Authorization: Bearer <access_token>
@@ -387,22 +422,26 @@ Authorization: Bearer <access_token>
 ## 6. Search and Discovery Endpoints
 
 ### 6.1 Global Model Search
+
 ```http
 GET /search/models
 ```
 
 **Query Parameters:**
+
 - `q` (string): Search query
 - `faction` (string): Filter by faction
 - `gameSystem` (string): Filter by game system
 - `public` (boolean): Only public collections (default: true)
 
 ### 6.2 User Search
+
 ```http
 GET /search/users
 ```
 
 ### 6.3 Collection Search
+
 ```http
 GET /search/collections
 ```
@@ -410,12 +449,14 @@ GET /search/collections
 ## 7. Social Features Endpoints
 
 ### 7.1 Get Activity Feed
+
 ```http
 GET /feed
 Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -446,6 +487,7 @@ Authorization: Bearer <access_token>
 ```
 
 ### 7.2 Like/Unlike Model
+
 ```http
 POST /collections/models/{modelId}/like
 DELETE /collections/models/{modelId}/like
@@ -453,12 +495,14 @@ Authorization: Bearer <access_token>
 ```
 
 ### 7.3 Comment on Model
+
 ```http
 POST /collections/models/{modelId}/comments
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "content": "Amazing paint job! What colors did you use?"
@@ -466,6 +510,7 @@ Authorization: Bearer <access_token>
 ```
 
 ### 7.4 Get Model Comments
+
 ```http
 GET /collections/models/{modelId}/comments
 ```
@@ -473,24 +518,27 @@ GET /collections/models/{modelId}/comments
 ## 8. Wishlist Endpoints
 
 ### 8.1 Get Wishlist
+
 ```http
 GET /wishlist
 Authorization: Bearer <access_token>
 ```
 
 ### 8.2 Add to Wishlist
+
 ```http
 POST /wishlist
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Imperial Knight Questoris",
   "faction": "Imperial Knights",
   "gameSystem": "Warhammer 40,000",
-  "estimatedPrice": 120.00,
+  "estimatedPrice": 120.0,
   "currency": "GBP",
   "priority": "high",
   "notes": "For upcoming tournament"
@@ -500,12 +548,14 @@ Authorization: Bearer <access_token>
 ## 9. Statistics and Analytics Endpoints
 
 ### 9.1 Get User Statistics
+
 ```http
 GET /users/me/stats
 Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -514,7 +564,7 @@ Authorization: Bearer <access_token>
       "totalModels": 156,
       "paintedModels": 89,
       "paintingProgress": 57.1,
-      "totalValue": 2340.50,
+      "totalValue": 2340.5,
       "currency": "GBP"
     },
     "byFaction": [
@@ -522,7 +572,7 @@ Authorization: Bearer <access_token>
         "faction": "Space Marines",
         "modelCount": 78,
         "painted": 45,
-        "value": 1200.00
+        "value": 1200.0
       }
     ],
     "byGameSystem": [
@@ -538,8 +588,8 @@ Authorization: Bearer <access_token>
       "thisYear": 89
     },
     "spending": {
-      "thisMonth": 85.00,
-      "thisYear": 890.50,
+      "thisMonth": 85.0,
+      "thisYear": 890.5,
       "currency": "GBP"
     }
   }
@@ -549,6 +599,7 @@ Authorization: Bearer <access_token>
 ## 10. File Upload Endpoints
 
 ### 10.1 Upload Avatar
+
 ```http
 POST /users/me/avatar
 Authorization: Bearer <access_token>
@@ -556,12 +607,14 @@ Content-Type: multipart/form-data
 ```
 
 ### 10.2 Get Upload URL (for large files)
+
 ```http
 POST /upload/presigned-url
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "fileName": "space_marine_squad.jpg",
@@ -573,12 +626,14 @@ Authorization: Bearer <access_token>
 ## 11. Admin Endpoints
 
 ### 11.1 Get All Users (Admin Only)
+
 ```http
 GET /admin/users
 Authorization: Bearer <admin_access_token>
 ```
 
 ### 11.2 Product Database Management
+
 ```http
 GET /admin/products
 POST /admin/products
@@ -590,15 +645,18 @@ Authorization: Bearer <admin_access_token>
 ## 12. Data Export Endpoints
 
 ### 12.1 Export User Data
+
 ```http
 GET /export/user-data
 Authorization: Bearer <access_token>
 ```
 
 **Query Parameters:**
+
 - `format` (string): Export format (json, csv, xml)
 
 ### 12.2 Export Collection
+
 ```http
 GET /export/collection
 Authorization: Bearer <access_token>
@@ -606,20 +664,21 @@ Authorization: Bearer <access_token>
 
 ## 13. Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| VALIDATION_ERROR | 400 | Request validation failed |
-| UNAUTHORIZED | 401 | Authentication required |
-| FORBIDDEN | 403 | Insufficient permissions |
-| NOT_FOUND | 404 | Resource not found |
-| CONFLICT | 409 | Resource conflict |
-| RATE_LIMITED | 429 | Rate limit exceeded |
-| SERVER_ERROR | 500 | Internal server error |
-| SERVICE_UNAVAILABLE | 503 | Service temporarily unavailable |
+| Code                | HTTP Status | Description                     |
+| ------------------- | ----------- | ------------------------------- |
+| VALIDATION_ERROR    | 400         | Request validation failed       |
+| UNAUTHORIZED        | 401         | Authentication required         |
+| FORBIDDEN           | 403         | Insufficient permissions        |
+| NOT_FOUND           | 404         | Resource not found              |
+| CONFLICT            | 409         | Resource conflict               |
+| RATE_LIMITED        | 429         | Rate limit exceeded             |
+| SERVER_ERROR        | 500         | Internal server error           |
+| SERVICE_UNAVAILABLE | 503         | Service temporarily unavailable |
 
 ## 14. Rate Limiting
 
 ### 14.1 Rate Limit Headers
+
 ```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 950
@@ -627,6 +686,7 @@ X-RateLimit-Reset: 1625151600
 ```
 
 ### 14.2 Rate Limit Tiers
+
 - **Anonymous**: 100 requests/hour
 - **Authenticated**: 1000 requests/hour
 - **Premium**: 5000 requests/hour
