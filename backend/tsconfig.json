@@ -24,6 +24,6 @@
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/generated/**/*"
+    "src/generated/**/*.js"
   ]
 }

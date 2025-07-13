@@ -5,11 +5,14 @@
  * Verifies that the development environment is properly configured
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
 
-// Change to project root directory
+// Get project root directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 process.chdir(projectRoot);
 
@@ -31,24 +34,44 @@ const checks = [
     },
   },
   {
-    name: 'Package.json exists',
+    name: 'Root package.json',
     check: () => {
       const exists = fs.existsSync('package.json');
       return {
         success: exists,
-        message: exists ? '✅ package.json found' : '❌ package.json missing',
+        message: exists ? '✅ Root package.json found' : '❌ Root package.json missing',
       };
+    },
+  },
+  {
+    name: 'Workspace configuration',
+    check: () => {
+      try {
+        const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+        const hasWorkspaces = pkg.workspaces && Array.isArray(pkg.workspaces);
+        return {
+          success: hasWorkspaces,
+          message: hasWorkspaces 
+            ? '✅ NPM workspaces configured' 
+            : '❌ NPM workspaces not configured',
+        };
+      } catch (error) {
+        return { success: false, message: '❌ Failed to read package.json' };
+      }
     },
   },
   {
     name: 'TypeScript configuration',
     check: () => {
-      const exists = fs.existsSync('tsconfig.json');
-      return {
-        success: exists,
-        message: exists
-          ? '✅ tsconfig.json configured'
-          : '❌ tsconfig.json missing',
+      const folders = ['backend', 'frontend', 'mobile', 'shared'];  
+      const missingConfigs = folders.filter(folder => !fs.existsSync(path.join(folder, 'tsconfig.json')));  
+
+      if (missingConfigs.length === 0) {  
+        return { success: true, message: '✅ All workspace tsconfig.json files are configured' };  
+      }  
+      return {  
+        success: false,  
+        message: `❌ Missing tsconfig.json in: ${missingConfigs.join(', ')}`, 
       };
     },
   },
@@ -115,6 +138,118 @@ const checks = [
       };
     },
   },
+  {
+    name: 'Workspace package.json files',
+    check: () => {
+      const workspaces = ['backend', 'frontend', 'mobile', 'shared'];
+      const missing = workspaces.filter(ws => !fs.existsSync(path.join(ws, 'package.json')));
+
+      if (missing.length === 0) {
+        return { success: true, message: '✅ All workspace package.json files exist' };
+      }
+      return {
+        success: false,
+        message: `❌ Missing package.json in: ${missing.join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'Backend workspace configuration',
+    check: () => {
+      const checks = [
+        { file: 'backend/tsconfig.json', name: 'TypeScript config' },
+        { file: 'backend/prisma/schema.prisma', name: 'Prisma schema' },
+        { file: 'backend/src/app.ts', name: 'Express app' },
+        { file: 'backend/src/index.ts', name: 'Server entry point' },
+      ];
+
+      const missing = checks.filter(check => !fs.existsSync(check.file));
+
+      if (missing.length === 0) {
+        return { success: true, message: '✅ Backend workspace properly configured' };
+      }
+      return {
+        success: false,
+        message: `❌ Backend missing: ${missing.map(m => m.name).join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'Frontend workspace configuration',
+    check: () => {
+      const checks = [
+        { file: 'frontend/tsconfig.json', name: 'TypeScript config' },
+        { file: 'frontend/vite.config.ts', name: 'Vite config' },
+        { file: 'frontend/src/main.tsx', name: 'React entry point' },
+        { file: 'frontend/src/App.tsx', name: 'React app component' },
+      ];
+
+      const missing = checks.filter(check => !fs.existsSync(check.file));
+
+      if (missing.length === 0) {
+        return { success: true, message: '✅ Frontend workspace properly configured' };
+      }
+      return {
+        success: false,
+        message: `❌ Frontend missing: ${missing.map(m => m.name).join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'Mobile workspace configuration',
+    check: () => {
+      const checks = [
+        { file: 'mobile/tsconfig.json', name: 'TypeScript config' },
+        { file: 'mobile/app.json', name: 'Expo config' },
+        { file: 'mobile/App.tsx', name: 'App component' },
+      ];
+
+      const missing = checks.filter(check => !fs.existsSync(check.file));
+
+      if (missing.length === 0) {
+        return { success: true, message: '✅ Mobile workspace properly configured' };
+      }
+      return {
+        success: false,
+        message: `❌ Mobile missing: ${missing.map(m => m.name).join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'Dependencies installation',
+    check: () => {
+      const nodeModulesExists = fs.existsSync('node_modules');
+      const lockFileExists = fs.existsSync('package-lock.json');
+
+      if (nodeModulesExists && lockFileExists) {
+        return { success: true, message: '✅ Dependencies installed' };
+      }
+      return {
+        success: false,
+        message: '❌ Dependencies not installed (run npm install)',
+      };
+    },
+  },
+  {
+    name: 'Git repository',
+    check: () => {
+      const gitExists = fs.existsSync('.git');
+      return {
+        success: gitExists,
+        message: gitExists ? '✅ Git repository initialized' : '❌ Not a git repository',
+      };
+    },
+  },
+  {
+    name: 'GitHub Actions CI',
+    check: () => {
+      const ciExists = fs.existsSync('.github/workflows/ci.yml');
+      return {
+        success: ciExists,
+        message: ciExists ? '✅ GitHub Actions CI configured' : '❌ CI workflow missing',
+      };
+    },
+  },
 ];
 
 let allPassed = true;
@@ -138,9 +273,21 @@ if (allPassed) {
   console.log('🎉 All checks passed! Development environment is ready.');
   console.log('\nNext steps:');
   console.log('1. Copy .env.example to .env and configure your environment');
-  console.log('2. Run "npm run docker:dev" to start services');
-  console.log('3. Run "npm run dev" to start development servers');
+  console.log('2. Install dependencies: npm install');
+  console.log('3. Start database services: npm run docker:dev');
+  console.log('4. Set up database: npm run db:setup');
+  console.log('5. Run tests: npm run test');
+  console.log('6. Start development servers: npm run dev');
+  console.log('\nAvailable scripts:');
+  console.log('- npm run lint          # Run linting across all workspaces');
+  console.log('- npm run build         # Build all workspaces');
+  console.log('- npm run type-check    # TypeScript type checking');
+  console.log('- npm run test          # Run test suites');
 } else {
   console.log('⚠️  Some checks failed. Please address the issues above.');
+  console.log('\nCommon fixes:');
+  console.log('- Run "npm install" to install dependencies');
+  console.log('- Ensure all workspace folders have proper package.json files');
+  console.log('- Check that all required configuration files exist');
   process.exit(1);
 }
