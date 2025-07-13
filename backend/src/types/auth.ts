@@ -40,3 +40,32 @@ export interface AuthenticatedRequest extends Request {
     displayName: string | null;
   };
 }
+
+export interface EmailVerificationRequest {
+  token: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface AuthError {
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+export interface PasswordValidationResult {
+  isValid: boolean;
+  errors: string[];
+}

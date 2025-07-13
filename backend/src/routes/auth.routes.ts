@@ -2,8 +2,15 @@ import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 
 import { authenticateToken } from '../middleware/auth.middleware';
+import { authRateLimit, loginRateLimit, passwordResetRateLimit } from '../middleware/rateLimiter';
 import { AuthService } from '../services/auth.service';
-import { RegisterRequest, LoginRequest, AuthenticatedRequest } from '../types/auth';
+import { 
+  RegisterRequest, 
+  LoginRequest, 
+  AuthenticatedRequest,
+  EmailVerificationRequest,
+  PasswordResetRequest 
+} from '../types/auth';
 
 const router = Router();
 
@@ -44,7 +51,7 @@ const loginValidation = [
 ];
 
 // POST /api/auth/register
-router.post('/register', registerValidation, async (req: Request<{}, {}, RegisterRequest>, res: Response) => {
+router.post('/register', authRateLimit, registerValidation, async (req: Request<{}, {}, RegisterRequest>, res: Response) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -77,7 +84,7 @@ router.post('/register', registerValidation, async (req: Request<{}, {}, Registe
 });
 
 // POST /api/auth/login
-router.post('/login', loginValidation, async (req: Request<{}, {}, LoginRequest>, res: Response) => {
+router.post('/login', loginRateLimit, loginValidation, async (req: Request<{}, {}, LoginRequest>, res: Response) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -142,7 +149,7 @@ router.get('/me', authenticateToken, async (req: AuthenticatedRequest, res: Resp
 });
 
 // POST /api/auth/refresh
-router.post('/refresh', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/refresh', authRateLimit, authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' });
@@ -165,6 +172,66 @@ router.post('/logout', authenticateToken, (req: AuthenticatedRequest, res: Respo
   // In a JWT setup, logout is handled client-side by removing the token
   // For server-side token blacklisting, you'd implement a token blacklist here
   res.json({ message: 'Logout successful' });
+});
+
+// POST /api/auth/verify-email
+router.post('/verify-email', authRateLimit, async (req: Request<{}, {}, EmailVerificationRequest>, res: Response) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      res.status(400).json({ error: 'Verification token is required' });
+      return;
+    }
+
+    const result = await AuthService.verifyEmail(token);
+
+    if (result) {
+      res.json({ message: 'Email verified successfully' });
+    } else {
+      res.status(400).json({ error: 'Invalid or expired verification token' });
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Email verification failed';
+    res.status(400).json({ error: errorMessage });
+  }
+});
+
+// POST /api/auth/request-password-reset
+router.post('/request-password-reset', passwordResetRateLimit, async (req: Request<{}, {}, PasswordResetRequest>, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({ error: 'Email is required' });
+      return;
+    }
+
+    // Generate password reset token (placeholder for future implementation)
+    const resetToken = AuthService.generatePasswordResetToken();
+
+    // In a real implementation, you would:
+    // 1. Store the reset token in the database with expiration
+    // 2. Send an email with the reset link
+    // For now, we just return success (don't reveal if email exists)
+    
+    res.json({ 
+      message: 'If an account with that email exists, a password reset link has been sent',
+      // In development, return the token for testing purposes
+      ...(process.env.NODE_ENV === 'development' && { resetToken })
+    });
+  } catch {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/auth/validate-token
+router.get('/validate-token', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+  // If we reach here, the token is valid (middleware validated it)
+  res.json({ 
+    valid: true, 
+    user: req.user 
+  });
 });
 
 export default router;

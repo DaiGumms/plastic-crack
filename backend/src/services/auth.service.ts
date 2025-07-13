@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -22,18 +24,45 @@ export class AuthService {
 
   // Generate JWT token
   static generateToken(payload: JWTPayload): string {
-    return jwt.sign(payload, this.JWT_SECRET, {
+    // Add a unique identifier to ensure different tokens
+    const tokenPayload = {
+      ...payload,
+      jti: crypto.randomBytes(16).toString('hex'), // JWT ID for uniqueness
+    };
+    
+    return jwt.sign(tokenPayload, this.JWT_SECRET, {
       expiresIn: this.JWT_EXPIRES_IN,
     });
   }
 
   // Verify JWT token
   static verifyToken(token: string): JWTPayload {
-    return jwt.verify(token, this.JWT_SECRET) as JWTPayload;
+    try {
+      const decoded = jwt.verify(token, this.JWT_SECRET) as JWTPayload;
+      
+      // Additional validation can be added here
+      // e.g., check if token is blacklisted, check user status, etc.
+      
+      return decoded;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new Error('Token has expired');
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new Error('Invalid token');
+      }
+      throw new Error('Token verification failed');
+    }
   }
 
   // Register new user
   static async register(username: string, email: string, password: string, displayName?: string): Promise<AuthResponse> {
+    // Validate password strength
+    const passwordValidation = this.validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -53,74 +82,116 @@ export class AuthService {
       }
     }
 
-    // Hash password
-    const hashedPassword = await this.hashPassword(password);
+    try {
+      // Hash password
+      const hashedPassword = await this.hashPassword(password);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        passwordHash: hashedPassword,
-        displayName: displayName || username,
-      }
-    });
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          username,
+          email,
+          passwordHash: hashedPassword,
+          displayName: displayName || username,
+        }
+      });
 
-    // Generate token
-    const token = this.generateToken({
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-    });
-
-    return {
-      user: {
-        id: user.id,
+      // Generate token
+      const token = this.generateToken({
+        userId: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
-        profilePictureUrl: user.profileImageUrl,
-        createdAt: user.createdAt,
-      },
-      token,
-    };
+      });
+
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profilePictureUrl: user.profileImageUrl,
+          createdAt: user.createdAt,
+        },
+        token,
+      };
+    } catch (error) {
+      // In production, you would use proper logging (e.g., winston, pino)
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error('User registration error:', error);
+      }
+      throw new Error('Failed to register user');
+    }
   }
 
   // Login user
   static async login(email: string, password: string): Promise<AuthResponse> {
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    try {
+      // Find user by email
+      const user = await prisma.user.findUnique({
+        where: { email }
+      });
 
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
 
-    // Verify password
-    const isValidPassword = await this.verifyPassword(password, user.passwordHash);
-    if (!isValidPassword) {
-      throw new Error('Invalid credentials');
-    }
+      // Check if user account is active
+      if (!user.isActive) {
+        throw new Error('Account has been deactivated');
+      }
 
-    // Generate token
-    const token = this.generateToken({
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-    });
+      // Verify password
+      const isValidPassword = await this.verifyPassword(password, user.passwordHash);
+      if (!isValidPassword) {
+        throw new Error('Invalid credentials');
+      }
 
-    return {
-      user: {
-        id: user.id,
+      // Update last login timestamp
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() }
+        });
+      } catch (updateError) {
+        // Log the error but don't fail the login if update fails
+        if (process.env.NODE_ENV !== 'test') {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to update last login timestamp:', updateError);
+        }
+      }
+
+      // Generate token
+      const token = this.generateToken({
+        userId: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
-        profilePictureUrl: user.profileImageUrl,
-        createdAt: user.createdAt,
-      },
-      token,
-    };
+      });
+
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profilePictureUrl: user.profileImageUrl,
+          createdAt: user.createdAt,
+        },
+        token,
+      };
+    } catch (error) {
+      // Re-throw known errors, wrap unknown errors
+      if (error instanceof Error && 
+          (error.message === 'Invalid credentials' || error.message === 'Account has been deactivated')) {
+        throw error;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error('User login error:', error);
+      }
+      throw new Error('Login failed');
+    }
   }
 
   // Get user by ID
@@ -142,5 +213,75 @@ export class AuthService {
       username: user.username,
       email: user.email,
     });
+  }
+
+  // Generate email verification token
+  static generateEmailVerificationToken(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Verify email address
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  static async verifyEmail(_token: string): Promise<boolean> {
+    // This would typically verify against a token stored in the database
+    // For now, this is a placeholder for future implementation
+    void _token; // Parameter will be used in future implementation
+    
+    const user = await prisma.user.findFirst({
+      where: {
+        // In a real implementation, you'd store the verification token
+        // For now, this is just structure for future development
+        emailVerified: false,
+      }
+    });
+
+    if (!user) {
+      throw new Error('Invalid verification token');
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      }
+    });
+
+    return true;
+  }
+
+  // Generate password reset token
+  static generatePasswordResetToken(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Validate password strength
+  static validatePasswordStrength(password: string): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (password.length < 8) {
+      errors.push('Password must be at least 8 characters long');
+    }
+
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+
+    if (!/(?=.*\d)/.test(password)) {
+      errors.push('Password must contain at least one number');
+    }
+
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      errors.push('Password must contain at least one special character (@$!%*?&)');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 }

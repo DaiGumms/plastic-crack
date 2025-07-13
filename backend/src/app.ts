@@ -1,16 +1,16 @@
-import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import compression from 'compression';
-import dotenv from 'dotenv';
 
 import { config } from './config/config';
+import { isRedisConnected, checkRedisHealth } from './lib/redis';
+import { initializeSession } from './lib/session';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { requestValidator } from './middleware/requestValidator';
-import { initializeSession } from './lib/session';
-import { isRedisConnected, checkRedisHealth } from './lib/redis';
 import { v1Routes } from './routes/v1';
 
 // Load environment variables

@@ -18,18 +18,26 @@ export class AppError extends Error implements ApiError {
   }
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 export const errorHandler = (
   err: ApiError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
+  // _next parameter required by Express error middleware signature
+  void _next;
+  
   const { statusCode = 500, message, stack } = err;
 
-  // Log error
-  console.error(`Error ${statusCode}: ${message}`);
+  // Log error in development mode
   if (process.env.NODE_ENV === 'development') {
-    console.error(stack);
+    // eslint-disable-next-line no-console
+    console.error(`Error ${statusCode}: ${message}`);
+    if (stack) {
+      // eslint-disable-next-line no-console
+      console.error(stack);
+    }
   }
 
   // Send error response
@@ -42,7 +50,7 @@ export const errorHandler = (
       }),
     },
     timestamp: new Date().toISOString(),
-    path: req.path,
-    method: req.method,
+    path: _req.path,
+    method: _req.method,
   });
 };
