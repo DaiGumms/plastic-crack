@@ -6,7 +6,7 @@ export class StorageManager {
   }
 
   static async getItem(key: string): Promise<string | null> {
-    return await AsyncStorage.getItem(key);
+    return AsyncStorage.getItem(key);
   }
 
   static async setObject<T>(key: string, value: T): Promise<void> {
