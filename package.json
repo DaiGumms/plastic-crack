@@ -48,6 +48,7 @@
     "install:frontend": "cd frontend && npm install",
     "install:mobile": "cd mobile && npm install",
     "install:shared": "cd shared && npm install",
+    "db:generate": "cd backend && npm run db:generate",
     "validate": "node scripts/validate-setup.js",
     "validate:backend": "cd backend && npm run validate"
   },
