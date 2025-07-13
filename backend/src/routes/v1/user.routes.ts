@@ -5,7 +5,10 @@ import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import multer from 'multer';
 
-import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware';
+import {
+  authenticateToken,
+  requireAdmin,
+} from '../../middleware/auth.middleware';
 import { rateLimiter } from '../../middleware/rateLimiter';
 import { UserService } from '../../services/user.service';
 import { AuthenticatedRequest } from '../../types/auth';
@@ -27,7 +30,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     void req; // Mark as used for linting
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const extension = path.extname(file.originalname);
     cb(null, `profile-${uniqueSuffix}${extension}`);
   },
@@ -44,7 +47,11 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.'));
+      cb(
+        new Error(
+          'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.'
+        )
+      );
     }
   },
 });
@@ -76,10 +83,7 @@ const validateProfileUpdate = [
     .isLength({ max: 100 })
     .withMessage('Location must be 100 characters or less')
     .trim(),
-  body('website')
-    .optional()
-    .isURL()
-    .withMessage('Website must be a valid URL'),
+  body('website').optional().isURL().withMessage('Website must be a valid URL'),
 ];
 
 const validatePrivacySettings = [
@@ -101,7 +105,9 @@ const validatePasswordChange = [
     .isLength({ min: 8 })
     .withMessage('New password must be at least 8 characters long')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
+    .withMessage(
+      'New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    ),
 ];
 
 const validateAccountDeletion = [
@@ -115,11 +121,17 @@ const validateUsername = [
     .isLength({ min: 3, max: 30 })
     .withMessage('Username must be between 3 and 30 characters')
     .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage('Username can only contain letters, numbers, underscores, and hyphens'),
+    .withMessage(
+      'Username can only contain letters, numbers, underscores, and hyphens'
+    ),
 ];
 
 // Request validation handler
-const handleValidationErrors = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const handleValidationErrors = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -137,41 +149,53 @@ const handleValidationErrors = (req: express.Request, res: express.Response, nex
  * @desc Get current user's profile
  * @access Private
  */
-router.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: 'User not authenticated' });
+router.get(
+  '/profile',
+  authenticateToken,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+      const profile = await UserService.getUserProfile(req.user.id);
+      res.json({
+        message: 'Profile retrieved successfully',
+        data: profile,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to get profile';
+      res.status(500).json({ message });
     }
-    const profile = await UserService.getUserProfile(req.user.id);
-    res.json({
-      message: 'Profile retrieved successfully',
-      data: profile,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to get profile';
-    res.status(500).json({ message });
   }
-});
+);
 
 /**
  * @route GET /api/v1/users/profile/:username
  * @desc Get public user profile by username
  * @access Public
  */
-router.get('/profile/:username', 
-  validateUsername, 
+router.get(
+  '/profile/:username',
+  validateUsername,
   handleValidationErrors,
   rateLimiter(100, 15 * 60 * 1000), // 100 requests per 15 minutes
   async (req: express.Request, res: express.Response) => {
     try {
-      const profile = await UserService.getPublicUserProfile(req.params.username);
+      const profile = await UserService.getPublicUserProfile(
+        req.params.username
+      );
       res.json({
         message: 'Public profile retrieved successfully',
         data: profile,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to get profile';
-      const statusCode = message === 'User not found' || message === 'Profile is private' ? 404 : 500;
+      const message =
+        error instanceof Error ? error.message : 'Failed to get profile';
+      const statusCode =
+        message === 'User not found' || message === 'Profile is private'
+          ? 404
+          : 500;
       res.status(statusCode).json({ message });
     }
   }
@@ -182,7 +206,8 @@ router.get('/profile/:username',
  * @desc Update current user's profile
  * @access Private
  */
-router.put('/profile', 
+router.put(
+  '/profile',
   authenticateToken,
   rateLimiter(10, 60 * 1000), // 10 requests per minute
   validateProfileUpdate,
@@ -192,13 +217,17 @@ router.put('/profile',
       if (!req.user) {
         return res.status(401).json({ message: 'User not authenticated' });
       }
-      const updatedProfile = await UserService.updateUserProfile(req.user.id, req.body);
+      const updatedProfile = await UserService.updateUserProfile(
+        req.user.id,
+        req.body
+      );
       res.json({
         message: 'Profile updated successfully',
         data: updatedProfile,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update profile';
+      const message =
+        error instanceof Error ? error.message : 'Failed to update profile';
       res.status(400).json({ message });
     }
   }
@@ -209,7 +238,8 @@ router.put('/profile',
  * @desc Update privacy settings
  * @access Private
  */
-router.put('/privacy',
+router.put(
+  '/privacy',
   authenticateToken,
   rateLimiter(5, 60 * 1000), // 5 requests per minute
   validatePrivacySettings,
@@ -219,13 +249,19 @@ router.put('/privacy',
       if (!req.user) {
         return res.status(401).json({ message: 'User not authenticated' });
       }
-      const updatedProfile = await UserService.updatePrivacySettings(req.user.id, req.body);
+      const updatedProfile = await UserService.updatePrivacySettings(
+        req.user.id,
+        req.body
+      );
       res.json({
         message: 'Privacy settings updated successfully',
         data: updatedProfile,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update privacy settings';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update privacy settings';
       res.status(400).json({ message });
     }
   }
@@ -236,7 +272,8 @@ router.put('/privacy',
  * @desc Upload profile image
  * @access Private
  */
-router.post('/profile-image',
+router.post(
+  '/profile-image',
   authenticateToken,
   rateLimiter(3, 60 * 1000), // 3 uploads per minute
   upload.single('profileImage'),
@@ -255,8 +292,11 @@ router.post('/profile-image',
       const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
       const profileImageUrl = `${baseUrl}/uploads/profiles/${req.file.filename}`;
 
-      const updatedProfile = await UserService.updateProfileImage(req.user.id, profileImageUrl);
-      
+      const updatedProfile = await UserService.updateProfileImage(
+        req.user.id,
+        profileImageUrl
+      );
+
       res.json({
         message: 'Profile image updated successfully',
         data: updatedProfile,
@@ -275,7 +315,10 @@ router.post('/profile-image',
         }
       }
 
-      const message = error instanceof Error ? error.message : 'Failed to update profile image';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update profile image';
       res.status(400).json({ message });
     }
   }
@@ -286,7 +329,8 @@ router.post('/profile-image',
  * @desc Change user password
  * @access Private
  */
-router.put('/password',
+router.put(
+  '/password',
   authenticateToken,
   rateLimiter(3, 60 * 1000), // 3 requests per minute
   validatePasswordChange,
@@ -301,13 +345,15 @@ router.put('/password',
         req.body.currentPassword,
         req.body.newPassword
       );
-      
+
       res.json({
         message: 'Password changed successfully',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to change password';
-      const statusCode = message === 'Current password is incorrect' ? 400 : 500;
+      const message =
+        error instanceof Error ? error.message : 'Failed to change password';
+      const statusCode =
+        message === 'Current password is incorrect' ? 400 : 500;
       res.status(statusCode).json({ message });
     }
   }
@@ -318,7 +364,8 @@ router.put('/password',
  * @desc Get user statistics
  * @access Private
  */
-router.get('/statistics',
+router.get(
+  '/statistics',
   authenticateToken,
   async (req: AuthenticatedRequest, res: express.Response) => {
     try {
@@ -331,7 +378,10 @@ router.get('/statistics',
         data: statistics,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to get user statistics';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to get user statistics';
       res.status(500).json({ message });
     }
   }
@@ -342,7 +392,8 @@ router.get('/statistics',
  * @desc Delete user account
  * @access Private
  */
-router.delete('/account',
+router.delete(
+  '/account',
   authenticateToken,
   rateLimiter(1, 60 * 1000), // 1 request per minute
   validateAccountDeletion,
@@ -353,12 +404,13 @@ router.delete('/account',
         return res.status(401).json({ message: 'User not authenticated' });
       }
       await UserService.deleteUserAccount(req.user.id, req.body.password);
-      
+
       res.json({
         message: 'Account deleted successfully',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete account';
+      const message =
+        error instanceof Error ? error.message : 'Failed to delete account';
       const statusCode = message === 'Invalid password' ? 400 : 500;
       res.status(statusCode).json({ message });
     }
@@ -381,7 +433,8 @@ router.delete('/account',
  *       403:
  *         description: Forbidden - Admin access required
  */
-router.get('/admin/all-statistics',
+router.get(
+  '/admin/all-statistics',
   authenticateToken,
   requireAdmin,
   async (req: AuthenticatedRequest, res: express.Response) => {
@@ -390,14 +443,14 @@ router.get('/admin/all-statistics',
       // For now, just return a placeholder response
       res.json({
         message: 'Admin statistics endpoint - implementation pending',
-        note: 'This endpoint requires admin role authorization'
+        note: 'This endpoint requires admin role authorization',
       });
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error getting all users statistics:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: 'Internal server error',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

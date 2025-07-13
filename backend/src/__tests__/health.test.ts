@@ -4,9 +4,7 @@ import { app } from '../app';
 describe('Health Endpoints', () => {
   describe('GET /health', () => {
     it('should return health status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toMatchObject({
         status: 'ok',
@@ -20,9 +18,7 @@ describe('Health Endpoints', () => {
 
   describe('GET /api/v1/health', () => {
     it('should return detailed health status', async () => {
-      const response = await request(app)
-        .get('/api/v1/health')
-        .expect(200);
+      const response = await request(app).get('/api/v1/health').expect(200);
 
       expect(response.body).toMatchObject({
         success: true,

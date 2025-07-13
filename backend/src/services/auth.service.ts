@@ -8,7 +8,8 @@ import { prisma } from '../lib/database';
 import { JWTPayload, AuthResponse } from '../types/auth';
 
 export class AuthService {
-  private static readonly JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+  private static readonly JWT_SECRET =
+    process.env.JWT_SECRET || 'your-secret-key';
   private static readonly JWT_EXPIRES_IN = '7d';
   private static readonly SALT_ROUNDS = 12;
 
@@ -18,7 +19,10 @@ export class AuthService {
   }
 
   // Verify password
-  static async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  static async verifyPassword(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 
@@ -29,7 +33,7 @@ export class AuthService {
       ...payload,
       jti: crypto.randomBytes(16).toString('hex'), // JWT ID for uniqueness
     };
-    
+
     return jwt.sign(tokenPayload, this.JWT_SECRET, {
       expiresIn: this.JWT_EXPIRES_IN,
     });
@@ -39,10 +43,10 @@ export class AuthService {
   static verifyToken(token: string): JWTPayload {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as JWTPayload;
-      
+
       // Additional validation can be added here
       // e.g., check if token is blacklisted, check user status, etc.
-      
+
       return decoded;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -56,21 +60,25 @@ export class AuthService {
   }
 
   // Register new user
-  static async register(username: string, email: string, password: string, displayName?: string): Promise<AuthResponse> {
+  static async register(
+    username: string,
+    email: string,
+    password: string,
+    displayName?: string
+  ): Promise<AuthResponse> {
     // Validate password strength
     const passwordValidation = this.validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
-      throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
+      throw new Error(
+        `Password validation failed: ${passwordValidation.errors.join(', ')}`
+      );
     }
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email },
-          { username }
-        ]
-      }
+        OR: [{ email }, { username }],
+      },
     });
 
     if (existingUser) {
@@ -93,7 +101,7 @@ export class AuthService {
           email,
           passwordHash: hashedPassword,
           displayName: displayName || username,
-        }
+        },
       });
 
       // Generate token
@@ -130,7 +138,7 @@ export class AuthService {
     try {
       // Find user by email
       const user = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
       });
 
       if (!user) {
@@ -143,7 +151,10 @@ export class AuthService {
       }
 
       // Verify password
-      const isValidPassword = await this.verifyPassword(password, user.passwordHash);
+      const isValidPassword = await this.verifyPassword(
+        password,
+        user.passwordHash
+      );
       if (!isValidPassword) {
         throw new Error('Invalid credentials');
       }
@@ -152,7 +163,7 @@ export class AuthService {
       try {
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastLoginAt: new Date() }
+          data: { lastLoginAt: new Date() },
         });
       } catch (updateError) {
         // Log the error but don't fail the login if update fails
@@ -183,11 +194,14 @@ export class AuthService {
       };
     } catch (error) {
       // Re-throw known errors, wrap unknown errors
-      if (error instanceof Error && 
-          (error.message === 'Invalid credentials' || error.message === 'Account has been deactivated')) {
+      if (
+        error instanceof Error &&
+        (error.message === 'Invalid credentials' ||
+          error.message === 'Account has been deactivated')
+      ) {
         throw error;
       }
-      
+
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error('User login error:', error);
@@ -199,7 +213,7 @@ export class AuthService {
   // Get user by ID
   static async getUserById(userId: string): Promise<User | null> {
     return prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
   }
 
@@ -229,13 +243,13 @@ export class AuthService {
     // This would typically verify against a token stored in the database
     // For now, this is a placeholder for future implementation
     void _token; // Parameter will be used in future implementation
-    
+
     const user = await prisma.user.findFirst({
       where: {
         // In a real implementation, you'd store the verification token
         // For now, this is just structure for future development
         emailVerified: false,
-      }
+      },
     });
 
     if (!user) {
@@ -247,7 +261,7 @@ export class AuthService {
       data: {
         emailVerified: true,
         emailVerifiedAt: new Date(),
-      }
+      },
     });
 
     return true;
@@ -259,7 +273,10 @@ export class AuthService {
   }
 
   // Validate password strength
-  static validatePasswordStrength(password: string): { isValid: boolean; errors: string[] } {
+  static validatePasswordStrength(password: string): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (password.length < 8) {
@@ -279,7 +296,9 @@ export class AuthService {
     }
 
     if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.push('Password must contain at least one special character (@$!%*?&)');
+      errors.push(
+        'Password must contain at least one special character (@$!%*?&)'
+      );
     }
 
     return {

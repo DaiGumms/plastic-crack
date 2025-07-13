@@ -17,16 +17,24 @@ const PlaceholderScreen = ({ title }: { title: string }) => (
 
 const HomeScreen = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <AppInfo title="Plastic Crack" version="1.0.0" />
-    <Text style={{ marginTop: 20, textAlign: 'center', color: '#666', paddingHorizontal: 20 }}>
-      Track and identify plastic items with your camera. Start by navigating to the Camera tab to scan items.
+    <AppInfo title='Plastic Crack' version='1.0.0' />
+    <Text
+      style={{
+        marginTop: 20,
+        textAlign: 'center',
+        color: '#666',
+        paddingHorizontal: 20,
+      }}
+    >
+      Track and identify plastic items with your camera. Start by navigating to
+      the Camera tab to scan items.
     </Text>
   </View>
 );
-const CollectionsScreen = () => <PlaceholderScreen title="Collections" />;
-const CameraScreen = () => <PlaceholderScreen title="Camera" />;
-const SearchScreen = () => <PlaceholderScreen title="Search" />;
-const ProfileScreen = () => <PlaceholderScreen title="Profile" />;
+const CollectionsScreen = () => <PlaceholderScreen title='Collections' />;
+const CameraScreen = () => <PlaceholderScreen title='Camera' />;
+const SearchScreen = () => <PlaceholderScreen title='Search' />;
+const ProfileScreen = () => <PlaceholderScreen title='Profile' />;
 
 export function MainTabNavigator() {
   return (
@@ -36,42 +44,42 @@ export function MainTabNavigator() {
         tabBarInactiveTintColor: '#666',
         headerShown: true,
       }}
-      initialRouteName="Home"
+      initialRouteName='Home'
     >
-      <MainTab.Screen 
-        name="Home" 
+      <MainTab.Screen
+        name='Home'
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
           // TODO: Add icon when react-native-vector-icons is configured
         }}
       />
-      <MainTab.Screen 
-        name="Collections" 
+      <MainTab.Screen
+        name='Collections'
         component={CollectionsScreen}
         options={{
           tabBarLabel: 'Collections',
           // TODO: Add icon
         }}
       />
-      <MainTab.Screen 
-        name="Camera" 
+      <MainTab.Screen
+        name='Camera'
         component={CameraScreen}
         options={{
           tabBarLabel: 'Camera',
           // TODO: Add icon
         }}
       />
-      <MainTab.Screen 
-        name="Search" 
+      <MainTab.Screen
+        name='Search'
         component={SearchScreen}
         options={{
           tabBarLabel: 'Search',
           // TODO: Add icon
         }}
       />
-      <MainTab.Screen 
-        name="Profile" 
+      <MainTab.Screen
+        name='Profile'
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',

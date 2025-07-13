@@ -38,7 +38,7 @@ export const createRedisClient = (): RedisClientType => {
   redisClient = createClient(redisOptions);
 
   // Error handling
-  redisClient.on('error', (error) => {
+  redisClient.on('error', error => {
     // eslint-disable-next-line no-console
     console.error('Redis client error:', error);
     isConnected = false;
@@ -132,7 +132,7 @@ export const pingRedis = async (): Promise<string> => {
   if (!redisClient) {
     throw new Error('Redis client not initialized');
   }
-  
+
   if (!redisClient.isOpen) {
     throw new Error('Redis client not connected');
   }
@@ -157,7 +157,7 @@ export const checkRedisHealth = async (): Promise<{
     }
 
     const pingResult = await pingRedis();
-    
+
     return {
       status: 'healthy',
       message: `Redis is healthy. Ping: ${pingResult}`,
@@ -239,7 +239,7 @@ export class CacheService {
   async flush(): Promise<void> {
     // Get all keys with our prefix
     const keys = await this.client.keys(`${this.keyPrefix}*`);
-    
+
     if (keys.length > 0) {
       await this.client.del(keys);
     }
@@ -249,7 +249,7 @@ export class CacheService {
     // Get all keys matching the pattern with our prefix
     const searchPattern = `${this.keyPrefix}${pattern}`;
     const keys = await this.client.keys(searchPattern);
-    
+
     if (keys.length > 0) {
       await this.client.del(keys);
     }
@@ -267,7 +267,7 @@ export class CacheService {
  */
 export const createCacheService = (keyPrefix?: string): CacheService => {
   const client = getRedisClient();
-  
+
   if (!client) {
     throw new Error('Redis client not initialized');
   }

@@ -1,12 +1,15 @@
 # User Profile API Reference
 
 ## Base URL
+
 ```
 /api/v1/users
 ```
 
 ## Authentication
+
 All protected endpoints require a valid JWT token in the Authorization header:
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -20,9 +23,11 @@ Authorization: Bearer <jwt_token>
 Get the authenticated user's complete profile information.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 
 #### Response
+
 ```json
 {
   "message": "Profile retrieved successfully",
@@ -48,6 +53,7 @@ Get the authenticated user's complete profile information.
 ```
 
 #### Error Responses
+
 - `401 Unauthorized`: Missing or invalid authentication token
 - `500 Internal Server Error`: Server error
 
@@ -60,10 +66,12 @@ Get the authenticated user's complete profile information.
 Update the authenticated user's profile information.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 - `Content-Type: application/json`
 
 #### Request Body
+
 ```json
 {
   "displayName": "John Doe",
@@ -76,6 +84,7 @@ Update the authenticated user's profile information.
 ```
 
 #### Field Validation
+
 - `displayName`: 1-50 characters (optional)
 - `firstName`: 1-30 characters (optional)
 - `lastName`: 1-30 characters (optional)
@@ -84,9 +93,11 @@ Update the authenticated user's profile information.
 - `website`: valid URL format (optional)
 
 #### Rate Limiting
+
 - 10 requests per minute per IP
 
 #### Response
+
 ```json
 {
   "message": "Profile updated successfully",
@@ -97,6 +108,7 @@ Update the authenticated user's profile information.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Validation errors
 - `401 Unauthorized`: Authentication required
 - `429 Too Many Requests`: Rate limit exceeded
@@ -110,12 +122,15 @@ Update the authenticated user's profile information.
 Get a user's public profile by username.
 
 #### Parameters
+
 - `username`: User's username (3-30 characters, alphanumeric, underscore, hyphen)
 
 #### Rate Limiting
+
 - 100 requests per 15 minutes per IP
 
 #### Response
+
 ```json
 {
   "message": "Public profile retrieved successfully",
@@ -133,6 +148,7 @@ Get a user's public profile by username.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Invalid username format
 - `404 Not Found`: User not found or profile is private
 - `429 Too Many Requests`: Rate limit exceeded
@@ -146,10 +162,12 @@ Get a user's public profile by username.
 Update the authenticated user's privacy settings.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 - `Content-Type: application/json`
 
 #### Request Body
+
 ```json
 {
   "isProfilePublic": true,
@@ -158,13 +176,16 @@ Update the authenticated user's privacy settings.
 ```
 
 #### Field Validation
+
 - `isProfilePublic`: boolean (optional)
 - `allowFollowers`: boolean (optional)
 
 #### Rate Limiting
+
 - 5 requests per minute per IP
 
 #### Response
+
 ```json
 {
   "message": "Privacy settings updated successfully",
@@ -175,6 +196,7 @@ Update the authenticated user's privacy settings.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Validation errors
 - `401 Unauthorized`: Authentication required
 - `429 Too Many Requests`: Rate limit exceeded
@@ -188,21 +210,26 @@ Update the authenticated user's privacy settings.
 Upload a new profile image for the authenticated user.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 - `Content-Type: multipart/form-data`
 
 #### Request Body (Form Data)
+
 - `profileImage`: Image file (required)
 
 #### File Restrictions
+
 - **Max Size**: 5MB
 - **Allowed Types**: JPEG, PNG, WebP, GIF
 - **Processing**: Automatic filename generation
 
 #### Rate Limiting
+
 - 3 uploads per minute per IP
 
 #### Response
+
 ```json
 {
   "message": "Profile image updated successfully",
@@ -213,12 +240,14 @@ Upload a new profile image for the authenticated user.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: No file provided or invalid file type
 - `401 Unauthorized`: Authentication required
 - `413 Payload Too Large`: File size exceeds limit
 - `429 Too Many Requests`: Rate limit exceeded
 
 #### Example using curl
+
 ```bash
 curl -X POST \
   -H "Authorization: Bearer <token>" \
@@ -235,10 +264,12 @@ curl -X POST \
 Change the authenticated user's password.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 - `Content-Type: application/json`
 
 #### Request Body
+
 ```json
 {
   "currentPassword": "current_password",
@@ -247,16 +278,19 @@ Change the authenticated user's password.
 ```
 
 #### Password Requirements
+
 - Minimum 8 characters
 - At least one uppercase letter
 - At least one lowercase letter
 - At least one number
-- At least one special character (@$!%*?&)
+- At least one special character (@$!%\*?&)
 
 #### Rate Limiting
+
 - 3 requests per minute per IP
 
 #### Response
+
 ```json
 {
   "message": "Password changed successfully"
@@ -264,6 +298,7 @@ Change the authenticated user's password.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Validation errors or incorrect current password
 - `401 Unauthorized`: Authentication required
 - `429 Too Many Requests`: Rate limit exceeded
@@ -277,9 +312,11 @@ Change the authenticated user's password.
 Get statistics for the authenticated user.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 
 #### Response
+
 ```json
 {
   "message": "User statistics retrieved successfully",
@@ -293,6 +330,7 @@ Get statistics for the authenticated user.
 ```
 
 #### Error Responses
+
 - `401 Unauthorized`: Authentication required
 - `500 Internal Server Error`: Server error
 
@@ -305,10 +343,12 @@ Get statistics for the authenticated user.
 Permanently delete the authenticated user's account.
 
 #### Headers
+
 - `Authorization: Bearer <token>` (required)
 - `Content-Type: application/json`
 
 #### Request Body
+
 ```json
 {
   "password": "user_password"
@@ -316,9 +356,11 @@ Permanently delete the authenticated user's account.
 ```
 
 #### Rate Limiting
+
 - 1 request per minute per IP
 
 #### Response
+
 ```json
 {
   "message": "Account deleted successfully"
@@ -326,11 +368,13 @@ Permanently delete the authenticated user's account.
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Missing password or incorrect password
 - `401 Unauthorized`: Authentication required
 - `429 Too Many Requests`: Rate limit exceeded
 
 #### ⚠️ Warning
+
 This action is irreversible and will permanently delete all user data.
 
 ---
@@ -365,16 +409,17 @@ All error responses follow this standard format:
 
 Rate limits are applied per IP address and reset at the specified intervals:
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
+| Endpoint                 | Limit        | Window     |
+| ------------------------ | ------------ | ---------- |
 | `GET /profile/:username` | 100 requests | 15 minutes |
-| `PUT /profile` | 10 requests | 1 minute |
-| `PUT /privacy` | 5 requests | 1 minute |
-| `POST /profile-image` | 3 requests | 1 minute |
-| `PUT /password` | 3 requests | 1 minute |
-| `DELETE /account` | 1 request | 1 minute |
+| `PUT /profile`           | 10 requests  | 1 minute   |
+| `PUT /privacy`           | 5 requests   | 1 minute   |
+| `POST /profile-image`    | 3 requests   | 1 minute   |
+| `PUT /password`          | 3 requests   | 1 minute   |
+| `DELETE /account`        | 1 request    | 1 minute   |
 
 When rate limit is exceeded, the response includes:
+
 ```json
 {
   "error": "Too many requests, please try again later.",
@@ -385,25 +430,26 @@ When rate limit is exceeded, the response includes:
 ## Examples
 
 ### JavaScript/Fetch Example
+
 ```javascript
 // Get user profile
 const response = await fetch('/api/v1/users/profile', {
   headers: {
-    'Authorization': `Bearer ${token}`
-  }
+    Authorization: `Bearer ${token}`,
+  },
 });
 
 // Update profile
 const updateResponse = await fetch('/api/v1/users/profile', {
   method: 'PUT',
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     displayName: 'New Display Name',
-    bio: 'Updated bio'
-  })
+    bio: 'Updated bio',
+  }),
 });
 
 // Upload profile image
@@ -413,13 +459,14 @@ formData.append('profileImage', fileInput.files[0]);
 const uploadResponse = await fetch('/api/v1/users/profile-image', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   },
-  body: formData
+  body: formData,
 });
 ```
 
 ### Python/Requests Example
+
 ```python
 import requests
 

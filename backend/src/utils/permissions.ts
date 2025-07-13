@@ -9,24 +9,24 @@ export const PERMISSIONS = {
   USER_WRITE: 'user:write',
   USER_DELETE: 'user:delete',
   USER_ADMIN: 'user:admin',
-  
+
   // Collection management
   COLLECTION_READ: 'collection:read',
   COLLECTION_WRITE: 'collection:write',
   COLLECTION_DELETE: 'collection:delete',
   COLLECTION_ADMIN: 'collection:admin',
-  
+
   // Model management
   MODEL_READ: 'model:read',
   MODEL_WRITE: 'model:write',
   MODEL_DELETE: 'model:delete',
   MODEL_ADMIN: 'model:admin',
-  
+
   // System administration
   SYSTEM_CONFIG: 'system:config',
   SYSTEM_MONITOR: 'system:monitor',
   SYSTEM_BACKUP: 'system:backup',
-  
+
   // Content moderation
   CONTENT_MODERATE: 'content:moderate',
   CONTENT_REVIEW: 'content:review',
@@ -44,7 +44,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     PERMISSIONS.MODEL_READ,
     PERMISSIONS.MODEL_WRITE,
   ],
-  
+
   [UserRole.MODERATOR]: [
     PERMISSIONS.USER_READ,
     PERMISSIONS.COLLECTION_READ,
@@ -56,7 +56,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     PERMISSIONS.CONTENT_MODERATE,
     PERMISSIONS.CONTENT_REVIEW,
   ],
-  
+
   [UserRole.ADMIN]: [
     PERMISSIONS.USER_READ,
     PERMISSIONS.USER_WRITE,
@@ -75,10 +75,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     PERMISSIONS.CONTENT_DELETE,
     PERMISSIONS.SYSTEM_MONITOR,
   ],
-  
-  [UserRole.SUPER_ADMIN]: [
-    ...Object.values(PERMISSIONS),
-  ],
+
+  [UserRole.SUPER_ADMIN]: [...Object.values(PERMISSIONS)],
 };
 
 /**
@@ -98,7 +96,10 @@ export function getRolePermissions(role: UserRole): string[] {
 /**
  * Combine role-based and explicit permissions
  */
-export function getUserPermissions(role: UserRole, explicitPermissions: string[] = []): string[] {
+export function getUserPermissions(
+  role: UserRole,
+  explicitPermissions: string[] = []
+): string[] {
   const rolePermissions = getRolePermissions(role);
   const allPermissions = new Set([...rolePermissions, ...explicitPermissions]);
   return Array.from(allPermissions);
@@ -108,8 +109,8 @@ export function getUserPermissions(role: UserRole, explicitPermissions: string[]
  * Check if user has permission (either from role or explicit)
  */
 export function userHasPermission(
-  userRole: UserRole, 
-  userPermissions: string[], 
+  userRole: UserRole,
+  userPermissions: string[],
   requiredPermission: string
 ): boolean {
   const allPermissions = getUserPermissions(userRole, userPermissions);
@@ -136,7 +137,9 @@ export function generatePermission(resource: string, action: string): string {
 /**
  * Parse permission string into resource and action
  */
-export function parsePermission(permission: string): { resource: string; action: string } | null {
+export function parsePermission(
+  permission: string
+): { resource: string; action: string } | null {
   const parts = permission.split(':');
   if (parts.length !== 2) {
     return null;

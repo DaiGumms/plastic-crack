@@ -15,14 +15,14 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer>
-      <RootStack.Navigator 
+      <RootStack.Navigator
         screenOptions={{ headerShown: false }}
         initialRouteName={isAuthenticated ? 'Main' : 'Auth'}
       >
         {!isAuthenticated ? (
-          <RootStack.Screen name="Auth" component={AuthStackNavigator} />
+          <RootStack.Screen name='Auth' component={AuthStackNavigator} />
         ) : (
-          <RootStack.Screen name="Main" component={MainTabNavigator} />
+          <RootStack.Screen name='Main' component={MainTabNavigator} />
         )}
       </RootStack.Navigator>
     </NavigationContainer>

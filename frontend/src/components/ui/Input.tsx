@@ -12,9 +12,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || `input-${Math.random().toString(36).substring(7)}`;
 
     return (
-      <div className="space-y-2">
+      <div className='space-y-2'>
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor={inputId}
+            className='text-sm font-medium text-gray-700'
+          >
             {label}
           </label>
         )}
@@ -28,8 +31,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {helperText && !error && <p className="text-sm text-gray-500">{helperText}</p>}
+        {error && <p className='text-sm text-red-600'>{error}</p>}
+        {helperText && !error && (
+          <p className='text-sm text-gray-500'>{helperText}</p>
+        )}
       </div>
     );
   }

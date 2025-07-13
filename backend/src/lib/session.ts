@@ -10,7 +10,7 @@ import { getRedisClient } from './redis';
  */
 export const createSessionStore = () => {
   const redisClient = getRedisClient();
-  
+
   // Create Redis store instance - connect-redis v9 syntax
   const store = new RedisStore({
     client: redisClient,
@@ -45,7 +45,7 @@ export const sessionConfig: session.SessionOptions = {
 export const initializeSession = () => {
   const store = createSessionStore();
   sessionConfig.store = store;
-  
+
   return session(sessionConfig);
 };
 

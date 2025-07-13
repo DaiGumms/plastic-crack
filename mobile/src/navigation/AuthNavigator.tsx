@@ -15,26 +15,26 @@ const PlaceholderScreen = () => null;
 
 export function AuthStackNavigator() {
   return (
-    <AuthStack.Navigator 
-      screenOptions={{ 
+    <AuthStack.Navigator
+      screenOptions={{
         headerShown: false,
         gestureEnabled: true,
       }}
-      initialRouteName="Login"
+      initialRouteName='Login'
     >
-      <AuthStack.Screen 
-        name="Login" 
-        component={PlaceholderScreen} 
+      <AuthStack.Screen
+        name='Login'
+        component={PlaceholderScreen}
         options={{ title: 'Sign In' }}
       />
-      <AuthStack.Screen 
-        name="Register" 
-        component={PlaceholderScreen} 
+      <AuthStack.Screen
+        name='Register'
+        component={PlaceholderScreen}
         options={{ title: 'Sign Up' }}
       />
-      <AuthStack.Screen 
-        name="ForgotPassword" 
-        component={PlaceholderScreen} 
+      <AuthStack.Screen
+        name='ForgotPassword'
+        component={PlaceholderScreen}
         options={{ title: 'Reset Password' }}
       />
     </AuthStack.Navigator>

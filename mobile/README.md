@@ -24,11 +24,13 @@ The React Native mobile application for Plastic Crack - a miniature collection m
 ## 📦 Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Install Expo CLI globally (if not already installed):
+
 ```bash
 npm install -g @expo/cli
 ```
@@ -36,11 +38,13 @@ npm install -g @expo/cli
 ## 🔧 Development
 
 ### Start the development server:
+
 ```bash
 npm start
 ```
 
 ### Run on specific platforms:
+
 ```bash
 npm run android    # Android emulator/device
 npm run ios        # iOS simulator/device (macOS only)
@@ -48,6 +52,7 @@ npm run web        # Web browser
 ```
 
 ### Other commands:
+
 ```bash
 npm run lint       # Run ESLint
 npm run lint:fix   # Fix ESLint errors
@@ -57,11 +62,13 @@ npm run type-check # TypeScript type checking
 ## 📱 Platform Requirements
 
 ### iOS
+
 - iOS 11.0 or later
 - Xcode 12.0 or later (for development)
 - macOS (for iOS development)
 
 ### Android
+
 - Android 6.0 (API level 23) or later
 - Android Studio (for development)
 
@@ -89,6 +96,7 @@ src/
 ## 🔗 API Integration
 
 The app connects to the Plastic Crack backend API for:
+
 - User authentication
 - Collection and model management
 - Image upload and storage

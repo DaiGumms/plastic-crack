@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document describes the Redis integration implementation for the Plastic Crack backend API, which provides caching, session management, and performance optimization features.
+This document describes the Redis integration implementation for the Plastic Crack backend API,
+which provides caching, session management, and performance optimization features.
 
 ## Table of Contents
 
@@ -20,6 +21,7 @@ This document describes the Redis integration implementation for the Plastic Cra
 ## Features Implemented
 
 ### ✅ Core Redis Features
+
 - **Redis Client Configuration**: Fully configured Redis client with connection pooling
 - **Session Store**: Express session management with Redis persistence
 - **Caching Middleware**: HTTP response caching with TTL support
@@ -27,6 +29,7 @@ This document describes the Redis integration implementation for the Plastic Cra
 - **Health Monitoring**: Real-time Redis health checking and diagnostics
 
 ### ✅ Advanced Features
+
 - **Cache Invalidation**: Pattern-based cache invalidation
 - **User-Specific Caching**: Session-aware caching strategies
 - **Graceful Degradation**: Application continues to work when Redis is unavailable
@@ -116,9 +119,11 @@ redis: {
 ### Health and Status
 
 #### `GET /health`
+
 General application health check including Redis status.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -136,9 +141,11 @@ General application health check including Redis status.
 ```
 
 #### `GET /api/v1/redis/status`
+
 Redis-specific connection status.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -152,49 +159,56 @@ Redis-specific connection status.
 ### Cache Management
 
 #### `POST /api/v1/redis/test-set`
+
 Set a value in Redis cache.
 
 **Request Body:**
+
 ```json
 {
   "key": "user:123",
-  "value": {"name": "John", "email": "john@example.com"},
+  "value": { "name": "John", "email": "john@example.com" },
   "ttl": 3600
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "message": "Value set in cache",
   "data": {
     "key": "user:123",
-    "value": {"name": "John", "email": "john@example.com"},
+    "value": { "name": "John", "email": "john@example.com" },
     "ttl": 3600
   }
 }
 ```
 
 #### `GET /api/v1/redis/test-get/:key`
+
 Retrieve a value from Redis cache.
 
 **Response:**
+
 ```json
 {
   "success": true,
   "data": {
     "key": "user:123",
-    "value": {"name": "John", "email": "john@example.com"},
+    "value": { "name": "John", "email": "john@example.com" },
     "found": true
   }
 }
 ```
 
 #### `DELETE /api/v1/redis/test-delete/:key`
+
 Delete a value from Redis cache.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -206,9 +220,11 @@ Delete a value from Redis cache.
 ```
 
 #### `GET /api/v1/redis/test-cached`
+
 Cached endpoint demonstrating HTTP response caching.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -222,9 +238,11 @@ Cached endpoint demonstrating HTTP response caching.
 ```
 
 #### `GET /api/v1/redis/stats`
+
 Get cache statistics and information.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -252,10 +270,14 @@ import { createCacheService } from '../lib/redis';
 const cache = createCacheService('user:');
 
 // Set a value with TTL
-await cache.set('profile:123', {
-  name: 'John Doe',
-  email: 'john@example.com'
-}, 3600); // 1 hour TTL
+await cache.set(
+  'profile:123',
+  {
+    name: 'John Doe',
+    email: 'john@example.com',
+  },
+  3600
+); // 1 hour TTL
 
 // Get a value
 const userProfile = await cache.get('profile:123');
@@ -291,10 +313,14 @@ router.get('/api/users', cache(300), async (req, res) => {
 });
 
 // Cache with custom key based on user ID
-router.get('/api/users/:id', cache(600, (req) => `user:${req.params.id}`), async (req, res) => {
-  const user = await getUserById(req.params.id);
-  res.json(user);
-});
+router.get(
+  '/api/users/:id',
+  cache(600, req => `user:${req.params.id}`),
+  async (req, res) => {
+    const user = await getUserById(req.params.id);
+    res.json(user);
+  }
+);
 ```
 
 ### Session Management
@@ -305,15 +331,15 @@ Sessions are automatically managed when you include the session middleware:
 // Sessions are automatically available in routes
 router.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   // Authenticate user
   const user = await authenticateUser(email, password);
-  
+
   if (user) {
     // Store user in session
     req.session.userId = user.id;
     req.session.email = user.email;
-    
+
     res.json({ success: true, user });
   } else {
     res.status(401).json({ error: 'Invalid credentials' });
@@ -325,7 +351,7 @@ router.get('/api/profile', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
-  
+
   const user = await getUserById(req.session.userId);
   res.json(user);
 });
@@ -344,7 +370,11 @@ import { cache, invalidateCache } from '../middleware/cache';
 router.get('/api/data', cache(300), handler);
 
 // Custom cache key generation
-router.get('/api/user/:id', cache(600, (req) => `user:${req.params.id}`), handler);
+router.get(
+  '/api/user/:id',
+  cache(600, req => `user:${req.params.id}`),
+  handler
+);
 
 // Cache invalidation on data changes
 router.post('/api/users', invalidateCache('user:*'), async (req, res) => {
@@ -387,14 +417,14 @@ req.session.preferences = userPreferences;
 const userId = req.session.userId;
 
 // Destroy session
-req.session.destroy((err) => {
+req.session.destroy(err => {
   if (err) {
     console.error('Session destruction error:', err);
   }
 });
 
 // Regenerate session ID
-req.session.regenerate((err) => {
+req.session.regenerate(err => {
   if (err) {
     console.error('Session regeneration error:', err);
   }
@@ -409,7 +439,7 @@ The Redis integration includes comprehensive error handling:
 
 ```typescript
 // Redis connection is automatically managed with reconnection
-redisClient.on('error', (error) => {
+redisClient.on('error', error => {
   console.error('Redis client error:', error);
   // Application continues to function without Redis
 });
@@ -455,14 +485,14 @@ Use descriptive, hierarchical key names:
 
 ```typescript
 // Good key naming
-'user:profile:123'
-'api:response:users:page:1'
-'session:user:456'
+'user:profile:123';
+'api:response:users:page:1';
+'session:user:456';
 
 // Poor key naming
-'u123'
-'data'
-'temp'
+'u123';
+'data';
+'temp';
 ```
 
 ### Memory Management
@@ -595,4 +625,6 @@ redis-cli keys "*"
 redis-cli get "plastic-crack:cache:key"
 ```
 
-This Redis integration provides a robust foundation for caching and session management in the Plastic Crack application, with comprehensive error handling, monitoring, and performance optimization features.
+This Redis integration provides a robust foundation for caching and session management in the
+Plastic Crack application, with comprehensive error handling, monitoring, and performance
+optimization features.

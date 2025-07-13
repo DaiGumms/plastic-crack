@@ -28,7 +28,7 @@ router.get('/status', (req: Request, res: Response) => {
 router.post('/test-set', async (req: Request, res: Response) => {
   try {
     const { key, value, ttl } = req.body;
-    
+
     if (!key || value === undefined) {
       return res.status(400).json({
         success: false,
@@ -37,7 +37,7 @@ router.post('/test-set', async (req: Request, res: Response) => {
     }
 
     await getCacheService().set(key, value, ttl);
-    
+
     res.json({
       success: true,
       message: 'Value set in cache',
@@ -56,7 +56,7 @@ router.get('/test-get/:key', async (req: Request, res: Response) => {
   try {
     const { key } = req.params;
     const value = await getCacheService().get(key);
-    
+
     res.json({
       success: true,
       data: { key, value, found: value !== null },
@@ -73,7 +73,7 @@ router.get('/test-get/:key', async (req: Request, res: Response) => {
 router.delete('/test-delete/:key', async (req: Request, res: Response) => {
   try {
     const { key } = req.params;
-    
+
     // Invalidate cache if Redis is connected
     if (isRedisConnected()) {
       try {
@@ -82,9 +82,9 @@ router.delete('/test-delete/:key', async (req: Request, res: Response) => {
         // Cache invalidation failed, continue with deletion
       }
     }
-    
+
     const deleted = await getCacheService().del(key);
-    
+
     res.json({
       success: true,
       data: { key, deleted: deleted > 0 },
@@ -117,7 +117,7 @@ router.get('/test-cached', (req: Request, res: Response) => {
       // Cache middleware failed, continue without caching
     }
   }
-  
+
   // Return uncached response
   res.json({
     success: true,
@@ -134,7 +134,7 @@ router.get('/test-cached', (req: Request, res: Response) => {
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     const keys = await getCacheService().getKeys('*');
-    
+
     res.json({
       success: true,
       data: {

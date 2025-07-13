@@ -27,7 +27,7 @@ export const errorHandler = (
 ): void => {
   // _next parameter required by Express error middleware signature
   void _next;
-  
+
   const { statusCode = 500, message, stack } = err;
 
   // Log error in development mode

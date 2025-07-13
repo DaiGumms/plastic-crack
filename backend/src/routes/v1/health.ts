@@ -21,7 +21,7 @@ const cacheMiddleware = (ttl: number) => {
 // Detailed health check endpoint with caching
 router.get('/', cacheMiddleware(30), async (req: Request, res: Response) => {
   const redisHealth = await checkRedisHealth();
-  
+
   const healthData = {
     status: 'ok',
     timestamp: new Date().toISOString(),

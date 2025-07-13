@@ -79,7 +79,9 @@ export class UserService {
   }
 
   // Get public user profile (for viewing other users)
-  static async getPublicUserProfile(username: string): Promise<PublicUserProfile> {
+  static async getPublicUserProfile(
+    username: string
+  ): Promise<PublicUserProfile> {
     const user = await prisma.user.findUnique({
       where: { username },
       select: {
@@ -268,7 +270,10 @@ export class UserService {
   }
 
   // Delete user account
-  static async deleteUserAccount(userId: string, password: string): Promise<void> {
+  static async deleteUserAccount(
+    userId: string,
+    password: string
+  ): Promise<void> {
     // First, verify the user's password for security
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -279,7 +284,10 @@ export class UserService {
       throw new Error('User not found');
     }
 
-    const isValidPassword = await AuthService.verifyPassword(password, user.passwordHash);
+    const isValidPassword = await AuthService.verifyPassword(
+      password,
+      user.passwordHash
+    );
     if (!isValidPassword) {
       throw new Error('Invalid password');
     }
@@ -315,15 +323,21 @@ export class UserService {
     }
 
     // Verify current password
-    const isValidPassword = await AuthService.verifyPassword(currentPassword, user.passwordHash);
+    const isValidPassword = await AuthService.verifyPassword(
+      currentPassword,
+      user.passwordHash
+    );
     if (!isValidPassword) {
       throw new Error('Current password is incorrect');
     }
 
     // Validate new password strength
-    const passwordValidation = AuthService.validatePasswordStrength(newPassword);
+    const passwordValidation =
+      AuthService.validatePasswordStrength(newPassword);
     if (!passwordValidation.isValid) {
-      throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
+      throw new Error(
+        `Password validation failed: ${passwordValidation.errors.join(', ')}`
+      );
     }
 
     // Hash new password
@@ -365,17 +379,13 @@ export class UserService {
     followingCount: number;
   }> {
     try {
-      const [
-        totalCollections,
-        totalModelLikes,
-        followerCount,
-        followingCount,
-      ] = await Promise.all([
-        prisma.collection.count({ where: { userId } }),
-        prisma.modelLike.count({ where: { userId } }),
-        prisma.userRelationship.count({ where: { followingId: userId } }),
-        prisma.userRelationship.count({ where: { followerId: userId } }),
-      ]);
+      const [totalCollections, totalModelLikes, followerCount, followingCount] =
+        await Promise.all([
+          prisma.collection.count({ where: { userId } }),
+          prisma.modelLike.count({ where: { userId } }),
+          prisma.userRelationship.count({ where: { followingId: userId } }),
+          prisma.userRelationship.count({ where: { followerId: userId } }),
+        ]);
 
       return {
         totalCollections,

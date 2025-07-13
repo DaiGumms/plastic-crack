@@ -14,21 +14,23 @@ const startServer = async (): Promise<void> => {
       console.log(`📱 Environment: ${config.nodeEnv}`);
       console.log(`🔗 API Base URL: ${config.api.baseUrl}`);
       console.log(`✅ Health check: http://localhost:${config.port}/health`);
-      console.log(`📚 API v1: http://localhost:${config.port}${config.api.baseUrl}/v1`);
+      console.log(
+        `📚 API v1: http://localhost:${config.port}${config.api.baseUrl}/v1`
+      );
     });
 
     // Graceful shutdown handling
     const gracefulShutdown = async (signal: string) => {
       console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
-      
+
       server.close(async () => {
         console.log('✅ HTTP server closed.');
-        
+
         // Disconnect from Redis
         console.log('🔄 Disconnecting from Redis...');
         await disconnectRedis();
         console.log('✅ Redis disconnected');
-        
+
         process.exit(0);
       });
 
@@ -41,7 +43,6 @@ const startServer = async (): Promise<void> => {
 
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);

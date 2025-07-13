@@ -6,10 +6,15 @@ declare global {
 }
 
 // Prevent multiple instances of Prisma Client in development
-const prisma = globalThis.__prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  errorFormat: 'pretty',
-});
+const prisma =
+  globalThis.__prisma ??
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
+    errorFormat: 'pretty',
+  });
 
 if (process.env.NODE_ENV !== 'production') {
   globalThis.__prisma = prisma;

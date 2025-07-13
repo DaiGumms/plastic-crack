@@ -28,16 +28,16 @@ export type RootStackParamList = {
 };
 
 // Screen props types for type safety
-export type AuthStackScreenProps<T extends keyof AuthStackParamList> = 
+export type AuthStackScreenProps<T extends keyof AuthStackParamList> =
   NativeStackScreenProps<AuthStackParamList, T>;
 
-export type MainTabScreenProps<T extends keyof MainTabParamList> = 
+export type MainTabScreenProps<T extends keyof MainTabParamList> =
   CompositeScreenProps<
     BottomTabScreenProps<MainTabParamList, T>,
     NativeStackScreenProps<RootStackParamList>
   >;
 
-export type RootStackScreenProps<T extends keyof RootStackParamList> = 
+export type RootStackScreenProps<T extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, T>;
 
 declare global {

@@ -17,7 +17,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className='min-h-screen bg-white dark:bg-gray-900'>
       <main>{children}</main>
     </div>
   );

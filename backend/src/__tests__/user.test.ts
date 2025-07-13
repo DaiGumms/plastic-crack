@@ -21,9 +21,9 @@ describe('User Profile Routes', () => {
           { email: { contains: 'profile-user' } },
           { email: { contains: 'delete-test' } },
           { email: { contains: 'incorrect-pass-test' } },
-          { email: { contains: 'nopassword-test' } }
-        ]
-      }
+          { email: { contains: 'nopassword-test' } },
+        ],
+      },
     });
 
     // Create a test user with unique credentials
@@ -48,9 +48,9 @@ describe('User Profile Routes', () => {
           { email: { contains: 'profile-user' } },
           { email: { contains: 'delete-test' } },
           { email: { contains: 'incorrect-pass-test' } },
-          { email: { contains: 'nopassword-test' } }
-        ]
-      }
+          { email: { contains: 'nopassword-test' } },
+        ],
+      },
     });
   });
 
@@ -152,7 +152,9 @@ describe('User Profile Routes', () => {
         .send(privacyData)
         .expect(200);
 
-      expect(response.body.message).toBe('Privacy settings updated successfully');
+      expect(response.body.message).toBe(
+        'Privacy settings updated successfully'
+      );
       expect(response.body.data.isProfilePublic).toBe(false);
       expect(response.body.data.allowFollowers).toBe(false);
     });
@@ -185,7 +187,9 @@ describe('User Profile Routes', () => {
         .get(`/api/v1/users/profile/${testUsername}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Public profile retrieved successfully');
+      expect(response.body.message).toBe(
+        'Public profile retrieved successfully'
+      );
       expect(response.body.data).toMatchObject({
         id: userId,
         username: testUsername,
@@ -228,16 +232,26 @@ describe('User Profile Routes', () => {
   describe('POST /api/v1/users/profile-image', () => {
     it('should upload profile image successfully', async () => {
       // Create a simple test image buffer
-      const testImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', 'base64');
-      
+      const testImageBuffer = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+        'base64'
+      );
+
       const response = await request(app)
         .post('/api/v1/users/profile-image')
         .set('Authorization', `Bearer ${authToken}`)
-        .attach('profileImage', testImageBuffer, { filename: 'test.png', contentType: 'image/png' });
-      
+        .attach('profileImage', testImageBuffer, {
+          filename: 'test.png',
+          contentType: 'image/png',
+        });
+
       if (response.status === 200) {
-        expect(response.body.message).toBe('Profile image updated successfully');
-        expect(response.body.data.profileImageUrl).toContain('/uploads/profiles/');
+        expect(response.body.message).toBe(
+          'Profile image updated successfully'
+        );
+        expect(response.body.data.profileImageUrl).toContain(
+          '/uploads/profiles/'
+        );
       } else {
         // Skip this test if upload functionality isn't fully implemented
         expect(response.status).toBeGreaterThan(0);
@@ -254,12 +268,18 @@ describe('User Profile Routes', () => {
     });
 
     it('should require authentication', async () => {
-      const testImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', 'base64');
-      
+      const testImageBuffer = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+        'base64'
+      );
+
       const response = await request(app)
         .post('/api/v1/users/profile-image')
-        .attach('profileImage', testImageBuffer, { filename: 'test.png', contentType: 'image/png' });
-      
+        .attach('profileImage', testImageBuffer, {
+          filename: 'test.png',
+          contentType: 'image/png',
+        });
+
       if (response.status === 401) {
         expect(response.body.error).toBe('Access token required');
       } else {
@@ -277,12 +297,15 @@ describe('User Profile Routes', () => {
         .send({
           currentPassword: 'SecurePass123!',
           newPassword: 'NewSecurePass123!',
-        });      
+        });
       if (response.status === 200) {
         expect(response.body.message).toBe('Password changed successfully');
 
         // Verify new password works
-        const loginResponse = await AuthService.login(testEmail, 'NewSecurePass123!');
+        const loginResponse = await AuthService.login(
+          testEmail,
+          'NewSecurePass123!'
+        );
         expect(loginResponse.token).toBeDefined();
       } else {
         // Don't fail the test suite for implementation issues
@@ -324,7 +347,9 @@ describe('User Profile Routes', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body.message).toBe('User statistics retrieved successfully');
+      expect(response.body.message).toBe(
+        'User statistics retrieved successfully'
+      );
       expect(response.body.data).toMatchObject({
         totalCollections: 0,
         totalModelLikes: 0,
@@ -347,13 +372,16 @@ describe('User Profile Routes', () => {
 
     beforeAll(async () => {
       // Create a separate user for deletion test
-      void await AuthService.register(
+      void (await AuthService.register(
         'deleteuser',
         'delete-test@plastic-crack-test.com',
         'DeletePass123!'
-      );
+      ));
 
-      const loginResponse = await AuthService.login('delete-test@plastic-crack-test.com', 'DeletePass123!');
+      const loginResponse = await AuthService.login(
+        'delete-test@plastic-crack-test.com',
+        'DeletePass123!'
+      );
       deleteTestToken = loginResponse.token;
     });
 
@@ -370,7 +398,10 @@ describe('User Profile Routes', () => {
 
       // Verify user can no longer login
       try {
-        await AuthService.login('delete-test@plastic-crack-test.com', 'DeletePass123!');
+        await AuthService.login(
+          'delete-test@plastic-crack-test.com',
+          'DeletePass123!'
+        );
         throw new Error('Login should have failed after account deletion');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
@@ -380,13 +411,16 @@ describe('User Profile Routes', () => {
     it('should reject incorrect password', async () => {
       // Create a new user for this test to avoid rate limiting conflicts
       const timestamp = Date.now();
-      void await AuthService.register(
+      void (await AuthService.register(
         `incorrecttest${timestamp}`,
         `incorrect-pass-test-${timestamp}@plastic-crack-test.com`,
         'IncorrectPass123!'
+      ));
+      const testLoginResponse = await AuthService.login(
+        `incorrect-pass-test-${timestamp}@plastic-crack-test.com`,
+        'IncorrectPass123!'
       );
-      const testLoginResponse = await AuthService.login(`incorrect-pass-test-${timestamp}@plastic-crack-test.com`, 'IncorrectPass123!');
-      
+
       const response = await request(app)
         .delete('/api/v1/users/account')
         .set('Authorization', `Bearer ${testLoginResponse.token}`)
@@ -401,13 +435,16 @@ describe('User Profile Routes', () => {
     it('should require password', async () => {
       // Create a new user for this test to avoid rate limiting conflicts
       const timestamp = Date.now();
-      void await AuthService.register(
+      void (await AuthService.register(
         `nopasstest${timestamp}`,
         `nopassword-test-${timestamp}@plastic-crack-test.com`,
         'NoPassword123!'
+      ));
+      const testLoginResponse = await AuthService.login(
+        `nopassword-test-${timestamp}@plastic-crack-test.com`,
+        'NoPassword123!'
       );
-      const testLoginResponse = await AuthService.login(`nopassword-test-${timestamp}@plastic-crack-test.com`, 'NoPassword123!');
-      
+
       const response = await request(app)
         .delete('/api/v1/users/account')
         .set('Authorization', `Bearer ${testLoginResponse.token}`)

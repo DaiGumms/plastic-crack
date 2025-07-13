@@ -12,7 +12,8 @@ async function main() {
     create: {
       name: 'Warhammer 40,000',
       shortName: 'W40K',
-      description: 'The grim darkness of the far future where there is only war',
+      description:
+        'The grim darkness of the far future where there is only war',
       publisher: 'Games Workshop',
       sortOrder: 1,
     },
@@ -44,21 +45,33 @@ async function main() {
 
   // Seed Warhammer 40K Factions
   const w40kFactions = [
-    { name: 'Space Marines', description: 'The Emperor\'s finest warriors' },
-    { name: 'Chaos Space Marines', description: 'Traitorous Astartes who serve the Dark Gods' },
+    { name: 'Space Marines', description: "The Emperor's finest warriors" },
+    {
+      name: 'Chaos Space Marines',
+      description: 'Traitorous Astartes who serve the Dark Gods',
+    },
     { name: 'Imperial Guard', description: 'The vast armies of the Imperium' },
     { name: 'Orks', description: 'Green-skinned warlike aliens' },
     { name: 'Eldar', description: 'Ancient and sophisticated aliens' },
     { name: 'Dark Eldar', description: 'Sadistic raiders from the Dark City' },
-    { name: 'Tau Empire', description: 'Technologically advanced aliens seeking the Greater Good' },
-    { name: 'Tyranids', description: 'Horrific bio-engineered swarm creatures' },
-    { name: 'Necrons', description: 'Ancient robotic beings awakening from eons of slumber' },
+    {
+      name: 'Tau Empire',
+      description: 'Technologically advanced aliens seeking the Greater Good',
+    },
+    {
+      name: 'Tyranids',
+      description: 'Horrific bio-engineered swarm creatures',
+    },
+    {
+      name: 'Necrons',
+      description: 'Ancient robotic beings awakening from eons of slumber',
+    },
     { name: 'Chaos Daemons', description: 'Manifestations of the Chaos Gods' },
   ];
 
   for (const faction of w40kFactions) {
     await prisma.faction.upsert({
-      where: { 
+      where: {
         name_gameSystemId: {
           name: faction.name,
           gameSystemId: warhammer40k.id,
@@ -75,7 +88,7 @@ async function main() {
 
   // Seed Age of Sigmar Factions
   const aosFactions = [
-    { name: 'Stormcast Eternals', description: 'Sigmar\'s immortal warriors' },
+    { name: 'Stormcast Eternals', description: "Sigmar's immortal warriors" },
     { name: 'Chaos Warriors', description: 'Champions of the Dark Gods' },
     { name: 'Seraphon', description: 'Starborne lizardmen' },
     { name: 'Sylvaneth', description: 'Tree spirits and forest dwellers' },
@@ -85,7 +98,7 @@ async function main() {
 
   for (const faction of aosFactions) {
     await prisma.faction.upsert({
-      where: { 
+      where: {
         name_gameSystemId: {
           name: faction.name,
           gameSystemId: ageOfSigmar.id,
@@ -101,12 +114,16 @@ async function main() {
   }
 
   console.log('✅ Database seeding completed successfully!');
-  console.log(`📊 Created game systems: ${[warhammer40k, ageOfSigmar, killTeam].length}`);
-  console.log(`🏛️ Created factions: ${w40kFactions.length + aosFactions.length}`);
+  console.log(
+    `📊 Created game systems: ${[warhammer40k, ageOfSigmar, killTeam].length}`
+  );
+  console.log(
+    `🏛️ Created factions: ${w40kFactions.length + aosFactions.length}`
+  );
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seeding failed:', e);
     process.exit(1);
   })

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document describes the JWT-based authentication system implemented for the Plastic Crack application. The system provides secure user registration, login, token refresh, and user session management.
+This document describes the JWT-based authentication system implemented for the Plastic Crack
+application. The system provides secure user registration, login, token refresh, and user session
+management.
 
 ## Features Implemented
 
@@ -29,11 +31,13 @@ This document describes the JWT-based authentication system implemented for the 
 ### Authentication Routes (`/api/v1/auth`)
 
 #### POST `/register`
+
 Register a new user account.
 
 **Rate Limiting**: 5 requests per 15 minutes per IP
 
 **Request Body**:
+
 ```json
 {
   "username": "string (3-30 chars, alphanumeric + _ -)",
@@ -44,6 +48,7 @@ Register a new user account.
 ```
 
 **Response (201)**:
+
 ```json
 {
   "message": "User registered successfully",
@@ -60,11 +65,13 @@ Register a new user account.
 ```
 
 #### POST `/login`
+
 Authenticate user and receive JWT token.
 
 **Rate Limiting**: 3 requests per 15 minutes per IP
 
 **Request Body**:
+
 ```json
 {
   "email": "string",
@@ -73,6 +80,7 @@ Authenticate user and receive JWT token.
 ```
 
 **Response (200)**:
+
 ```json
 {
   "message": "Login successful",
@@ -89,11 +97,13 @@ Authenticate user and receive JWT token.
 ```
 
 #### GET `/me`
+
 Get current user information (requires authentication).
 
 **Headers**: `Authorization: Bearer <token>`
 
 **Response (200)**:
+
 ```json
 {
   "user": {
@@ -109,12 +119,13 @@ Get current user information (requires authentication).
 ```
 
 #### POST `/refresh`
+
 Refresh JWT token for extended session.
 
-**Rate Limiting**: 5 requests per 15 minutes per IP
-**Headers**: `Authorization: Bearer <token>`
+**Rate Limiting**: 5 requests per 15 minutes per IP **Headers**: `Authorization: Bearer <token>`
 
 **Response (200)**:
+
 ```json
 {
   "message": "Token refreshed successfully",
@@ -123,11 +134,13 @@ Refresh JWT token for extended session.
 ```
 
 #### POST `/logout`
+
 Logout user (client-side token removal).
 
 **Headers**: `Authorization: Bearer <token>`
 
 **Response (200)**:
+
 ```json
 {
   "message": "Logout successful"
@@ -135,11 +148,13 @@ Logout user (client-side token removal).
 ```
 
 #### GET `/validate-token`
+
 Validate current JWT token.
 
 **Headers**: `Authorization: Bearer <token>`
 
 **Response (200)**:
+
 ```json
 {
   "valid": true,
@@ -153,11 +168,13 @@ Validate current JWT token.
 ```
 
 #### POST `/verify-email` (Future)
+
 Verify user email address.
 
 **Rate Limiting**: 5 requests per 15 minutes per IP
 
 **Request Body**:
+
 ```json
 {
   "token": "string (verification token)"
@@ -165,11 +182,13 @@ Verify user email address.
 ```
 
 #### POST `/request-password-reset` (Future)
+
 Request password reset email.
 
 **Rate Limiting**: 3 requests per hour per IP
 
 **Request Body**:
+
 ```json
 {
   "email": "string"
@@ -179,23 +198,27 @@ Request password reset email.
 ## Security Features
 
 ### Password Security
+
 - **Hashing**: bcrypt with 12 salt rounds
 - **Validation**: Minimum 8 characters, uppercase, lowercase, number, special character
 - **Timing Attack Protection**: Consistent response times for invalid credentials
 
 ### JWT Security
+
 - **Secret Key**: Configurable via environment variable (`JWT_SECRET`)
 - **Expiration**: 7 days default (`JWT_EXPIRES_IN`)
 - **Unique Tokens**: Each token includes a unique identifier (jti) for revocation capability
 - **Proper Verification**: Comprehensive token validation with error handling
 
 ### Rate Limiting
+
 - **Authentication**: 5 requests per 15 minutes
 - **Login**: 3 requests per 15 minutes (stricter)
 - **Password Reset**: 3 requests per hour
 - **Test Environment**: Rate limiting disabled for testing
 
 ### Input Validation
+
 - **Email**: RFC compliant email validation
 - **Username**: Alphanumeric with underscores and hyphens
 - **Password**: Strength requirements enforced
@@ -204,6 +227,7 @@ Request password reset email.
 ## Database Schema
 
 ### User Model
+
 ```prisma
 model User {
   id                String   @id @default(cuid())
@@ -216,31 +240,31 @@ model User {
   bio               String?
   location          String?
   website           String?
-  
+
   // Authentication
   passwordHash      String
   emailVerified     Boolean  @default(false)
   emailVerifiedAt   DateTime?
-  
+
   // Account Status
   isActive          Boolean  @default(true)
   lastLoginAt       DateTime?
-  
+
   // Privacy Settings
   isProfilePublic   Boolean  @default(true)
   allowFollowers    Boolean  @default(true)
-  
+
   // Timestamps
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  
+
   // Relations
   collections       Collection[]
   models            Model[]
   modelLikes        ModelLike[]
   followers         UserRelationship[] @relation("UserFollowers")
   following         UserRelationship[] @relation("UserFollowing")
-  
+
   @@map("users")
 }
 ```
@@ -248,6 +272,7 @@ model User {
 ## Error Handling
 
 ### Standard Error Response Format
+
 ```json
 {
   "error": "string (error message)",
@@ -256,6 +281,7 @@ model User {
 ```
 
 ### HTTP Status Codes
+
 - **200**: Success
 - **201**: Created (registration)
 - **400**: Bad Request (validation errors)
@@ -268,12 +294,14 @@ model User {
 ## Environment Variables
 
 ### Required
+
 ```env
 JWT_SECRET=your-secure-secret-key-here
 DATABASE_URL=postgresql://...
 ```
 
 ### Optional
+
 ```env
 NODE_ENV=development|production|test
 JWT_EXPIRES_IN=7d
@@ -282,6 +310,7 @@ JWT_EXPIRES_IN=7d
 ## Testing
 
 ### Test Coverage
+
 - ✅ User registration (valid/invalid cases)
 - ✅ User login (valid/invalid credentials)
 - ✅ Token validation and refresh
@@ -292,6 +321,7 @@ JWT_EXPIRES_IN=7d
 - ✅ Error handling and edge cases
 
 ### Running Tests
+
 ```bash
 # Run all auth tests
 npm test auth.test.ts
@@ -308,6 +338,7 @@ npm run test:coverage
 ### Frontend Integration
 
 #### Registration
+
 ```javascript
 const response = await fetch('/api/v1/auth/register', {
   method: 'POST',
@@ -318,7 +349,7 @@ const response = await fetch('/api/v1/auth/register', {
     username: 'johndoe',
     email: 'john@example.com',
     password: 'SecurePassword123!',
-    displayName: 'John Doe'
+    displayName: 'John Doe',
   }),
 });
 
@@ -331,6 +362,7 @@ if (response.ok) {
 ```
 
 #### Login
+
 ```javascript
 const response = await fetch('/api/v1/auth/login', {
   method: 'POST',
@@ -339,7 +371,7 @@ const response = await fetch('/api/v1/auth/login', {
   },
   body: JSON.stringify({
     email: 'john@example.com',
-    password: 'SecurePassword123!'
+    password: 'SecurePassword123!',
   }),
 });
 
@@ -350,12 +382,13 @@ if (response.ok) {
 ```
 
 #### Authenticated Requests
+
 ```javascript
 const token = localStorage.getItem('authToken');
 
 const response = await fetch('/api/v1/auth/me', {
   headers: {
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   },
 });
 
@@ -367,23 +400,24 @@ if (response.status === 401) {
 ```
 
 #### Token Refresh
+
 ```javascript
 const refreshToken = async () => {
   const token = localStorage.getItem('authToken');
-  
+
   const response = await fetch('/api/v1/auth/refresh', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
-  
+
   if (response.ok) {
     const data = await response.json();
     localStorage.setItem('authToken', data.token);
     return data.token;
   }
-  
+
   // Refresh failed, redirect to login
   localStorage.removeItem('authToken');
   window.location.href = '/login';
@@ -396,6 +430,7 @@ setInterval(refreshToken, 6 * 24 * 60 * 60 * 1000); // 6 days
 ## Security Considerations
 
 ### Production Deployment
+
 1. **Environment Variables**: Use strong, unique JWT secrets
 2. **HTTPS**: Always use HTTPS in production
 3. **Rate Limiting**: Monitor and adjust rate limits based on usage
@@ -404,6 +439,7 @@ setInterval(refreshToken, 6 * 24 * 60 * 60 * 1000); // 6 days
 6. **Database Security**: Use connection pooling and prepared statements
 
 ### Development Best Practices
+
 1. **Secret Management**: Never commit secrets to version control
 2. **Token Storage**: Use secure storage mechanisms (httpOnly cookies for web)
 3. **CORS**: Configure appropriate CORS policies
@@ -415,30 +451,36 @@ setInterval(refreshToken, 6 * 24 * 60 * 60 * 1000); // 6 days
 ### Common Issues
 
 #### "Invalid or expired token"
+
 - Check token format (Bearer prefix)
 - Verify token hasn't expired
 - Ensure JWT_SECRET matches between token generation and verification
 
 #### "Too many requests"
+
 - Rate limiting triggered
 - Wait for rate limit window to reset
 - Consider implementing exponential backoff
 
 #### "Email already registered"
+
 - User attempting to register with existing email
 - Implement "forgot password" flow instead
 
 #### "Invalid credentials"
+
 - Incorrect email or password
 - Check for typos and case sensitivity
 - Verify user account is active
 
 ### Debug Mode
+
 In development environment, set `NODE_ENV=development` for additional logging and debug information.
 
 ## Migration and Updates
 
 ### Database Migrations
+
 ```bash
 # Generate migration after schema changes
 npm run db:generate
@@ -451,6 +493,7 @@ npm run db:reset
 ```
 
 ### Backward Compatibility
+
 - Token format changes require user re-authentication
 - Database schema changes should use migrations
 - API versioning for breaking changes
@@ -458,6 +501,7 @@ npm run db:reset
 ## Monitoring and Analytics
 
 ### Metrics to Track
+
 - Registration success/failure rates
 - Login attempt patterns
 - Token refresh frequency
@@ -465,9 +509,11 @@ npm run db:reset
 - Authentication errors
 
 ### Security Monitoring
+
 - Failed login attempts
 - Unusual access patterns
 - Rate limiting violations
 - Token validation failures
 
-This JWT authentication system provides a robust, secure foundation for user authentication in the Plastic Crack application while maintaining flexibility for future enhancements.
+This JWT authentication system provides a robust, secure foundation for user authentication in the
+Plastic Crack application while maintaining flexibility for future enhancements.

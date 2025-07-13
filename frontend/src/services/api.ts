@@ -1,6 +1,15 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { ApiResponse, LoginCredentials, RegisterData, AuthUser, User, UserModel, CreateModelData, PaginatedResponse } from '../types';
+import type {
+  ApiResponse,
+  LoginCredentials,
+  RegisterData,
+  AuthUser,
+  User,
+  UserModel,
+  CreateModelData,
+  PaginatedResponse,
+} from '../types';
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
@@ -12,7 +21,7 @@ const api: AxiosInstance = axios.create({
 });
 
 // Request interceptor to add auth token
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -23,7 +32,7 @@ api.interceptors.request.use((config) => {
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  async (error) => {
+  async error => {
     if (error.response?.status === 401) {
       // Handle token expiration
       localStorage.removeItem('access_token');
@@ -37,19 +46,30 @@ api.interceptors.response.use(
 // Auth API
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthUser> => {
-    const response = await api.post<ApiResponse<AuthUser>>('/auth/login', credentials);
+    const response = await api.post<ApiResponse<AuthUser>>(
+      '/auth/login',
+      credentials
+    );
     return response.data.data!;
   },
 
   register: async (data: RegisterData): Promise<AuthUser> => {
-    const response = await api.post<ApiResponse<AuthUser>>('/auth/register', data);
+    const response = await api.post<ApiResponse<AuthUser>>(
+      '/auth/register',
+      data
+    );
     return response.data.data!;
   },
 
-  refreshToken: async (refreshToken: string): Promise<{ accessToken: string }> => {
-    const response = await api.post<ApiResponse<{ accessToken: string }>>('/auth/refresh', {
-      refreshToken,
-    });
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<{ accessToken: string }> => {
+    const response = await api.post<ApiResponse<{ accessToken: string }>>(
+      '/auth/refresh',
+      {
+        refreshToken,
+      }
+    );
     return response.data.data!;
   },
 
@@ -65,7 +85,10 @@ export const authApi = {
 
 // Models API
 export const modelsApi = {
-  getModels: async (page = 1, limit = 20): Promise<PaginatedResponse<UserModel>> => {
+  getModels: async (
+    page = 1,
+    limit = 20
+  ): Promise<PaginatedResponse<UserModel>> => {
     const response = await api.get<ApiResponse<PaginatedResponse<UserModel>>>(
       `/models?page=${page}&limit=${limit}`
     );
@@ -82,8 +105,14 @@ export const modelsApi = {
     return response.data.data!;
   },
 
-  updateModel: async (id: string, data: Partial<CreateModelData>): Promise<UserModel> => {
-    const response = await api.put<ApiResponse<UserModel>>(`/models/${id}`, data);
+  updateModel: async (
+    id: string,
+    data: Partial<CreateModelData>
+  ): Promise<UserModel> => {
+    const response = await api.put<ApiResponse<UserModel>>(
+      `/models/${id}`,
+      data
+    );
     return response.data.data!;
   },
 
@@ -95,7 +124,10 @@ export const modelsApi = {
 // Health check API
 export const healthApi = {
   check: async (): Promise<{ status: string; timestamp: string }> => {
-    const response = await api.get<ApiResponse<{ status: string; timestamp: string }>>('/health');
+    const response =
+      await api.get<ApiResponse<{ status: string; timestamp: string }>>(
+        '/health'
+      );
     return response.data.data!;
   },
 };

@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Define our base API URL - this will point to our backend
-const baseUrl = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:5001/api/v1' // Development - adjust port as needed
-  : 'https://your-production-api.com/api/v1'; // Production URL
+const baseUrl =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001/api/v1' // Development - adjust port as needed
+    : 'https://your-production-api.com/api/v1'; // Production URL
 
 // Define types for our API responses
 export interface User {
@@ -36,7 +37,7 @@ export const plasticCrackApi = createApi({
   reducerPath: 'plasticCrackApi',
   baseQuery: fetchBaseQuery({
     baseUrl,
-    prepareHeaders: (headers) => {
+    prepareHeaders: headers => {
       // Add auth token to requests if available
       // TODO: Add token management
       headers.set('content-type', 'application/json');
@@ -44,17 +45,17 @@ export const plasticCrackApi = createApi({
     },
   }),
   tagTypes: ['User', 'Collection', 'Model'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     // Authentication endpoints
     login: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials) => ({
+      query: credentials => ({
         url: '/auth/login',
         method: 'POST',
         body: credentials,
       }),
     }),
     register: builder.mutation<LoginResponse, RegisterRequest>({
-      query: (userData) => ({
+      query: userData => ({
         url: '/auth/register',
         method: 'POST',
         body: userData,

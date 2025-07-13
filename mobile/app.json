@@ -34,12 +34,7 @@
       "output": "static",
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-camera",
-      "expo-sqlite"
-    ],
-    "assetBundlePatterns": [
-      "**/*"
-    ]
+    "plugins": ["expo-camera", "expo-sqlite"],
+    "assetBundlePatterns": ["**/*"]
   }
 }

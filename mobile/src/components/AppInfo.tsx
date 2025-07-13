@@ -6,9 +6,9 @@ export interface AppInfoProps {
   version?: string;
 }
 
-export const AppInfo: React.FC<AppInfoProps> = ({ 
-  title = 'Plastic Crack', 
-  version = '1.0.0' 
+export const AppInfo: React.FC<AppInfoProps> = ({
+  title = 'Plastic Crack',
+  version = '1.0.0',
 }) => {
   return (
     <View style={styles.container}>

@@ -10,13 +10,13 @@ This directory contains the Node.js/Express.js backend API for Plastic Crack.
 ✅ Health check endpoint  
 ✅ API versioning structure (/api/v1/)  
 ✅ Environment configuration  
-✅ Request validation with Joi  
+✅ Request validation with Joi
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm
 
 ### Installation
@@ -48,11 +48,13 @@ The server will start on `http://localhost:3001`
 ### API Endpoints
 
 #### Health Check
+
 - `GET /health` - Basic health check
 - `GET /api/v1/health` - Detailed health information
 - `GET /api/v1/health/ping` - Simple ping endpoint
 
 #### API Info
+
 - `GET /api/v1/` - API information and available endpoints
 
 ### Environment Variables
@@ -87,12 +89,14 @@ Tests are written using Jest and Supertest.
 ## Docker
 
 ### Development
+
 ```bash
 docker build -f Dockerfile.dev -t plastic-crack-backend:dev .
 docker run -p 3001:3001 plastic-crack-backend:dev
 ```
 
 ### Production
+
 ```bash
 docker build -f Dockerfile.prod -t plastic-crack-backend:prod .
 docker run -p 3001:3001 plastic-crack-backend:prod
@@ -100,4 +104,5 @@ docker run -p 3001:3001 plastic-crack-backend:prod
 
 ## API Documentation
 
-API documentation will be available at `/api/docs` when running in development mode (to be implemented).
+API documentation will be available at `/api/docs` when running in development mode (to be
+implemented).

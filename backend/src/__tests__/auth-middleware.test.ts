@@ -1,12 +1,12 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, UserRole } from '../types/auth';
-import { 
-  requireRole, 
-  requirePermission, 
-  requireAdmin, 
+import {
+  requireRole,
+  requirePermission,
+  requireAdmin,
   requireModerator,
   requireResourcePermission,
-  requireOwnershipOrAdmin 
+  requireOwnershipOrAdmin,
 } from '../middleware/auth.middleware';
 
 // Mock AuthService
@@ -40,7 +40,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -57,7 +61,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -71,7 +79,11 @@ describe('Authorization Middleware', () => {
     it('should deny access for unauthenticated users', () => {
       const middleware = requireRole(UserRole.USER);
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -91,7 +103,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -110,7 +126,11 @@ describe('Authorization Middleware', () => {
         permissions: ['user:read', 'collection:write'],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -127,7 +147,11 @@ describe('Authorization Middleware', () => {
         permissions: ['user:read'],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -149,7 +173,11 @@ describe('Authorization Middleware', () => {
         permissions: ['user:read'], // Missing user:write
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockNext).not.toHaveBeenCalled();
@@ -167,7 +195,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      requireAdmin(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      requireAdmin(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -182,7 +214,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      requireAdmin(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      requireAdmin(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -197,7 +233,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      requireAdmin(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      requireAdmin(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -206,7 +246,7 @@ describe('Authorization Middleware', () => {
   describe('requireModerator', () => {
     it('should allow access for moderator and higher roles', () => {
       const roles = [UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN];
-      
+
       roles.forEach(role => {
         jest.clearAllMocks();
         mockReq.user = {
@@ -218,7 +258,11 @@ describe('Authorization Middleware', () => {
           permissions: [],
         };
 
-        requireModerator(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+        requireModerator(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext
+        );
 
         expect(mockNext).toHaveBeenCalled();
         expect(mockRes.status).not.toHaveBeenCalled();
@@ -235,7 +279,11 @@ describe('Authorization Middleware', () => {
         permissions: [],
       };
 
-      requireModerator(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      requireModerator(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -253,7 +301,11 @@ describe('Authorization Middleware', () => {
         permissions: ['collection:delete'],
       };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -261,9 +313,10 @@ describe('Authorization Middleware', () => {
 
   describe('requireOwnershipOrAdmin', () => {
     it('should allow access for resource owner', () => {
-      const getResourceUserId = (req: AuthenticatedRequest) => req.params?.userId || '1';
+      const getResourceUserId = (req: AuthenticatedRequest) =>
+        req.params?.userId || '1';
       const middleware = requireOwnershipOrAdmin(getResourceUserId);
-      
+
       mockReq.user = {
         id: '1',
         username: 'user',
@@ -274,16 +327,21 @@ describe('Authorization Middleware', () => {
       };
       mockReq.params = { userId: '1' };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
 
     it('should allow access for admin users', () => {
-      const getResourceUserId = (req: AuthenticatedRequest) => req.params?.userId || '2';
+      const getResourceUserId = (req: AuthenticatedRequest) =>
+        req.params?.userId || '2';
       const middleware = requireOwnershipOrAdmin(getResourceUserId);
-      
+
       mockReq.user = {
         id: '1',
         username: 'admin',
@@ -294,16 +352,21 @@ describe('Authorization Middleware', () => {
       };
       mockReq.params = { userId: '2' };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
 
     it('should deny access for non-owner regular users', () => {
-      const getResourceUserId = (req: AuthenticatedRequest) => req.params?.userId || '2';
+      const getResourceUserId = (req: AuthenticatedRequest) =>
+        req.params?.userId || '2';
       const middleware = requireOwnershipOrAdmin(getResourceUserId);
-      
+
       mockReq.user = {
         id: '1',
         username: 'user',
@@ -314,11 +377,16 @@ describe('Authorization Middleware', () => {
       };
       mockReq.params = { userId: '2' };
 
-      middleware(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
+      middleware(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: 'Access denied - you can only access your own resources or need admin privileges'
+        error:
+          'Access denied - you can only access your own resources or need admin privileges',
       });
       expect(mockNext).not.toHaveBeenCalled();
     });

@@ -25,25 +25,29 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // CORS configuration
-app.use(cors({
-  origin: config.cors.origin,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
+app.use(
+  cors({
+    origin: config.cors.origin,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  })
+);
 
 // Request parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -75,7 +79,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Health check endpoint
 app.get('/health', async (req, res) => {
   const redisHealth = await checkRedisHealth();
-  
+
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),

@@ -103,7 +103,11 @@ export const validate = (schema: ValidationSchema) => {
 };
 
 // Basic request validator middleware (can be extended)
-export const requestValidator = (req: Request, res: Response, next: NextFunction): void => {
+export const requestValidator = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   // Set default content-type validation for POST/PUT/PATCH requests
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const contentType = req.get('Content-Type');
@@ -118,6 +122,6 @@ export const requestValidator = (req: Request, res: Response, next: NextFunction
       return;
     }
   }
-  
+
   next();
 };

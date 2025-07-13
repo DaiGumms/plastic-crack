@@ -18,7 +18,7 @@ const createTestUser = async (overrides: Partial<any> = {}) => {
     displayName: 'Auth Test User',
     ...overrides,
   };
-  
+
   return AuthService.register(
     userData.username,
     userData.email,
@@ -48,9 +48,9 @@ describe('Authentication System', () => {
           { email: { contains: 'login-test' } },
           { username: { contains: 'authuser' } },
           { username: { contains: 'testuser' } },
-          { username: { contains: 'reguser' } }
-        ]
-      }
+          { username: { contains: 'reguser' } },
+        ],
+      },
     });
   });
 
@@ -64,9 +64,9 @@ describe('Authentication System', () => {
           { email: { contains: 'login-test' } },
           { username: { contains: 'authuser' } },
           { username: { contains: 'testuser' } },
-          { username: { contains: 'reguser' } }
-        ]
-      }
+          { username: { contains: 'reguser' } },
+        ],
+      },
     });
   });
 
@@ -144,7 +144,7 @@ describe('Authentication System', () => {
     });
 
     it('should reject registration with duplicate username', async () => {
-      // First create a user with our test username  
+      // First create a user with our test username
       await createTestUser({ email: testEmail, username: testUsername });
 
       // Try to register again with same username but different email
@@ -166,15 +166,17 @@ describe('Authentication System', () => {
 
   describe('POST /api/v1/auth/login', () => {
     it('should login with valid credentials', async () => {
-      // Create a test user first  
-      await createTestUser({ email: testEmail, username: testUsername, password: testPassword });
+      // Create a test user first
+      await createTestUser({
+        email: testEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          email: testEmail,
-          password: testPassword,
-        });
+      const response = await request(app).post('/api/v1/auth/login').send({
+        email: testEmail,
+        password: testPassword,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.message).toBe('Login successful');
@@ -185,12 +187,10 @@ describe('Authentication System', () => {
     it('should reject login with invalid email', async () => {
       await createTestUser();
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          email: 'nonexistent@example.com',
-          password: 'TestPassword123!',
-        });
+      const response = await request(app).post('/api/v1/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: 'TestPassword123!',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Invalid credentials');
@@ -199,12 +199,10 @@ describe('Authentication System', () => {
     it('should reject login with invalid password', async () => {
       await createTestUser();
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'WrongPassword123!',
-        });
+      const response = await request(app).post('/api/v1/auth/login').send({
+        email: 'test@example.com',
+        password: 'WrongPassword123!',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Invalid credentials');
@@ -213,7 +211,10 @@ describe('Authentication System', () => {
 
   describe('GET /api/v1/auth/me', () => {
     it('should return user data for authenticated user', async () => {
-      const { token } = await createTestUser({ email: testEmail, username: testUsername });
+      const { token } = await createTestUser({
+        email: testEmail,
+        username: testUsername,
+      });
 
       const response = await request(app)
         .get('/api/v1/auth/me')
@@ -226,8 +227,7 @@ describe('Authentication System', () => {
     });
 
     it('should reject request without token', async () => {
-      const response = await request(app)
-        .get('/api/v1/auth/me');
+      const response = await request(app).get('/api/v1/auth/me');
 
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Access token required');
@@ -258,8 +258,7 @@ describe('Authentication System', () => {
     });
 
     it('should reject refresh without token', async () => {
-      const response = await request(app)
-        .post('/api/v1/auth/refresh');
+      const response = await request(app).post('/api/v1/auth/refresh');
 
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Access token required');
@@ -303,10 +302,16 @@ describe('AuthService', () => {
       const password = 'TestPassword123!';
       const hashedPassword = await AuthService.hashPassword(password);
 
-      const isValid = await AuthService.verifyPassword(password, hashedPassword);
+      const isValid = await AuthService.verifyPassword(
+        password,
+        hashedPassword
+      );
       expect(isValid).toBe(true);
 
-      const isInvalid = await AuthService.verifyPassword('WrongPassword', hashedPassword);
+      const isInvalid = await AuthService.verifyPassword(
+        'WrongPassword',
+        hashedPassword
+      );
       expect(isInvalid).toBe(false);
     });
   });

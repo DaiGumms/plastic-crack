@@ -32,7 +32,7 @@ const defaultKeyGenerator = (req: Request): string => {
   const baseKey = req.originalUrl || req.url;
   const queryString = JSON.stringify(req.query);
   const userId = req.session?.userId || 'anonymous';
-  
+
   return `cache:${userId}:${baseKey}:${Buffer.from(queryString).toString('base64')}`;
 };
 
@@ -65,15 +65,17 @@ export const createCacheMiddleware = (options: CacheOptions) => {
       }
 
       // Generate cache key
-      const cacheKey = prefix ? `${prefix}:${keyGenerator(req)}` : keyGenerator(req);
+      const cacheKey = prefix
+        ? `${prefix}:${keyGenerator(req)}`
+        : keyGenerator(req);
 
       // Try to get cached response
       const cachedResponse = await cacheService.get<CachedResponse>(cacheKey);
-      
+
       if (cachedResponse) {
         // Add cache hit header
         res.set('X-Cache', 'HIT');
-        
+
         // Set cached headers if they exist
         if (cachedResponse.headers) {
           Object.entries(cachedResponse.headers).forEach(([key, value]) => {
@@ -82,23 +84,25 @@ export const createCacheMiddleware = (options: CacheOptions) => {
         }
 
         // Send cached response
-        return res.status(cachedResponse.status || 200).json(cachedResponse.data);
+        return res
+          .status(cachedResponse.status || 200)
+          .json(cachedResponse.data);
       }
 
       // Store original res.json method
       const originalJson = res.json.bind(res);
       const originalStatus = res.status.bind(res);
-      
+
       let statusCode = 200;
 
       // Override res.status to capture status code
-      res.status = function(code: number) {
+      res.status = function (code: number) {
         statusCode = code;
         return originalStatus(code);
       };
 
       // Override res.json to cache the response
-      res.json = function(data: unknown) {
+      res.json = function (data: unknown) {
         // Only cache successful responses
         if (statusCode >= 200 && statusCode < 300) {
           const responseToCache = {
@@ -146,11 +150,11 @@ export const invalidateCache = (patterns: string | string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const patternArray = Array.isArray(patterns) ? patterns : [patterns];
-      
+
       // Store original response methods
       const originalJson = res.json.bind(res);
       const originalSend = res.send.bind(res);
-      
+
       // Override response methods to invalidate cache after successful operations
       const invalidateCachePatterns = async () => {
         for (const pattern of patternArray) {
@@ -162,25 +166,25 @@ export const invalidateCache = (patterns: string | string[]) => {
         }
       };
 
-      res.json = function(data: unknown) {
+      res.json = function (data: unknown) {
         const result = originalJson(data);
-        
+
         // Invalidate cache for successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
           invalidateCachePatterns();
         }
-        
+
         return result;
       };
 
-      res.send = function(data: unknown) {
+      res.send = function (data: unknown) {
         const result = originalSend(data);
-        
+
         // Invalidate cache for successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
           invalidateCachePatterns();
         }
-        
+
         return result;
       };
 

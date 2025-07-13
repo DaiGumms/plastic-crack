@@ -9,6 +9,11 @@ dist/
 build/
 *.tsbuildinfo
 
+# Generated files
+backend/src/generated/
+**/prisma/migrations/
+package-lock.json
+
 # Coverage reports
 coverage/
 .nyc_output/

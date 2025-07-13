@@ -21,7 +21,7 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path='/' element={<HomePage />} />
             {/* Add more routes here as we implement them */}
           </Routes>
           <NotificationContainer />

@@ -9,7 +9,8 @@ export const queryKeys = {
   },
   models: {
     all: ['models'] as const,
-    list: (page: number, limit: number) => [...queryKeys.models.all, 'list', page, limit] as const,
+    list: (page: number, limit: number) =>
+      [...queryKeys.models.all, 'list', page, limit] as const,
     detail: (id: string) => [...queryKeys.models.all, 'detail', id] as const,
   },
   health: {
@@ -20,10 +21,10 @@ export const queryKeys = {
 // Auth hooks
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
-    onSuccess: (data) => {
+    onSuccess: data => {
       localStorage.setItem('access_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
       queryClient.setQueryData(queryKeys.auth.profile, data);
@@ -33,10 +34,10 @@ export const useLogin = () => {
 
 export const useRegister = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: RegisterData) => authApi.register(data),
-    onSuccess: (data) => {
+    onSuccess: data => {
       localStorage.setItem('access_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
       queryClient.setQueryData(queryKeys.auth.profile, data);
@@ -46,7 +47,7 @@ export const useRegister = () => {
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
@@ -84,7 +85,7 @@ export const useModel = (id: string) => {
 
 export const useCreateModel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: CreateModelData) => modelsApi.createModel(data),
     onSuccess: () => {
@@ -95,10 +96,15 @@ export const useCreateModel = () => {
 
 export const useUpdateModel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateModelData> }) =>
-      modelsApi.updateModel(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateModelData>;
+    }) => modelsApi.updateModel(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.models.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.models.all });
@@ -108,7 +114,7 @@ export const useUpdateModel = () => {
 
 export const useDeleteModel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => modelsApi.deleteModel(id),
     onSuccess: () => {

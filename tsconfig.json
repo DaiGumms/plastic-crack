@@ -24,7 +24,5 @@
     }
   },
   "files": [],
-  "references": [
-    { "path": "./backend" }
-  ]
+  "references": [{ "path": "./backend" }]
 }

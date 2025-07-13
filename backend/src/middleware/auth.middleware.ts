@@ -24,7 +24,7 @@ export const authenticateToken = async (
 
     // Verify token
     const decoded = AuthService.verifyToken(token);
-    
+
     // Get user from database
     const user = await AuthService.getUserById(decoded.userId);
     if (!user) {
@@ -33,7 +33,10 @@ export const authenticateToken = async (
     }
 
     // Add user to request object with computed permissions
-    const allPermissions = getUserPermissions(user.role, user.permissions || []);
+    const allPermissions = getUserPermissions(
+      user.role,
+      user.permissions || []
+    );
     req.user = {
       id: user.id,
       username: user.username,
@@ -61,9 +64,12 @@ export const optionalAuth = async (
     if (token) {
       const decoded = AuthService.verifyToken(token);
       const user = await AuthService.getUserById(decoded.userId);
-      
+
       if (user) {
-        const allPermissions = getUserPermissions(user.role, user.permissions || []);
+        const allPermissions = getUserPermissions(
+          user.role,
+          user.permissions || []
+        );
         req.user = {
           id: user.id,
           username: user.username,
@@ -86,17 +92,21 @@ export const optionalAuth = async (
  * Middleware to require specific roles
  */
 export const requireRole = (...allowedRoles: UserRole[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      res.status(403).json({ 
+      res.status(403).json({
         error: 'Insufficient permissions',
         required: allowedRoles,
-        current: req.user.role
+        current: req.user.role,
       });
       return;
     }
@@ -109,21 +119,25 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
  * Middleware to require specific permissions
  */
 export const requirePermission = (...requiredPermissions: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    const hasPermission = requiredPermissions.every(permission => 
+    const hasPermission = requiredPermissions.every(permission =>
       req.user?.permissions.includes(permission)
     );
 
     if (!hasPermission) {
-      res.status(403).json({ 
+      res.status(403).json({
         error: 'Insufficient permissions',
         required: requiredPermissions,
-        current: req.user.permissions
+        current: req.user.permissions,
       });
       return;
     }
@@ -136,26 +150,34 @@ export const requirePermission = (...requiredPermissions: string[]) => {
  * Middleware to require either specific roles OR permissions
  */
 export const requireRoleOrPermission = (
-  allowedRoles: UserRole[] = [], 
+  allowedRoles: UserRole[] = [],
   allowedPermissions: string[] = []
 ) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    const hasRole = allowedRoles.length === 0 || allowedRoles.includes(req.user.role);
-    const hasPermission = allowedPermissions.length === 0 || 
-      allowedPermissions.some(permission => req.user?.permissions.includes(permission));
+    const hasRole =
+      allowedRoles.length === 0 || allowedRoles.includes(req.user.role);
+    const hasPermission =
+      allowedPermissions.length === 0 ||
+      allowedPermissions.some(permission =>
+        req.user?.permissions.includes(permission)
+      );
 
     if (!hasRole && !hasPermission) {
-      res.status(403).json({ 
+      res.status(403).json({
         error: 'Insufficient permissions',
         requiredRoles: allowedRoles,
         requiredPermissions: allowedPermissions,
         currentRole: req.user.role,
-        currentPermissions: req.user.permissions
+        currentPermissions: req.user.permissions,
       });
       return;
     }
@@ -172,7 +194,11 @@ export const requireAdmin = requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN);
 /**
  * Check if user is moderator or higher
  */
-export const requireModerator = requireRole(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN);
+export const requireModerator = requireRole(
+  UserRole.MODERATOR,
+  UserRole.ADMIN,
+  UserRole.SUPER_ADMIN
+);
 
 /**
  * Resource-based permission checker
@@ -188,7 +214,11 @@ export const requireResourcePermission = (resource: string, action: string) => {
 export const requireOwnershipOrAdmin = (
   getResourceUserId: (req: AuthenticatedRequest) => string // eslint-disable-line no-unused-vars
 ) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): void => {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
@@ -196,11 +226,14 @@ export const requireOwnershipOrAdmin = (
 
     const resourceUserId = getResourceUserId(req);
     const isOwner = req.user.id === resourceUserId;
-    const isAdmin = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPER_ADMIN;
+    const isAdmin =
+      req.user.role === UserRole.ADMIN ||
+      req.user.role === UserRole.SUPER_ADMIN;
 
     if (!isOwner && !isAdmin) {
-      res.status(403).json({ 
-        error: 'Access denied - you can only access your own resources or need admin privileges'
+      res.status(403).json({
+        error:
+          'Access denied - you can only access your own resources or need admin privileges',
       });
       return;
     }

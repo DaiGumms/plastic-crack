@@ -59,7 +59,8 @@ const config: Config = {
     commandTimeout: parseInt(process.env.REDIS_COMMAND_TIMEOUT || '5000', 10),
   },
   session: {
-    secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+    secret:
+      process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
     name: process.env.SESSION_NAME || 'plastic-crack-session',
     maxAge: parseInt(process.env.SESSION_MAX_AGE || '86400000', 10), // 24 hours
     secure: process.env.NODE_ENV === 'production',

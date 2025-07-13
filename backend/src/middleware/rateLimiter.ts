@@ -10,7 +10,7 @@ export const authRateLimit = rateLimit({
   max: 5, // Limit each IP to 5 requests per windowMs for auth endpoints
   message: {
     error: 'Too many authentication attempts, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: '15 minutes',
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -18,7 +18,7 @@ export const authRateLimit = rateLimit({
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many authentication attempts, please try again later.',
-      retryAfter: '15 minutes'
+      retryAfter: '15 minutes',
     });
   },
 });
@@ -29,7 +29,7 @@ export const loginRateLimit = rateLimit({
   max: 3, // Limit each IP to 3 login attempts per windowMs
   message: {
     error: 'Too many login attempts, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: '15 minutes',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -37,7 +37,7 @@ export const loginRateLimit = rateLimit({
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many login attempts, please try again later.',
-      retryAfter: '15 minutes'
+      retryAfter: '15 minutes',
     });
   },
 });
@@ -48,7 +48,7 @@ export const passwordResetRateLimit = rateLimit({
   max: 3, // Limit each IP to 3 password reset requests per hour
   message: {
     error: 'Too many password reset attempts, please try again later.',
-    retryAfter: '1 hour'
+    retryAfter: '1 hour',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -56,7 +56,7 @@ export const passwordResetRateLimit = rateLimit({
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many password reset attempts, please try again later.',
-      retryAfter: '1 hour'
+      retryAfter: '1 hour',
     });
   },
 });
@@ -67,7 +67,7 @@ export const generalRateLimit = rateLimit({
   max: 100, // Limit each IP to 100 requests per windowMs for general API
   message: {
     error: 'Too many requests, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: '15 minutes',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -75,7 +75,7 @@ export const generalRateLimit = rateLimit({
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many requests, please try again later.',
-      retryAfter: '15 minutes'
+      retryAfter: '15 minutes',
     });
   },
 });
@@ -87,7 +87,7 @@ export const rateLimiter = (max: number, windowMs: number) => {
     max,
     message: {
       error: 'Too many requests, please try again later.',
-      retryAfter: `${Math.ceil(windowMs / 60000)} minutes`
+      retryAfter: `${Math.ceil(windowMs / 60000)} minutes`,
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -95,7 +95,7 @@ export const rateLimiter = (max: number, windowMs: number) => {
     handler: (req: Request, res: Response) => {
       res.status(429).json({
         error: 'Too many requests, please try again later.',
-        retryAfter: `${Math.ceil(windowMs / 60000)} minutes`
+        retryAfter: `${Math.ceil(windowMs / 60000)} minutes`,
       });
     },
   });
