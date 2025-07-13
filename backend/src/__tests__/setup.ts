@@ -1,7 +1,7 @@
 // Test setup file
 import dotenv from 'dotenv';
 
-// Load test environment variables
+// Load test environment variables first
 dotenv.config({ path: '.env.test' });
 
 // Set test environment

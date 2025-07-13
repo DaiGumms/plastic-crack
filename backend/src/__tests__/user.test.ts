@@ -411,19 +411,18 @@ describe('User Profile Routes', () => {
     it('should reject incorrect password', async () => {
       // Create a new user for this test to avoid rate limiting conflicts
       const timestamp = Date.now();
-      void (await AuthService.register(
+      const registrationResult = await AuthService.register(
         `incorrecttest${timestamp}`,
         `incorrect-pass-test-${timestamp}@plastic-crack-test.com`,
         'IncorrectPass123!'
-      ));
-      const testLoginResponse = await AuthService.login(
-        `incorrect-pass-test-${timestamp}@plastic-crack-test.com`,
-        'IncorrectPass123!'
       );
-
+      
+      // Small delay to ensure registration is fully committed
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const response = await request(app)
         .delete('/api/v1/users/account')
-        .set('Authorization', `Bearer ${testLoginResponse.token}`)
+        .set('Authorization', `Bearer ${registrationResult.token}`)
         .send({
           password: 'WrongPassword',
         })
