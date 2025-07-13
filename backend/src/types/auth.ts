@@ -1,5 +1,14 @@
 import { Request } from 'express';
 
+import { UserRole } from '../generated/prisma';
+
+export { UserRole };
+
+export interface Permission {
+  resource: string;
+  action: string;
+}
+
 export interface RegisterRequest {
   username: string;
   email: string;
@@ -28,6 +37,7 @@ export interface JWTPayload {
   userId: string;
   username: string;
   email: string;
+  role: UserRole;
   iat?: number;
   exp?: number;
 }
@@ -38,6 +48,8 @@ export interface AuthenticatedRequest extends Request {
     username: string;
     email: string;
     displayName: string | null;
+    role: UserRole;
+    permissions: string[];
   };
 }
 

@@ -5,7 +5,7 @@ import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import multer from 'multer';
 
-import { authenticateToken } from '../../middleware/auth.middleware';
+import { authenticateToken, requireOwnershipOrAdmin, requireAdmin } from '../../middleware/auth.middleware';
 import { rateLimiter } from '../../middleware/rateLimiter';
 import { UserService } from '../../services/user.service';
 import { AuthenticatedRequest } from '../../types/auth';
@@ -361,6 +361,44 @@ router.delete('/account',
       const message = error instanceof Error ? error.message : 'Failed to delete account';
       const statusCode = message === 'Invalid password' ? 400 : 500;
       res.status(statusCode).json({ message });
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/v1/users/admin/all-statistics:
+ *   get:
+ *     summary: Get statistics for all users (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All users statistics retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin access required
+ */
+router.get('/admin/all-statistics',
+  authenticateToken,
+  requireAdmin,
+  async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      // This would require implementing UserService.getAllUsersStatistics()
+      // For now, just return a placeholder response
+      res.json({
+        message: 'Admin statistics endpoint - implementation pending',
+        note: 'This endpoint requires admin role authorization'
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error getting all users statistics:', error);
+      res.status(500).json({ 
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   }
 );
