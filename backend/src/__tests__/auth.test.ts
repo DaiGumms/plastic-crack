@@ -3,9 +3,10 @@ import request from 'supertest';
 import { app } from '../app';
 import { prisma } from '../lib/database';
 import { AuthService } from '../services/auth.service';
+import { UserRole } from '../types/auth';
 
 // Disable rate limiting for auth tests to focus on authentication logic
-process.env.SKIP_RATE_LIMIT = 'true';
+process.env.SKIP_RATE_LIMITING = 'true';
 
 // Test utilities
 const createTestUser = async (overrides: Partial<any> = {}) => {
@@ -27,10 +28,8 @@ const createTestUser = async (overrides: Partial<any> = {}) => {
 };
 
 describe('Authentication System', () => {
-  let testUser: any;
   let testEmail: string;
   let testUsername: string;
-  let testDisplayName: string;
   let testPassword: string;
 
   beforeEach(async () => {
@@ -38,7 +37,6 @@ describe('Authentication System', () => {
     const timestamp = Date.now();
     testEmail = `auth-test-${timestamp}@example.com`;
     testUsername = `authuser${timestamp}`;
-    testDisplayName = `Auth Test User ${timestamp}`;
     testPassword = 'TestPassword123!';
 
     // Clean up any existing test data
@@ -331,6 +329,7 @@ describe('AuthService', () => {
         userId: 'user123',
         username: 'testuser',
         email: 'test@example.com',
+        role: UserRole.USER,
       };
 
       const token = AuthService.generateToken(payload);
@@ -339,6 +338,7 @@ describe('AuthService', () => {
       expect(decoded.userId).toBe(payload.userId);
       expect(decoded.username).toBe(payload.username);
       expect(decoded.email).toBe(payload.email);
+      expect(decoded.role).toBe(payload.role);
     });
 
     it('should reject invalid JWT tokens', () => {

@@ -6,14 +6,12 @@ import { createCacheService } from '../lib/redis';
  * Cache middleware options
  */
 interface CacheOptions {
-  /** Cache TTL in seconds */
+  /** TTL in seconds */
   ttl: number;
   /** Cache key generator function */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  keyGenerator?: (req: Request) => string;
+  keyGenerator?: (req: Request) => string; // eslint-disable-line no-unused-vars
   /** Condition to determine if request should be cached */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  condition?: (req: Request) => boolean;
+  condition?: (req: Request) => boolean; // eslint-disable-line no-unused-vars
   /** Custom cache key prefix */
   prefix?: string;
 }

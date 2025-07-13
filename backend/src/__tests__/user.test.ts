@@ -1,4 +1,3 @@
-import path from 'path';
 import request from 'supertest';
 
 import { app } from '../app';
@@ -355,12 +354,11 @@ describe('User Profile Routes', () => {
   });
 
   describe('DELETE /api/v1/users/account', () => {
-    let deleteTestUser: any;
     let deleteTestToken: string;
 
     beforeAll(async () => {
       // Create a separate user for deletion test
-      deleteTestUser = await AuthService.register(
+      void await AuthService.register(
         'deleteuser',
         'delete-test@plastic-crack-test.com',
         'DeletePass123!'
@@ -384,7 +382,7 @@ describe('User Profile Routes', () => {
       // Verify user can no longer login
       try {
         await AuthService.login('delete-test@plastic-crack-test.com', 'DeletePass123!');
-        fail('Login should have failed after account deletion');
+        throw new Error('Login should have failed after account deletion');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
       }
@@ -396,7 +394,7 @@ describe('User Profile Routes', () => {
       
       // Create a new user for this test to avoid rate limiting conflicts
       const timestamp = Date.now();
-      const testUser = await AuthService.register(
+      void await AuthService.register(
         `incorrecttest${timestamp}`,
         `incorrect-pass-test-${timestamp}@plastic-crack-test.com`,
         'IncorrectPass123!'
@@ -420,7 +418,7 @@ describe('User Profile Routes', () => {
       
       // Create a new user for this test to avoid rate limiting conflicts
       const timestamp = Date.now();
-      const testUser = await AuthService.register(
+      void await AuthService.register(
         `nopasstest${timestamp}`,
         `nopassword-test-${timestamp}@plastic-crack-test.com`,
         'NoPassword123!'

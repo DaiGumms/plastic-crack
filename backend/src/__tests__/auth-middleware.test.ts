@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, UserRole } from '../types/auth';
 import { 
-  authenticateToken, 
   requireRole, 
   requirePermission, 
   requireAdmin, 

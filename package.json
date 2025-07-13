@@ -1,6 +1,7 @@
 {
   "name": "plastic-crack",
   "version": "0.1.0",
+  "type": "module",
   "description": "Cross-platform miniature wargaming collection management app with AI-powered features and social community",
   "main": "index.js",
   "scripts": {

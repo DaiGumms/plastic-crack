@@ -184,7 +184,10 @@ export const requireResourcePermission = (resource: string, action: string) => {
 /**
  * Check if user can access own resource or has admin permissions
  */
-export const requireOwnershipOrAdmin = (getResourceUserId: (req: AuthenticatedRequest) => string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const requireOwnershipOrAdmin = (
+  getResourceUserId: (req: AuthenticatedRequest) => string // eslint-disable-line no-unused-vars
+) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });

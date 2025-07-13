@@ -2,6 +2,7 @@ import { RedisStore } from 'connect-redis';
 import session from 'express-session';
 
 import { config } from '../config/config';
+
 import { getRedisClient } from './redis';
 
 /**

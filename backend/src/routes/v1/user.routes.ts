@@ -5,7 +5,7 @@ import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import multer from 'multer';
 
-import { authenticateToken, requireOwnershipOrAdmin, requireAdmin } from '../../middleware/auth.middleware';
+import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware';
 import { rateLimiter } from '../../middleware/rateLimiter';
 import { UserService } from '../../services/user.service';
 import { AuthenticatedRequest } from '../../types/auth';

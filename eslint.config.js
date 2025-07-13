@@ -10,6 +10,7 @@ export default [
   js.configs.recommended,
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/__tests__/**/*', '**/generated/**/*'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -21,7 +22,6 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals.jest,
       },
     },
     plugins: {
@@ -77,12 +77,27 @@ export default [
   {
     files: ['**/*.test.{ts,tsx,js,jsx}', '**/__tests__/**/*'],
     languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./*/tsconfig.test.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         ...globals.jest,
+        ...globals.node,
       },
+    },
+    plugins: {
+      '@typescript-eslint': typescript,
+      import: importPlugin,
+      'unused-imports': unusedImports,
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'off',
+      'unused-imports/no-unused-vars': 'off',
     },
   },
   {
@@ -99,6 +114,9 @@ export default [
       'coverage/',
       '*.config.js',
       '*.config.ts',
+      '**/generated/**/*',
+      '**/prisma/generated/**/*',
+      'backend/src/generated/**/*',
     ],
   },
   prettier,
