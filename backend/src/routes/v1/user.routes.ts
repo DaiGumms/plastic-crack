@@ -152,6 +152,7 @@ const handleValidationErrors = (
 router.get(
   '/profile',
   authenticateToken,
+  rateLimiter(30, 60 * 1000), // 30 requests per minute
   async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
@@ -367,6 +368,7 @@ router.put(
 router.get(
   '/statistics',
   authenticateToken,
+  rateLimiter(20, 60 * 1000), // 20 requests per minute
   async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       if (!req.user) {
@@ -437,6 +439,7 @@ router.get(
   '/admin/all-statistics',
   authenticateToken,
   requireAdmin,
+  rateLimiter(10, 60 * 1000), // 10 requests per minute for admin endpoints
   async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       // This would require implementing UserService.getAllUsersStatistics()

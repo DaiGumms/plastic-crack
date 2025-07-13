@@ -1,6 +1,7 @@
 import path from 'path';
 
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -10,6 +11,10 @@ import morgan from 'morgan';
 import { config } from './config/config';
 import { isRedisConnected, checkRedisHealth } from './lib/redis';
 import { initializeSession } from './lib/session';
+import {
+  createCSRFMiddleware,
+  getCSRFToken,
+} from './middleware/csrf.middleware';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { requestValidator } from './middleware/requestValidator';
@@ -45,13 +50,22 @@ app.use(
     origin: config.cors.origin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'X-CSRF-Token',
+    ],
   })
 );
 
 // Request parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// CSRF protection middleware (for web requests)
+app.use(createCSRFMiddleware());
 
 // Compression middleware
 app.use(compression());
@@ -91,6 +105,9 @@ app.get('/health', async (req, res) => {
     },
   });
 });
+
+// CSRF token endpoint
+app.get('/csrf-token', getCSRFToken);
 
 // API routes
 app.use(`${config.api.baseUrl}/v1`, v1Routes);
