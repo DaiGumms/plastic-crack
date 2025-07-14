@@ -16,7 +16,12 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.*',
         'dist/',
+        'e2e/**', // Exclude E2E tests
       ],
     },
+    exclude: [
+      'node_modules/',
+      'e2e/**', // Exclude E2E tests from Vitest
+    ],
   },
 });

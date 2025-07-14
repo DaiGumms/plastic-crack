@@ -2,14 +2,16 @@
 
 ## Overview
 
-This document details the frontend implementation requirements for the User Management system and the application homepage/landing page based on the functional requirements defined in `functional-requirements.md`.
+This document details the frontend implementation requirements for the User Management system and
+the application homepage/landing page based on the functional requirements defined in
+`functional-requirements.md`.
 
 ## 1. Homepage / Landing Page
 
 ### 1.1 Purpose and Goals
 
 - **Primary Goal**: Showcase Plastic Crack's capabilities to new visitors
-- **Secondary Goals**: 
+- **Secondary Goals**:
   - Convert visitors to registered users
   - Demonstrate the value proposition clearly
   - Provide easy navigation to key features
@@ -18,6 +20,7 @@ This document details the frontend implementation requirements for the User Mana
 ### 1.2 Page Sections
 
 #### 1.2.1 Hero Section
+
 - **Compelling headline**: "Manage Your Warhammer Collection Like Never Before"
 - **Subheadline**: Brief description of key benefits (AI-powered, cross-platform, social)
 - **Primary CTA**: "Start Your Collection" / "Sign Up Free"
@@ -25,12 +28,14 @@ This document details the frontend implementation requirements for the User Mana
 - **Hero image/video**: Showcase of the app interface or painted miniatures
 
 #### 1.2.2 Register Interest Section
+
 - **Closed Beta messaging**: "Join the Plastic Crack Closed Beta"
 - **Interest registration form**: Email signup for beta access
 - **Beta features preview**: Brief overview of what beta users will get
 - **Expected timeline**: When beta access will be granted
 
 #### 1.2.3 Footer
+
 - **Navigation links**
 - **Legal pages** (Terms of Service placeholder)
 - **Contact information**
@@ -59,6 +64,7 @@ This document details the frontend implementation requirements for the User Mana
 - **Loading states for all actions**
 
 **UI Components Needed:**
+
 - Login form component
 - OAuth button components
 - Form validation and error display
@@ -76,6 +82,7 @@ This document details the frontend implementation requirements for the User Mana
 - **Username availability checking**
 
 **UI Components Needed:**
+
 - Registration form component
 - Password strength indicator
 - Real-time validation feedback
@@ -105,6 +112,7 @@ This document details the frontend implementation requirements for the User Mana
 - **Profile preview mode**
 
 **UI Components Needed:**
+
 - Avatar upload component with crop functionality
 - Multi-section profile form
 - Privacy settings toggle components
@@ -122,6 +130,7 @@ This document details the frontend implementation requirements for the User Mana
 - **Account deletion**
 
 **Subsections:**
+
 - `/settings/security` - Password, 2FA, login history
 - `/settings/privacy` - Visibility, data sharing preferences
 - `/settings/notifications` - Email, push, in-app notification settings
@@ -142,6 +151,7 @@ This document details the frontend implementation requirements for the User Mana
 #### 2.4.1 Authentication State
 
 **Using Zustand store:**
+
 - Current user information
 - Authentication status
 - JWT token management
@@ -160,6 +170,7 @@ This document details the frontend implementation requirements for the User Mana
 #### 2.5.1 Authentication Endpoints
 
 **Using React Query for caching and management:**
+
 - `POST /api/auth/login`
 - `POST /api/auth/register`
 - `POST /api/auth/logout`
@@ -336,30 +347,35 @@ src/components/
 ## 8. Implementation Phases
 
 ### Phase 1: Core Infrastructure
+
 1. Set up routing structure
 2. Create basic layout components
 3. Implement authentication state management
 4. Set up API service layer
 
 ### Phase 2: Authentication
+
 1. Login/Register pages and flows
 2. Password reset functionality
 3. OAuth integration
 4. Authentication guards and redirects
 
 ### Phase 3: User Profile Management
+
 1. Profile viewing and editing
 2. Avatar upload functionality
 3. Privacy settings
 4. Account settings
 
 ### Phase 4: Homepage and Polish
+
 1. Landing page development
 2. Beta interest registration
 3. SEO optimization
 4. Performance optimization
 
 ### Phase 5: Testing and Deployment
+
 1. Comprehensive testing
 2. Performance optimization
 3. Error handling improvements

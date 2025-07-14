@@ -23,7 +23,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^http:\/\/localhost:8000\/api\/.*/,
+            urlPattern: /^http:\/\/localhost:3001\/api\/.*/,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -61,7 +61,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
       },

@@ -12,8 +12,11 @@ import type {
 } from '../types';
 
 // Create axios instance
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+console.log('🔧 API Service - Base URL:', baseURL);
+
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
+  baseURL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -22,7 +25,21 @@ const api: AxiosInstance = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('access_token');
+  // Try to get token from localStorage first (for remember me)
+  let token = localStorage.getItem('access_token');
+
+  // If not in localStorage, try to get from Zustand store
+  if (!token) {
+    try {
+      const authState = JSON.parse(
+        localStorage.getItem('auth-storage') || '{}'
+      );
+      token = authState?.state?.accessToken;
+    } catch {
+      // If parsing fails, token remains null
+    }
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -34,9 +51,10 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async error => {
     if (error.response?.status === 401) {
-      // Handle token expiration
+      // Handle token expiration - clear all auth data
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('auth-storage');
       window.location.href = '/login';
     }
     return Promise.reject(error);
