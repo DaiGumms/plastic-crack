@@ -1,5 +1,9 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { Header } from './Header';
+import { Footer } from './Footer';
 import { useAppStore } from '../../store';
+import { useAuth } from '../../hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,6 +11,10 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { isDarkMode } = useAppStore();
+  const location = useLocation();
+
+  // Initialize authentication status on app load
+  useAuth();
 
   React.useEffect(() => {
     if (isDarkMode) {
@@ -16,9 +24,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [isDarkMode]);
 
+  // Determine if we should show header/footer based on route
+  const isAuthPage = ['/login', '/register', '/reset-password'].includes(
+    location.pathname
+  );
+  const shouldShowFooter = !isAuthPage;
+
   return (
-    <div className='min-h-screen bg-white dark:bg-gray-900'>
-      <main>{children}</main>
+    <div className='min-h-screen bg-white dark:bg-gray-900 flex flex-col'>
+      {!isAuthPage && <Header />}
+      <main className={isAuthPage ? '' : 'flex-1'}>{children}</main>
+      {shouldShowFooter && <Footer />}
     </div>
   );
 };
