@@ -22,6 +22,14 @@ enum UserRole {
   SUPER_ADMIN // System administrator
 }
 
+// Experience level enum
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
 model User {
   id                String   @id @default(cuid())
   email             String   @unique
@@ -50,6 +58,11 @@ model User {
   // Privacy Settings
   isProfilePublic   Boolean  @default(true)
   allowFollowers    Boolean  @default(true)
+  
+  // Preferences
+  preferredGameSystems String[] @default([])
+  preferredPaintBrands String[] @default([])
+  experienceLevel      ExperienceLevel @default(BEGINNER)
   
   // Timestamps
   createdAt         DateTime @default(now())
@@ -127,6 +140,14 @@ model Collection {
   description String?
   isPublic    Boolean  @default(true)
   userId      String
+  
+  // Collection metadata
+  tags        String[] @default([])
+  imageUrl    String?  // Collection cover image
+  
+  // Collection stats (computed fields in app logic)
+  // totalModels, totalValue, etc. will be calculated dynamically
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -161,6 +182,14 @@ model Model {
   paintingStatus PaintingStatus @default(UNPAINTED)
   pointsCost     Int?
   notes          String?
+  tags          String[]      @default([])
+  
+  // Purchase Information
+  purchasePrice  Decimal?      @db.Decimal(10,2)
+  purchaseDate   DateTime?
+  
+  // Visibility and Status
+  isPublic       Boolean       @default(true)
   
   // Timestamps
   createdAt     DateTime @default(now())
@@ -173,6 +202,7 @@ model Model {
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   photos        ModelPhoto[]
   likes         ModelLike[]
+  modelTags     ModelTag[]
   
   @@map("models")
 }
@@ -186,6 +216,13 @@ model ModelPhoto {
   description String?
   isPrimary   Boolean  @default(false)
   sortOrder   Int      @default(0)
+  
+  // Enhanced metadata
+  fileSize    Int?     // File size in bytes
+  width       Int?     // Image width in pixels
+  height      Int?     // Image height in pixels
+  mimeType    String?  // MIME type (image/jpeg, image/png, etc.)
+  
   createdAt   DateTime @default(now())
   
   // Relations
@@ -206,4 +243,48 @@ model ModelLike {
   
   @@unique([modelId, userId])
   @@map("model_likes")
+}
+
+// ===== TAGGING SYSTEM =====
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  category    TagCategory @default(GENERAL)
+  color       String?  @default("#6B7280") // Hex color for UI display
+  isOfficial  Boolean  @default(false)     // Official vs user-generated tags
+  usageCount  Int      @default(0)         // Track popularity
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  modelTags   ModelTag[]
+  
+  @@map("tags")
+}
+
+enum TagCategory {
+  GENERAL
+  PAINTING
+  GAME_SYSTEM
+  FACTION
+  UNIT_TYPE
+  TECHNIQUE
+  STATUS
+  CUSTOM
+}
+
+model ModelTag {
+  id       String   @id @default(cuid())
+  modelId  String
+  tagId    String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  model    Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  tag      Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([modelId, tagId])
+  @@map("model_tags")
 }
