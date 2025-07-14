@@ -18,4 +18,8 @@ module.exports = {
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
+  // Force sequential execution to avoid database conflicts
+  maxWorkers: 1,
+  // Increase timeout for database operations
+  testTimeout: 15000,
 };

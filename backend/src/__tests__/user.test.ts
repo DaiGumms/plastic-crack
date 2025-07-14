@@ -35,7 +35,7 @@ describe('User Profile Routes', () => {
 
     // Login to get auth token
     const loginResponse = await AuthService.login(testEmail, 'SecurePass123!');
-    authToken = loginResponse.token;
+    authToken = loginResponse.accessToken;
     userId = testUser.user.id;
   });
 
@@ -58,9 +58,12 @@ describe('User Profile Routes', () => {
     it('should get current user profile', async () => {
       const response = await request(app)
         .get('/api/v1/users/profile')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${authToken}`);
 
+      console.log('Response status:', response.status);
+      console.log('Response body:', response.body);
+
+      expect(response.status).toBe(200);
       expect(response.body.message).toBe('Profile retrieved successfully');
       expect(response.body.data).toMatchObject({
         id: userId,
@@ -306,7 +309,7 @@ describe('User Profile Routes', () => {
           testEmail,
           'NewSecurePass123!'
         );
-        expect(loginResponse.token).toBeDefined();
+        expect(loginResponse.accessToken).toBeDefined();
       } else {
         // Don't fail the test suite for implementation issues
         expect(response.status).toBeGreaterThan(0);
@@ -382,7 +385,7 @@ describe('User Profile Routes', () => {
         'delete-test@plastic-crack-test.com',
         'DeletePass123!'
       );
-      deleteTestToken = loginResponse.token;
+      deleteTestToken = loginResponse.accessToken;
     });
 
     it('should delete user account successfully', async () => {
@@ -422,7 +425,7 @@ describe('User Profile Routes', () => {
 
       const response = await request(app)
         .delete('/api/v1/users/account')
-        .set('Authorization', `Bearer ${registrationResult.token}`)
+        .set('Authorization', `Bearer ${registrationResult.accessToken}`)
         .send({
           password: 'WrongPassword',
         })
@@ -446,7 +449,7 @@ describe('User Profile Routes', () => {
 
       const response = await request(app)
         .delete('/api/v1/users/account')
-        .set('Authorization', `Bearer ${testLoginResponse.token}`)
+        .set('Authorization', `Bearer ${testLoginResponse.accessToken}`)
         .send({})
         .expect(400);
 

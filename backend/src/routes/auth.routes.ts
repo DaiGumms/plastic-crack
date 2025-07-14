@@ -84,7 +84,9 @@ router.post(
 
       res.status(201).json({
         message: 'User registered successfully',
-        ...result,
+        user: result.user,
+        token: result.accessToken,
+        refreshToken: result.refreshToken,
       });
     } catch (error) {
       const errorMessage =
@@ -123,7 +125,9 @@ router.post(
 
       res.json({
         message: 'Login successful',
-        ...result,
+        user: result.user,
+        token: result.accessToken,
+        refreshToken: result.refreshToken,
       });
     } catch (error) {
       const errorMessage =

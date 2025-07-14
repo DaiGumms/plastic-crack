@@ -154,14 +154,14 @@ export class UserService {
         throw new Error('User not found');
       }
 
-      // Auto-generate displayName from firstName and lastName
+      // Auto-generate displayName from firstName and lastName only if not provided
       const updateData = { ...profileData };
       const firstName =
         (profileData.firstName ?? currentUser.firstName)?.trim() || '';
       const lastName =
         (profileData.lastName ?? currentUser.lastName)?.trim() || '';
       const fullName = `${firstName} ${lastName}`.trim();
-      updateData.displayName = fullName || undefined;
+      updateData.displayName = profileData.displayName || fullName || undefined;
 
       const updatedUser = await prisma.user.update({
         where: { id: userId },
