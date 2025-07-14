@@ -1,0 +1,260 @@
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Box,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Tooltip,
+} from '@mui/material';
+import {
+  MoreVert as MoreVertIcon,
+  Public as PublicIcon,
+  Lock as PrivateIcon,
+  Palette as PaletteIcon,
+  Category as CategoryIcon,
+} from '@mui/icons-material';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Collection } from '../../types';
+import { formatDistanceToNow } from 'date-fns';
+
+interface CollectionCardProps {
+  collection: Collection;
+  showOwner?: boolean;
+  onEdit?: (collection: Collection) => void;
+  onDelete?: (collection: Collection) => void;
+  onView?: (collection: Collection) => void;
+  currentUserId?: string;
+}
+
+export const CollectionCard: React.FC<CollectionCardProps> = ({
+  collection,
+  showOwner = true,
+  onEdit,
+  onDelete,
+  onView,
+  currentUserId,
+}) => {
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const isOwner = currentUserId === collection.userId;
+  const canEdit = isOwner && onEdit;
+  const canDelete = isOwner && onDelete;
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleCardClick = () => {
+    if (onView) {
+      onView(collection);
+    } else {
+      navigate(`/collections/${collection.id}`);
+    }
+  };
+
+  const handleEdit = () => {
+    handleMenuClose();
+    onEdit?.(collection);
+  };
+
+  const handleDelete = () => {
+    handleMenuClose();
+    onDelete?.(collection);
+  };
+
+  const modelCount = collection._count?.models || collection.models?.length || 0;
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 4,
+        },
+      }}
+      onClick={handleCardClick}
+    >
+      {/* Collection Image */}
+      {collection.imageUrl ? (
+        <CardMedia
+          component="img"
+          height="200"
+          image={collection.imageUrl}
+          alt={collection.name}
+          sx={{
+            objectFit: 'cover',
+          }}
+        />
+      ) : (
+        <Box
+          sx={{
+            height: 200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'grey.100',
+            position: 'relative',
+          }}
+        >
+          <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+        </Box>
+      )}
+
+      <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
+        {/* Header with title and menu */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.2,
+              flexGrow: 1,
+              mr: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {collection.name}
+          </Typography>
+
+          {/* Privacy indicator and menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Tooltip title={collection.isPublic ? 'Public Collection' : 'Private Collection'}>
+              {collection.isPublic ? (
+                <PublicIcon sx={{ fontSize: 18, color: 'success.main' }} />
+              ) : (
+                <PrivateIcon sx={{ fontSize: 18, color: 'warning.main' }} />
+              )}
+            </Tooltip>
+
+            {(canEdit || canDelete) && (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={handleMenuClick}
+                  sx={{ ml: 0.5 }}
+                >
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleMenuClose}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {canEdit && (
+                    <MenuItem onClick={handleEdit}>Edit Collection</MenuItem>
+                  )}
+                  {canDelete && (
+                    <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+                      Delete Collection
+                    </MenuItem>
+                  )}
+                </Menu>
+              </>
+            )}
+          </Box>
+        </Box>
+
+        {/* Description */}
+        {collection.description && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {collection.description}
+          </Typography>
+        )}
+
+        {/* Tags */}
+        {collection.tags && collection.tags.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {collection.tags.slice(0, 3).map((tag) => (
+                <Chip
+                  key={tag}
+                  label={tag}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              ))}
+              {collection.tags.length > 3 && (
+                <Chip
+                  label={`+${collection.tags.length - 3} more`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem', color: 'text.secondary' }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {/* Stats */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <PaletteIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2" color="text.secondary">
+              {modelCount} {modelCount === 1 ? 'model' : 'models'}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Owner info and date */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {showOwner && collection.user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar
+                src={collection.user.profileImageUrl}
+                sx={{ width: 24, height: 24 }}
+              >
+                {collection.user.displayName?.[0] || collection.user.username[0]}
+              </Avatar>
+              <Typography variant="caption" color="text.secondary">
+                {collection.user.displayName || collection.user.username}
+              </Typography>
+            </Box>
+          )}
+
+          <Typography variant="caption" color="text.secondary">
+            {formatDistanceToNow(new Date(collection.updatedAt), { addSuffix: true })}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default CollectionCard;
