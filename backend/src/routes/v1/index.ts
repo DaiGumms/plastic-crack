@@ -2,7 +2,9 @@ import { Router } from 'express';
 
 import authRoutes from '../auth.routes';
 
+import { collectionRoutes } from './collection.routes';
 import { healthRoutes } from './health';
+import { modelRoutes } from './model.routes';
 import { redisRoutes } from './redis';
 import { userRoutes } from './user.routes';
 
@@ -22,6 +24,12 @@ router.use('/auth', authRoutes);
 // User profile routes
 router.use('/users', userRoutes);
 
+// Collection management routes
+router.use('/collections', collectionRoutes);
+
+// Model management routes
+router.use('/models', modelRoutes);
+
 // Placeholder for future routes
 router.get('/', (req, res) => {
   res.json({
@@ -33,6 +41,8 @@ router.get('/', (req, res) => {
       health: '/api/v1/health',
       auth: '/api/v1/auth',
       users: '/api/v1/users',
+      collections: '/api/v1/collections',
+      models: '/api/v1/models',
       ...(process.env.NODE_ENV === 'development' && { redis: '/api/v1/redis' }),
       // Future endpoints will be listed here
     },

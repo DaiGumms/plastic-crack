@@ -10,20 +10,28 @@ process.env.SKIP_RATE_LIMITING = 'true';
 // Test utilities
 const createTestUser = async (overrides: Partial<any> = {}) => {
   const timestamp = Date.now();
-  const userData = {
+  const defaultData = {
     username: `authuser${timestamp}`,
     email: `auth-test-${timestamp}@example.com`,
     password: 'TestPassword123!',
     displayName: 'Auth Test User',
-    ...overrides,
   };
+  
+  // Apply overrides completely, not just spreading over defaults
+  const userData = { ...defaultData, ...overrides };
 
-  return AuthService.register(
+  const result = await AuthService.register(
     userData.username,
     userData.email,
     userData.password,
     userData.displayName
   );
+
+  // Return in the format expected by tests
+  return {
+    ...result,
+    token: result.accessToken, // Map accessToken to token for test compatibility
+  };
 };
 
 describe('Authentication System', () => {
@@ -123,13 +131,18 @@ describe('Authentication System', () => {
     });
 
     it('should reject registration with duplicate email', async () => {
+      // Use unique identifiers for this specific test
+      const uniqueId = Math.floor(Math.random() * 10000);
+      const originalEmail = `dupemail${uniqueId}@example.com`;
+      const originalUsername = `dupemail${uniqueId}`;
+      
       // First create a user with our test email
-      await createTestUser({ email: testEmail, username: testUsername });
+      await createTestUser({ email: originalEmail, username: originalUsername });
 
       // Try to register again with same email but different username
       const duplicateUser = {
-        username: `different${testUsername}`,
-        email: testEmail, // Same email as test user
+        username: `diff${uniqueId}`, // Shorter, valid username
+        email: originalEmail, // Same email as test user
         password: 'SecurePassword123!',
         displayName: 'Different User',
       };
@@ -143,13 +156,18 @@ describe('Authentication System', () => {
     });
 
     it('should reject registration with duplicate username', async () => {
+      // Use unique identifiers for this specific test
+      const uniqueId = Date.now() + Math.random();
+      const originalEmail = `duplicate-username-test-${uniqueId}@example.com`;
+      const originalUsername = `user${Math.floor(uniqueId).toString().slice(-8)}`;
+      
       // First create a user with our test username
-      await createTestUser({ email: testEmail, username: testUsername });
+      await createTestUser({ email: originalEmail, username: originalUsername });
 
       // Try to register again with same username but different email
       const duplicateUser = {
-        username: testUsername, // Same username as test user
-        email: `different-${testEmail}`,
+        username: originalUsername, // Same username as test user
+        email: `different-${originalEmail}`,
         password: 'SecurePassword123!',
         displayName: 'Different User',
       };
@@ -173,7 +191,7 @@ describe('Authentication System', () => {
       });
 
       const response = await request(app).post('/api/v1/auth/login').send({
-        email: testEmail,
+        emailOrUsername: testEmail,
         password: testPassword,
       });
 
@@ -187,7 +205,7 @@ describe('Authentication System', () => {
       await createTestUser();
 
       const response = await request(app).post('/api/v1/auth/login').send({
-        email: 'nonexistent@example.com',
+        emailOrUsername: 'nonexistent@example.com',
         password: 'TestPassword123!',
       });
 
@@ -199,7 +217,7 @@ describe('Authentication System', () => {
       await createTestUser();
 
       const response = await request(app).post('/api/v1/auth/login').send({
-        email: 'test@example.com',
+        emailOrUsername: 'test@example.com',
         password: 'WrongPassword123!',
       });
 
