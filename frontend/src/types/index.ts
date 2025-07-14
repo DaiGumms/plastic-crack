@@ -8,6 +8,38 @@ export interface User {
   updatedAt: string;
 }
 
+// Extended user profile for user management features
+export interface UserProfile extends User {
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatarUrl?: string;
+  isEmailVerified?: boolean;
+}
+
+// Public profile view (limited information)
+export interface PublicUserProfile {
+  id: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatarUrl?: string;
+  createdAt: string;
+  isEmailVerified?: boolean;
+}
+
+// Follow-related types
+export interface FollowStatus {
+  isFollowing: boolean;
+  followersCount: number;
+  followingCount: number;
+}
+
 export interface AuthUser extends User {
   accessToken: string;
   refreshToken: string;

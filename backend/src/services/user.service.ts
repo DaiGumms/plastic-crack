@@ -144,10 +144,29 @@ export class UserService {
     }
 
     try {
+      // Get current user data to merge with updates
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { firstName: true, lastName: true },
+      });
+
+      if (!currentUser) {
+        throw new Error('User not found');
+      }
+
+      // Auto-generate displayName from firstName and lastName
+      const updateData = { ...profileData };
+      const firstName =
+        (profileData.firstName ?? currentUser.firstName)?.trim() || '';
+      const lastName =
+        (profileData.lastName ?? currentUser.lastName)?.trim() || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      updateData.displayName = fullName || undefined;
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
-          ...profileData,
+          ...updateData,
           updatedAt: new Date(),
         },
         select: {

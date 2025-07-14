@@ -17,7 +17,7 @@ export interface RegisterRequest {
 }
 
 export interface LoginRequest {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 
@@ -30,7 +30,8 @@ export interface AuthResponse {
     profilePictureUrl: string | null;
     createdAt: Date;
   };
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface JWTPayload {

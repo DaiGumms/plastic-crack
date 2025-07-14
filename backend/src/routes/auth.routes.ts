@@ -36,9 +36,9 @@ const registerValidation = [
   body('password')
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
     .withMessage(
-      'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+      'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (@$!%*?&)'
     ),
 
   body('displayName')
@@ -48,10 +48,9 @@ const registerValidation = [
 ];
 
 const loginValidation = [
-  body('email')
-    .isEmail()
-    .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+  body('emailOrUsername')
+    .notEmpty()
+    .withMessage('Email or username is required'),
 
   body('password').notEmpty().withMessage('Password is required'),
 ];
@@ -117,10 +116,10 @@ router.post(
         return;
       }
 
-      const { email, password } = req.body;
+      const { emailOrUsername, password } = req.body;
 
       // Login user
-      const result = await AuthService.login(email, password);
+      const result = await AuthService.login(emailOrUsername, password);
 
       res.json({
         message: 'Login successful',
@@ -165,7 +164,14 @@ router.get(
           username: user.username,
           email: user.email,
           displayName: user.displayName,
-          profilePictureUrl: user.profileImageUrl,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          bio: user.bio,
+          location: user.location,
+          website: user.website,
+          avatarUrl: user.profileImageUrl,
+          isEmailVerified: user.emailVerified,
+          role: user.role as 'USER' | 'ADMIN',
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },

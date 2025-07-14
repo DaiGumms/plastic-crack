@@ -104,8 +104,15 @@ export class AuthService {
         },
       });
 
-      // Generate token
-      const token = this.generateToken({
+      // Generate tokens
+      const accessToken = this.generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      });
+
+      const refreshToken = this.generateToken({
         userId: user.id,
         username: user.username,
         email: user.email,
@@ -121,7 +128,8 @@ export class AuthService {
           profilePictureUrl: user.profileImageUrl,
           createdAt: user.createdAt,
         },
-        token,
+        accessToken,
+        refreshToken,
       };
     } catch (error) {
       // In production, you would use proper logging (e.g., winston, pino)
@@ -134,11 +142,16 @@ export class AuthService {
   }
 
   // Login user
-  static async login(email: string, password: string): Promise<AuthResponse> {
+  static async login(
+    emailOrUsername: string,
+    password: string
+  ): Promise<AuthResponse> {
     try {
-      // Find user by email
-      const user = await prisma.user.findUnique({
-        where: { email },
+      // Find user by email or username
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
+        },
       });
 
       if (!user) {
@@ -173,8 +186,15 @@ export class AuthService {
         }
       }
 
-      // Generate token
-      const token = this.generateToken({
+      // Generate tokens
+      const accessToken = this.generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      });
+
+      const refreshToken = this.generateToken({
         userId: user.id,
         username: user.username,
         email: user.email,
@@ -190,7 +210,8 @@ export class AuthService {
           profilePictureUrl: user.profileImageUrl,
           createdAt: user.createdAt,
         },
-        token,
+        accessToken,
+        refreshToken,
       };
     } catch (error) {
       // Re-throw known errors, wrap unknown errors
