@@ -38,7 +38,7 @@ export interface LibraryModelListProps {
   onFilterChange?: (filters: LibraryModelFilters) => void;
   onAddToCollection?: (model: LibraryModel) => void;
   onViewDetails?: (model: LibraryModel) => void;
-  
+
   // Filter options
   gameSystems?: GameSystem[];
   factions?: Faction[];
@@ -81,8 +81,12 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
   const [selectedFaction, setSelectedFaction] = useState<string>('');
   const [selectedOfficial, setSelectedOfficial] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
-  const [expandedSystems, setExpandedSystems] = useState<Set<string>>(new Set());
-  const [expandedFactions, setExpandedFactions] = useState<Set<string>>(new Set());
+  const [expandedSystems, setExpandedSystems] = useState<Set<string>>(
+    new Set()
+  );
+  const [expandedFactions, setExpandedFactions] = useState<Set<string>>(
+    new Set()
+  );
 
   // Filter factions based on selected game system
   const availableFactions = selectedGameSystem
@@ -123,11 +127,14 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
   }, [models]);
 
   // Handle search input change
-  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchQuery(value);
-    onSearch?.(value);
-  }, [onSearch]);
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setSearchQuery(value);
+      onSearch?.(value);
+    },
+    [onSearch]
+  );
 
   // Handle filter changes
   const handleFilterChange = useCallback(() => {
@@ -138,7 +145,13 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
       isOfficial: selectedOfficial ? selectedOfficial === 'true' : undefined,
     };
     onFilterChange?.(filters);
-  }, [searchQuery, selectedGameSystem, selectedFaction, selectedOfficial, onFilterChange]);
+  }, [
+    searchQuery,
+    selectedGameSystem,
+    selectedFaction,
+    selectedOfficial,
+    onFilterChange,
+  ]);
 
   // Apply filters when they change
   useEffect(() => {
@@ -177,7 +190,7 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity='error' sx={{ mb: 2 }}>
         {error}
       </Alert>
     );
@@ -187,21 +200,21 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
     <Box>
       {/* Search and Filters */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <Stack direction='row' spacing={2} sx={{ mb: 2 }}>
           <TextField
             fullWidth
-            placeholder="Search models..."
+            placeholder='Search models...'
             value={searchQuery}
             onChange={handleSearchChange}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">
+                <InputAdornment position='start'>
                   <SearchIcon />
                 </InputAdornment>
               ),
               endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setSearchQuery('')}>
+                <InputAdornment position='end'>
+                  <IconButton size='small' onClick={() => setSearchQuery('')}>
                     <ClearIcon />
                   </IconButton>
                 </InputAdornment>
@@ -209,7 +222,7 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
             }}
           />
           <Button
-            variant="outlined"
+            variant='outlined'
             startIcon={<FilterIcon />}
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -219,16 +232,18 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
 
         {/* Filter Controls */}
         {showFilters && (
-          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+          <Stack direction='row' spacing={2} sx={{ mb: 2 }}>
+            <FormControl size='small' sx={{ minWidth: 160 }}>
               <InputLabel>Game System</InputLabel>
               <Select
                 value={selectedGameSystem}
-                label="Game System"
-                onChange={(e: SelectChangeEvent) => setSelectedGameSystem(e.target.value)}
+                label='Game System'
+                onChange={(e: SelectChangeEvent) =>
+                  setSelectedGameSystem(e.target.value)
+                }
               >
-                <MenuItem value="">All Systems</MenuItem>
-                {gameSystems.map((system) => (
+                <MenuItem value=''>All Systems</MenuItem>
+                {gameSystems.map(system => (
                   <MenuItem key={system.id} value={system.id}>
                     {system.name}
                   </MenuItem>
@@ -236,16 +251,18 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <FormControl size='small' sx={{ minWidth: 160 }}>
               <InputLabel>Faction</InputLabel>
               <Select
                 value={selectedFaction}
-                label="Faction"
-                onChange={(e: SelectChangeEvent) => setSelectedFaction(e.target.value)}
+                label='Faction'
+                onChange={(e: SelectChangeEvent) =>
+                  setSelectedFaction(e.target.value)
+                }
                 disabled={!selectedGameSystem}
               >
-                <MenuItem value="">All Factions</MenuItem>
-                {availableFactions.map((faction) => (
+                <MenuItem value=''>All Factions</MenuItem>
+                {availableFactions.map(faction => (
                   <MenuItem key={faction.id} value={faction.id}>
                     {faction.name}
                   </MenuItem>
@@ -253,22 +270,24 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl size='small' sx={{ minWidth: 120 }}>
               <InputLabel>Official</InputLabel>
               <Select
                 value={selectedOfficial}
-                label="Official"
-                onChange={(e: SelectChangeEvent) => setSelectedOfficial(e.target.value)}
+                label='Official'
+                onChange={(e: SelectChangeEvent) =>
+                  setSelectedOfficial(e.target.value)
+                }
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="true">Official Only</MenuItem>
-                <MenuItem value="false">Community</MenuItem>
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='true'>Official Only</MenuItem>
+                <MenuItem value='false'>Community</MenuItem>
               </Select>
             </FormControl>
 
             <Button
-              variant="outlined"
-              size="small"
+              variant='outlined'
+              size='small'
               onClick={clearAllFilters}
               startIcon={<ClearIcon />}
             >
@@ -278,34 +297,37 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
         )}
 
         {/* Active filters */}
-        {(searchQuery || selectedGameSystem || selectedFaction || selectedOfficial) && (
-          <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        {(searchQuery ||
+          selectedGameSystem ||
+          selectedFaction ||
+          selectedOfficial) && (
+          <Stack direction='row' spacing={1} sx={{ mb: 2 }}>
             {searchQuery && (
               <Chip
                 label={`Search: ${searchQuery}`}
                 onDelete={() => setSearchQuery('')}
-                size="small"
+                size='small'
               />
             )}
             {selectedGameSystem && (
               <Chip
                 label={`System: ${gameSystems.find(s => s.id === selectedGameSystem)?.name}`}
                 onDelete={() => setSelectedGameSystem('')}
-                size="small"
+                size='small'
               />
             )}
             {selectedFaction && (
               <Chip
                 label={`Faction: ${factions.find(f => f.id === selectedFaction)?.name}`}
                 onDelete={() => setSelectedFaction('')}
-                size="small"
+                size='small'
               />
             )}
             {selectedOfficial && (
               <Chip
                 label={`${selectedOfficial === 'true' ? 'Official' : 'Community'}`}
                 onDelete={() => setSelectedOfficial('')}
-                size="small"
+                size='small'
               />
             )}
           </Stack>
@@ -316,7 +338,7 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
       {loading && (
         <Stack spacing={1}>
           {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} variant="rectangular" height={60} />
+            <Skeleton key={index} variant='rectangular' height={60} />
           ))}
         </Stack>
       )}
@@ -326,162 +348,223 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
         <>
           {Object.keys(groupedModels).length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
+              <Typography variant='h6' color='text.secondary' gutterBottom>
                 No models found
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant='body2' color='text.secondary'>
                 Try adjusting your search or filter criteria
               </Typography>
             </Box>
           ) : (
             <Box>
-              {Object.entries(groupedModels).map(([gameSystemId, systemData]) => (
-                <Accordion
-                  key={gameSystemId}
-                  expanded={expandedSystems.has(gameSystemId)}
-                  onChange={() => handleSystemToggle(gameSystemId)}
-                  sx={{ 
-                    mb: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    '&:before': {
-                      display: 'none',
-                    },
-                  }}
-                >
-                  <AccordionSummary 
-                    expandIcon={<ExpandMoreIcon />}
+              {Object.entries(groupedModels).map(
+                ([gameSystemId, systemData]) => (
+                  <Accordion
+                    key={gameSystemId}
+                    expanded={expandedSystems.has(gameSystemId)}
+                    onChange={() => handleSystemToggle(gameSystemId)}
                     sx={{
-                      backgroundColor: 'action.hover',
-                      '& .MuiAccordionSummary-content': {
-                        alignItems: 'center',
+                      mb: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&:before': {
+                        display: 'none',
                       },
                     }}
                   >
-                    <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {systemData.gameSystem.name}
-                      <Chip
-                        size="small"
-                        label={Object.values(systemData.factions).reduce((total, faction) => total + faction.models.length, 0)}
-                        variant="outlined"
-                      />
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ p: 0 }}>
-                    {Object.entries(systemData.factions).map(([factionId, factionData]) => (
-                      <Accordion
-                        key={factionId}
-                        expanded={expandedFactions.has(factionId)}
-                        onChange={() => handleFactionToggle(factionId)}
-                        sx={{ 
-                          boxShadow: 'none',
-                          border: 'none',
-                          borderBottom: '1px solid',
-                          borderBottomColor: 'divider',
-                          '&:before': {
-                            display: 'none',
-                          },
-                          '&.Mui-expanded': {
-                            margin: 'auto',
-                          },
-                        }}
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      sx={{
+                        backgroundColor: 'action.hover',
+                        '& .MuiAccordionSummary-content': {
+                          alignItems: 'center',
+                        },
+                      }}
+                    >
+                      <Typography
+                        variant='h6'
+                        component='div'
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                       >
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          sx={{
-                            backgroundColor: 'background.default',
-                            minHeight: 40,
-                            '&.Mui-expanded': {
-                              minHeight: 40,
-                            },
-                            '& .MuiAccordionSummary-content': {
-                              alignItems: 'center',
-                              '&.Mui-expanded': {
-                                margin: '8px 0',
+                        {systemData.gameSystem.name}
+                        <Chip
+                          size='small'
+                          label={Object.values(systemData.factions).reduce(
+                            (total, faction) => total + faction.models.length,
+                            0
+                          )}
+                          variant='outlined'
+                        />
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 0 }}>
+                      {Object.entries(systemData.factions).map(
+                        ([factionId, factionData]) => (
+                          <Accordion
+                            key={factionId}
+                            expanded={expandedFactions.has(factionId)}
+                            onChange={() => handleFactionToggle(factionId)}
+                            sx={{
+                              boxShadow: 'none',
+                              border: 'none',
+                              borderBottom: '1px solid',
+                              borderBottomColor: 'divider',
+                              '&:before': {
+                                display: 'none',
                               },
-                            },
-                          }}
-                        >
-                          <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'primary.main' }}>
-                            {factionData.faction.name}
-                          </Typography>
-                          <Chip
-                            size="small"
-                            label={factionData.models.length}
-                            variant="outlined"
-                            sx={{ ml: 1 }}
-                          />
-                        </AccordionSummary>
-                        <AccordionDetails sx={{ p: 0 }}>
-                          <List dense>
-                            {factionData.models.map((model) => (
-                              <ListItem
-                                key={model.id}
-                                sx={{
-                                  pl: 3,
-                                  border: 1,
-                                  borderColor: 'divider',
-                                  borderRadius: 1,
-                                  mb: 1,
-                                  mx: 1,
-                                  display: 'flex',
-                                  alignItems: 'flex-start',
-                                  '&:hover': {
-                                    backgroundColor: 'action.hover',
+                              '&.Mui-expanded': {
+                                margin: 'auto',
+                              },
+                            }}
+                          >
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
+                              sx={{
+                                backgroundColor: 'background.default',
+                                minHeight: 40,
+                                '&.Mui-expanded': {
+                                  minHeight: 40,
+                                },
+                                '& .MuiAccordionSummary-content': {
+                                  alignItems: 'center',
+                                  '&.Mui-expanded': {
+                                    margin: '8px 0',
                                   },
+                                },
+                              }}
+                            >
+                              <Typography
+                                variant='subtitle1'
+                                sx={{
+                                  fontWeight: 'medium',
+                                  color: 'primary.main',
                                 }}
                               >
-                                <Box sx={{ flexGrow: 1, py: 1 }}>
-                                  {/* Primary content */}
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                    <Typography variant="body1" component="div">
-                                      {model.name}
-                                    </Typography>
-                                    {model.isOfficial && (
-                                      <Chip size="small" label="Official" color="primary" variant="outlined" />
-                                    )}
-                                  </Box>
-                                  
-                                  {/* Secondary content */}
-                                  <Box>
-                                    {model.description && (
-                                      <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 0.5 }}>
-                                        {model.description}
-                                      </Typography>
-                                    )}
-                                    {model.tags && model.tags.length > 0 && (
-                                      <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
-                                        {model.tags.slice(0, 3).map((tag) => (
-                                          <Chip key={tag} size="small" label={tag} variant="outlined" />
-                                        ))}
-                                        {model.tags.length > 3 && (
-                                          <Chip size="small" label={`+${model.tags.length - 3} more`} variant="outlined" />
+                                {factionData.faction.name}
+                              </Typography>
+                              <Chip
+                                size='small'
+                                label={factionData.models.length}
+                                variant='outlined'
+                                sx={{ ml: 1 }}
+                              />
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ p: 0 }}>
+                              <List dense>
+                                {factionData.models.map(model => (
+                                  <ListItem
+                                    key={model.id}
+                                    sx={{
+                                      pl: 3,
+                                      border: 1,
+                                      borderColor: 'divider',
+                                      borderRadius: 1,
+                                      mb: 1,
+                                      mx: 1,
+                                      display: 'flex',
+                                      alignItems: 'flex-start',
+                                      '&:hover': {
+                                        backgroundColor: 'action.hover',
+                                      },
+                                    }}
+                                  >
+                                    <Box sx={{ flexGrow: 1, py: 1 }}>
+                                      {/* Primary content */}
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 1,
+                                          mb: 0.5,
+                                        }}
+                                      >
+                                        <Typography
+                                          variant='body1'
+                                          component='div'
+                                        >
+                                          {model.name}
+                                        </Typography>
+                                        {model.isOfficial && (
+                                          <Chip
+                                            size='small'
+                                            label='Official'
+                                            color='primary'
+                                            variant='outlined'
+                                          />
                                         )}
-                                      </Stack>
+                                      </Box>
+
+                                      {/* Secondary content */}
+                                      <Box>
+                                        {model.description && (
+                                          <Typography
+                                            variant='body2'
+                                            color='text.secondary'
+                                            component='div'
+                                            sx={{ mb: 0.5 }}
+                                          >
+                                            {model.description}
+                                          </Typography>
+                                        )}
+                                        {model.tags &&
+                                          model.tags.length > 0 && (
+                                            <Stack
+                                              direction='row'
+                                              spacing={0.5}
+                                              sx={{ mt: 0.5 }}
+                                            >
+                                              {model.tags
+                                                .slice(0, 3)
+                                                .map(tag => (
+                                                  <Chip
+                                                    key={tag}
+                                                    size='small'
+                                                    label={tag}
+                                                    variant='outlined'
+                                                  />
+                                                ))}
+                                              {model.tags.length > 3 && (
+                                                <Chip
+                                                  size='small'
+                                                  label={`+${model.tags.length - 3} more`}
+                                                  variant='outlined'
+                                                />
+                                              )}
+                                            </Stack>
+                                          )}
+                                      </Box>
+                                    </Box>
+
+                                    {showAddButtons && (
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          pl: 2,
+                                        }}
+                                      >
+                                        <IconButton
+                                          onClick={() =>
+                                            onAddToCollection?.(model)
+                                          }
+                                          color='primary'
+                                          size='small'
+                                        >
+                                          <AddIcon />
+                                        </IconButton>
+                                      </Box>
                                     )}
-                                  </Box>
-                                </Box>
-                                
-                                {showAddButtons && (
-                                  <Box sx={{ display: 'flex', alignItems: 'center', pl: 2 }}>
-                                    <IconButton
-                                      onClick={() => onAddToCollection?.(model)}
-                                      color="primary"
-                                      size="small"
-                                    >
-                                      <AddIcon />
-                                    </IconButton>
-                                  </Box>
-                                )}
-                              </ListItem>
-                            ))}
-                          </List>
-                        </AccordionDetails>
-                      </Accordion>
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+                                  </ListItem>
+                                ))}
+                              </List>
+                            </AccordionDetails>
+                          </Accordion>
+                        )
+                      )}
+                    </AccordionDetails>
+                  </Accordion>
+                )
+              )}
             </Box>
           )}
         </>

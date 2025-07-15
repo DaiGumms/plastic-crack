@@ -29,9 +29,9 @@ export interface CreateModelData {
 }
 
 export interface AddLibraryModelData {
-  modelId: string;       // ID of the library model to add
-  collectionId: string;  // Collection to add it to
-  customName?: string;   // User's custom name for this instance
+  modelId: string; // ID of the library model to add
+  collectionId: string; // Collection to add it to
+  customName?: string; // User's custom name for this instance
   paintingStatus?: PaintingStatus;
   notes?: string;
   tags?: string[];
@@ -102,7 +102,7 @@ export class ModelService {
    * Add a library model to a user's collection (create UserModel instance)
    */
   async addLibraryModelToCollection(
-    userId: string, 
+    userId: string,
     data: AddLibraryModelData
   ): Promise<UserModel> {
     // Verify the library model exists

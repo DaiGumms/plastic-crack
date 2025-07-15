@@ -6,8 +6,12 @@ async function main() {
   console.log('🌱 Starting model seeding...');
 
   // Get existing game systems and factions
-  const wh40k = await prisma.gameSystem.findFirst({ where: { shortName: 'W40K' } });
-  const aos = await prisma.gameSystem.findFirst({ where: { shortName: 'AOS' } });
+  const wh40k = await prisma.gameSystem.findFirst({
+    where: { shortName: 'W40K' },
+  });
+  const aos = await prisma.gameSystem.findFirst({
+    where: { shortName: 'AOS' },
+  });
 
   if (!wh40k || !aos) {
     console.error('Game systems not found. Please run the main seed first.');
@@ -15,20 +19,20 @@ async function main() {
   }
 
   // Get factions
-  const spaceMarine = await prisma.faction.findFirst({ 
-    where: { name: 'Space Marines', gameSystemId: wh40k.id } 
+  const spaceMarine = await prisma.faction.findFirst({
+    where: { name: 'Space Marines', gameSystemId: wh40k.id },
   });
-  const chaosSpaceMarines = await prisma.faction.findFirst({ 
-    where: { name: 'Chaos Space Marines', gameSystemId: wh40k.id } 
+  const chaosSpaceMarines = await prisma.faction.findFirst({
+    where: { name: 'Chaos Space Marines', gameSystemId: wh40k.id },
   });
-  const necrons = await prisma.faction.findFirst({ 
-    where: { name: 'Necrons', gameSystemId: wh40k.id } 
+  const necrons = await prisma.faction.findFirst({
+    where: { name: 'Necrons', gameSystemId: wh40k.id },
   });
-  const tyranids = await prisma.faction.findFirst({ 
-    where: { name: 'Tyranids', gameSystemId: wh40k.id } 
+  const tyranids = await prisma.faction.findFirst({
+    where: { name: 'Tyranids', gameSystemId: wh40k.id },
   });
-  const stormcast = await prisma.faction.findFirst({ 
-    where: { name: 'Stormcast Eternals', gameSystemId: aos.id } 
+  const stormcast = await prisma.faction.findFirst({
+    where: { name: 'Stormcast Eternals', gameSystemId: aos.id },
   });
 
   // Clear existing models
@@ -39,7 +43,8 @@ async function main() {
     const spaceMarineModels = [
       {
         name: 'Intercessor Squad',
-        description: 'Primaris Space Marine battle-line troops armed with bolt rifles. The backbone of any Primaris force.',
+        description:
+          'Primaris Space Marine battle-line troops armed with bolt rifles. The backbone of any Primaris force.',
         modelType: 'Infantry',
         officialPointsCost: 105,
         tags: ['Troops', 'Primaris', 'Core', 'Battleline'],
@@ -48,7 +53,8 @@ async function main() {
       },
       {
         name: 'Captain in Terminator Armour',
-        description: 'Elite Space Marine commander in heavy Terminator plate with storm bolter and power weapon.',
+        description:
+          'Elite Space Marine commander in heavy Terminator plate with storm bolter and power weapon.',
         modelType: 'Character',
         officialPointsCost: 115,
         tags: ['HQ', 'Character', 'Terminator', 'Leader'],
@@ -57,7 +63,8 @@ async function main() {
       },
       {
         name: 'Redemptor Dreadnought',
-        description: 'Massive Primaris walker with devastating firepower and heavy armor plating.',
+        description:
+          'Massive Primaris walker with devastating firepower and heavy armor plating.',
         modelType: 'Walker',
         officialPointsCost: 185,
         tags: ['Heavy Support', 'Vehicle', 'Dreadnought', 'Walker'],
@@ -66,7 +73,8 @@ async function main() {
       },
       {
         name: 'Assault Intercessor Squad',
-        description: 'Close-combat specialists with chainswords and heavy bolt pistols.',
+        description:
+          'Close-combat specialists with chainswords and heavy bolt pistols.',
         modelType: 'Infantry',
         officialPointsCost: 95,
         tags: ['Troops', 'Primaris', 'Core', 'Assault'],
@@ -84,7 +92,8 @@ async function main() {
       },
       {
         name: 'Tactical Squad',
-        description: 'Versatile Firstborn Space Marines with bolters and special weapons.',
+        description:
+          'Versatile Firstborn Space Marines with bolters and special weapons.',
         modelType: 'Infantry',
         officialPointsCost: 90,
         tags: ['Troops', 'Firstborn', 'Core', 'Battleline'],
@@ -104,7 +113,8 @@ async function main() {
     const chaosModels = [
       {
         name: 'Chaos Space Marine Squad',
-        description: 'Corrupted Astartes warriors devoted to the Dark Gods, armed with bolters and close combat weapons.',
+        description:
+          'Corrupted Astartes warriors devoted to the Dark Gods, armed with bolters and close combat weapons.',
         modelType: 'Infantry',
         officialPointsCost: 90,
         tags: ['Troops', 'Chaos', 'Core', 'Battleline'],
@@ -113,7 +123,8 @@ async function main() {
       },
       {
         name: 'Chaos Lord',
-        description: 'Powerful champion leading the forces of Chaos with dark blessings and brutal weapons.',
+        description:
+          'Powerful champion leading the forces of Chaos with dark blessings and brutal weapons.',
         modelType: 'Character',
         officialPointsCost: 80,
         tags: ['HQ', 'Character', 'Chaos', 'Leader'],
@@ -122,7 +133,8 @@ async function main() {
       },
       {
         name: 'Helbrute',
-        description: 'Daemon-possessed Dreadnought driven mad by corruption and warp energies.',
+        description:
+          'Daemon-possessed Dreadnought driven mad by corruption and warp energies.',
         modelType: 'Walker',
         officialPointsCost: 120,
         tags: ['Heavy Support', 'Vehicle', 'Daemon', 'Walker'],
@@ -131,7 +143,8 @@ async function main() {
       },
       {
         name: 'Chaos Cultists',
-        description: 'Fanatical human followers armed with basic weapons and unwavering devotion.',
+        description:
+          'Fanatical human followers armed with basic weapons and unwavering devotion.',
         modelType: 'Infantry',
         officialPointsCost: 50,
         tags: ['Troops', 'Human', 'Cultist'],
@@ -140,7 +153,8 @@ async function main() {
       },
       {
         name: 'Chaos Terminator Squad',
-        description: 'Elite warriors in ancient Terminator armor corrupted by Chaos.',
+        description:
+          'Elite warriors in ancient Terminator armor corrupted by Chaos.',
         modelType: 'Infantry',
         officialPointsCost: 170,
         tags: ['Elites', 'Terminator', 'Chaos'],
@@ -160,7 +174,8 @@ async function main() {
     const necronModels = [
       {
         name: 'Necron Warriors',
-        description: 'Basic troops of the Necron legions with gauss flayers that strip matter atom by atom.',
+        description:
+          'Basic troops of the Necron legions with gauss flayers that strip matter atom by atom.',
         modelType: 'Infantry',
         officialPointsCost: 130,
         tags: ['Troops', 'Core', 'Necron', 'Battleline'],
@@ -169,7 +184,8 @@ async function main() {
       },
       {
         name: 'Overlord',
-        description: 'Noble Necron commander with ancient authority and devastating weapons.',
+        description:
+          'Noble Necron commander with ancient authority and devastating weapons.',
         modelType: 'Character',
         officialPointsCost: 95,
         tags: ['HQ', 'Character', 'Noble', 'Leader'],
@@ -178,7 +194,8 @@ async function main() {
       },
       {
         name: 'Canoptek Scarabs',
-        description: 'Swarms of repair constructs that can strip enemy vehicles to their component atoms.',
+        description:
+          'Swarms of repair constructs that can strip enemy vehicles to their component atoms.',
         modelType: 'Beast',
         officialPointsCost: 45,
         tags: ['Fast Attack', 'Canoptek', 'Swarm'],
@@ -187,7 +204,8 @@ async function main() {
       },
       {
         name: 'Immortals',
-        description: 'Elite Necron troops with advanced weaponry and enhanced resilience.',
+        description:
+          'Elite Necron troops with advanced weaponry and enhanced resilience.',
         modelType: 'Infantry',
         officialPointsCost: 160,
         tags: ['Troops', 'Core', 'Necron'],
@@ -196,7 +214,8 @@ async function main() {
       },
       {
         name: 'Canoptek Doomstalker',
-        description: 'Spider-like construct with devastating long-range firepower.',
+        description:
+          'Spider-like construct with devastating long-range firepower.',
         modelType: 'Vehicle',
         officialPointsCost: 140,
         tags: ['Heavy Support', 'Vehicle', 'Canoptek'],
@@ -216,7 +235,8 @@ async function main() {
     const tyranidModels = [
       {
         name: 'Termagants',
-        description: 'Basic Tyranid organisms bred for swarm warfare with fleshborers.',
+        description:
+          'Basic Tyranid organisms bred for swarm warfare with fleshborers.',
         modelType: 'Infantry',
         officialPointsCost: 70,
         tags: ['Troops', 'Endless Multitude', 'Swarm'],
@@ -225,7 +245,8 @@ async function main() {
       },
       {
         name: 'Hive Tyrant',
-        description: 'Apex Tyranid bioform commanding the swarm with psychic might.',
+        description:
+          'Apex Tyranid bioform commanding the swarm with psychic might.',
         modelType: 'Monster',
         officialPointsCost: 220,
         tags: ['HQ', 'Monster', 'Synapse', 'Psyker'],
@@ -234,7 +255,8 @@ async function main() {
       },
       {
         name: 'Carnifex',
-        description: 'Living siege engine and heavy assault creature with crushing claws.',
+        description:
+          'Living siege engine and heavy assault creature with crushing claws.',
         modelType: 'Monster',
         officialPointsCost: 130,
         tags: ['Heavy Support', 'Monster'],
@@ -243,7 +265,8 @@ async function main() {
       },
       {
         name: 'Genestealers',
-        description: 'Swift infiltrators with razor-sharp claws and alien cunning.',
+        description:
+          'Swift infiltrators with razor-sharp claws and alien cunning.',
         modelType: 'Infantry',
         officialPointsCost: 120,
         tags: ['Troops', 'Infiltrator'],
@@ -272,7 +295,8 @@ async function main() {
     const stormcastModels = [
       {
         name: 'Liberators',
-        description: 'Core warriors of the Stormcast Eternals with warblades and shields.',
+        description:
+          'Core warriors of the Stormcast Eternals with warblades and shields.',
         modelType: 'Infantry',
         officialPointsCost: 115,
         tags: ['Battleline', 'Warrior Chamber'],
@@ -281,7 +305,8 @@ async function main() {
       },
       {
         name: 'Lord-Celestant',
-        description: 'Noble commander of the Stormhost wielding ancient weapons.',
+        description:
+          'Noble commander of the Stormhost wielding ancient weapons.',
         modelType: 'Hero',
         officialPointsCost: 155,
         tags: ['Hero', 'Leader', 'Warrior Chamber'],
@@ -290,7 +315,8 @@ async function main() {
       },
       {
         name: 'Retributors',
-        description: 'Heavy infantry with lightning hammers that can shatter mountains.',
+        description:
+          'Heavy infantry with lightning hammers that can shatter mountains.',
         modelType: 'Infantry',
         officialPointsCost: 130,
         tags: ['Warrior Chamber', 'Elite'],
@@ -299,7 +325,8 @@ async function main() {
       },
       {
         name: 'Sequitors',
-        description: 'Wizard-warriors who channel storm magic through their weapons.',
+        description:
+          'Wizard-warriors who channel storm magic through their weapons.',
         modelType: 'Infantry',
         officialPointsCost: 120,
         tags: ['Battleline', 'Sacrosanct Chamber', 'Wizard'],
@@ -324,11 +351,13 @@ async function main() {
   }
 
   const totalModels = await prisma.model.count();
-  console.log(`✅ Model seeding completed! Created ${totalModels} models total.`);
+  console.log(
+    `✅ Model seeding completed! Created ${totalModels} models total.`
+  );
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('Error during model seeding:', e);
     process.exit(1);
   })

@@ -3,10 +3,7 @@
  * Handles library model catalog operations (read-only model browsing)
  */
 
-import {
-  PrismaClient,
-  Prisma,
-} from '../generated/prisma';
+import { PrismaClient, Prisma } from '../generated/prisma';
 
 export interface LibraryModelFilters {
   search?: string;
@@ -28,10 +25,10 @@ export class LibraryModelService {
     filters: LibraryModelFilters = {}
   ) {
     const skip = (page - 1) * limit;
-    
+
     // Build where clause
     const where: Prisma.ModelWhereInput = {};
-    
+
     if (filters.search) {
       where.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },
@@ -39,19 +36,19 @@ export class LibraryModelService {
         { tags: { has: filters.search } },
       ];
     }
-    
+
     if (filters.gameSystemId) {
       where.gameSystemId = filters.gameSystemId;
     }
-    
+
     if (filters.factionId) {
       where.factionId = filters.factionId;
     }
-    
+
     if (filters.isOfficial !== undefined) {
       where.isOfficial = filters.isOfficial;
     }
-    
+
     if (filters.tags && filters.tags.length > 0) {
       where.tags = {
         hasEvery: filters.tags,
@@ -60,7 +57,7 @@ export class LibraryModelService {
 
     // Get total count
     const total = await this.prisma.model.count({ where });
-    
+
     // Get paginated data
     const models = await this.prisma.model.findMany({
       where,
@@ -122,10 +119,7 @@ export class LibraryModelService {
         faction: true,
       },
       take: limit,
-      orderBy: [
-        { isOfficial: 'desc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ isOfficial: 'desc' }, { name: 'asc' }],
     });
 
     return models;
@@ -163,10 +157,7 @@ export class LibraryModelService {
         faction: true,
       },
       take: limit,
-      orderBy: [
-        { isOfficial: 'desc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ isOfficial: 'desc' }, { name: 'asc' }],
     });
 
     return models;

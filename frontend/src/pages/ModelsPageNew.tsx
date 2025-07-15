@@ -21,8 +21,15 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import LibraryModelGrid from '../components/models/LibraryModelGrid';
 import type { LibraryModel, Collection, PaginatedResponse } from '../types';
-import { libraryModelService, type LibraryModelFilters } from '../services/libraryModelService';
-import { gameSystemService, type GameSystem, type Faction } from '../services/gameSystemService';
+import {
+  libraryModelService,
+  type LibraryModelFilters,
+} from '../services/libraryModelService';
+import {
+  gameSystemService,
+  type GameSystem,
+  type Faction,
+} from '../services/gameSystemService';
 
 // Mock service for now - will be replaced with real API
 const mockCollectionService = {
@@ -40,7 +47,7 @@ const mockCollectionService = {
         updatedAt: '2024-01-01T00:00:00Z',
       },
       {
-        id: '2', 
+        id: '2',
         name: 'Age of Sigmar Collection',
         description: 'Stormcast Eternals',
         isPublic: true,
@@ -61,15 +68,15 @@ const ModelsPage: React.FC = () => {
   const [gameSystems, setGameSystems] = useState<GameSystem[]>([]);
   const [factions, setFactions] = useState<Faction[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 20;
-  
+
   // Filter state
   const [filters, setFilters] = useState<LibraryModelFilters>({});
-  
+
   // Add to collection dialog state
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<LibraryModel | null>(null);
@@ -85,10 +92,10 @@ const ModelsPage: React.FC = () => {
           gameSystemService.getGameSystems(),
           mockCollectionService.getUserCollections(),
         ]);
-        
+
         setGameSystems(gameSystemsData.data);
         setCollections(collectionsData);
-        
+
         // Extract unique factions from game systems
         const allFactions: Faction[] = [];
         gameSystemsData.data.forEach((gs: GameSystem) => {
@@ -96,19 +103,53 @@ const ModelsPage: React.FC = () => {
           // For now, mock some factions
           if (gs.id === 'wh40k') {
             allFactions.push(
-              { id: 'sm', name: 'Space Marines', gameSystemId: gs.id, createdAt: '', updatedAt: '', description: '' },
-              { id: 'csm', name: 'Chaos Space Marines', gameSystemId: gs.id, createdAt: '', updatedAt: '', description: '' },
-              { id: 'necrons', name: 'Necrons', gameSystemId: gs.id, createdAt: '', updatedAt: '', description: '' },
+              {
+                id: 'sm',
+                name: 'Space Marines',
+                gameSystemId: gs.id,
+                createdAt: '',
+                updatedAt: '',
+                description: '',
+              },
+              {
+                id: 'csm',
+                name: 'Chaos Space Marines',
+                gameSystemId: gs.id,
+                createdAt: '',
+                updatedAt: '',
+                description: '',
+              },
+              {
+                id: 'necrons',
+                name: 'Necrons',
+                gameSystemId: gs.id,
+                createdAt: '',
+                updatedAt: '',
+                description: '',
+              }
             );
           } else if (gs.id === 'aos') {
             allFactions.push(
-              { id: 'sce', name: 'Stormcast Eternals', gameSystemId: gs.id, createdAt: '', updatedAt: '', description: '' },
-              { id: 'chaos', name: 'Chaos', gameSystemId: gs.id, createdAt: '', updatedAt: '', description: '' },
+              {
+                id: 'sce',
+                name: 'Stormcast Eternals',
+                gameSystemId: gs.id,
+                createdAt: '',
+                updatedAt: '',
+                description: '',
+              },
+              {
+                id: 'chaos',
+                name: 'Chaos',
+                gameSystemId: gs.id,
+                createdAt: '',
+                updatedAt: '',
+                description: '',
+              }
             );
           }
         });
         setFactions(allFactions);
-        
       } catch (err) {
         console.error('Error loading initial data:', err);
         setError('Failed to load initial data. Please refresh the page.');
@@ -125,13 +166,10 @@ const ModelsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response: PaginatedResponse<LibraryModel> = await libraryModelService.getModels(
-        currentPage,
-        pageSize,
-        filters
-      );
-      
+
+      const response: PaginatedResponse<LibraryModel> =
+        await libraryModelService.getModels(currentPage, pageSize, filters);
+
       setModels(response.data);
       setTotalCount(response.pagination.total);
     } catch (err) {
@@ -165,11 +203,14 @@ const ModelsPage: React.FC = () => {
   }, []);
 
   // Handle add to collection
-  const handleAddToCollection = useCallback((model: LibraryModel) => {
-    setSelectedModel(model);
-    setAddDialogOpen(true);
-    setSelectedCollection(collections[0]?.id || '');
-  }, [collections]);
+  const handleAddToCollection = useCallback(
+    (model: LibraryModel) => {
+      setSelectedModel(model);
+      setAddDialogOpen(true);
+      setSelectedCollection(collections[0]?.id || '');
+    },
+    [collections]
+  );
 
   // Handle view details
   const handleViewDetails = useCallback((model: LibraryModel) => {
@@ -180,10 +221,10 @@ const ModelsPage: React.FC = () => {
   // Handle confirm add to collection
   const handleConfirmAddToCollection = async () => {
     if (!selectedModel || !selectedCollection) return;
-    
+
     try {
       setAddingToCollection(true);
-      
+
       // TODO: Call API to add model to collection
       // await userModelService.createUserModel({
       //   libraryModelId: selectedModel.id,
@@ -191,12 +232,14 @@ const ModelsPage: React.FC = () => {
       //   paintingStatus: 'UNPAINTED',
       //   isPublic: false,
       // });
-      
-      console.log(`Added ${selectedModel.name} to collection ${selectedCollection}`);
-      
+
+      console.log(
+        `Added ${selectedModel.name} to collection ${selectedCollection}`
+      );
+
       // Show success message
       // You might want to use a notification system here
-      
+
       setAddDialogOpen(false);
       setSelectedModel(null);
       setSelectedCollection('');
@@ -216,31 +259,39 @@ const ModelsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth='xl' sx={{ py: 3 }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 2 }}>
         <Link
           component={RouterLink}
-          to="/"
+          to='/'
           sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
         >
-          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          <HomeIcon sx={{ mr: 0.5 }} fontSize='inherit' />
           Home
         </Link>
-        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-          <CategoryIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+        <Typography
+          color='text.primary'
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          <CategoryIcon sx={{ mr: 0.5 }} fontSize='inherit' />
           Model Library
         </Typography>
       </Breadcrumbs>
 
       {/* Page Header */}
       <Box sx={{ mb: 4 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          alignItems={{ sm: 'center' }}
+          justifyContent='space-between'
+        >
           <Box>
-            <Typography variant="h3" component="h1" gutterBottom>
+            <Typography variant='h3' component='h1' gutterBottom>
               Model Library
             </Typography>
-            <Typography variant="h6" color="text.secondary">
+            <Typography variant='h6' color='text.secondary'>
               Browse and discover models to add to your collections
             </Typography>
           </Box>
@@ -269,44 +320,42 @@ const ModelsPage: React.FC = () => {
       <Dialog
         open={addDialogOpen}
         onClose={handleCancelAddToCollection}
-        maxWidth="sm"
+        maxWidth='sm'
         fullWidth
       >
-        <DialogTitle>
-          Add "{selectedModel?.name}" to Collection
-        </DialogTitle>
+        <DialogTitle>Add "{selectedModel?.name}" to Collection</DialogTitle>
         <DialogContent>
           {collections.length === 0 ? (
-            <Alert severity="info" sx={{ mt: 1 }}>
+            <Alert severity='info' sx={{ mt: 1 }}>
               You need to create a collection first before adding models.
-              <Button
-                component={RouterLink}
-                to="/collections"
-                sx={{ ml: 1 }}
-              >
+              <Button component={RouterLink} to='/collections' sx={{ ml: 1 }}>
                 Go to Collections
               </Button>
             </Alert>
           ) : (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Choose which collection to add this model to:
               </Typography>
-              
+
               <Stack spacing={1} sx={{ mt: 2 }}>
-                {collections.map((collection) => (
+                {collections.map(collection => (
                   <Button
                     key={collection.id}
-                    variant={selectedCollection === collection.id ? "contained" : "outlined"}
+                    variant={
+                      selectedCollection === collection.id
+                        ? 'contained'
+                        : 'outlined'
+                    }
                     onClick={() => setSelectedCollection(collection.id)}
                     sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
                   >
                     <Box>
-                      <Typography variant="subtitle2">
+                      <Typography variant='subtitle2'>
                         {collection.name}
                       </Typography>
                       {collection.description && (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           {collection.description}
                         </Typography>
                       )}
@@ -318,13 +367,15 @@ const ModelsPage: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelAddToCollection}>
-            Cancel
-          </Button>
+          <Button onClick={handleCancelAddToCollection}>Cancel</Button>
           <Button
             onClick={handleConfirmAddToCollection}
-            variant="contained"
-            disabled={!selectedCollection || addingToCollection || collections.length === 0}
+            variant='contained'
+            disabled={
+              !selectedCollection ||
+              addingToCollection ||
+              collections.length === 0
+            }
             startIcon={addingToCollection ? undefined : <AddIcon />}
           >
             {addingToCollection ? 'Adding...' : 'Add to Collection'}

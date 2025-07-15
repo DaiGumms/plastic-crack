@@ -73,19 +73,19 @@ export interface LibraryModel {
   description?: string;
   gameSystemId: string;
   factionId: string;
-  
+
   // Model Details
   pointsCost?: number;
   officialImageUrl?: string;
-  
+
   // Metadata
   isOfficial: boolean;
   tags: string[];
-  
+
   // Timestamps
   createdAt: string;
   updatedAt: string;
-  
+
   // Relations
   gameSystem?: {
     id: string;
@@ -104,27 +104,33 @@ export interface UserModel {
   userId: string;
   modelId: string; // References LibraryModel (renamed from libraryModelId)
   collectionId: string;
-  
+
   // User customizations
   customName?: string; // User's custom name for this instance
-  paintingStatus: 'UNPAINTED' | 'PRIMED' | 'BASE_COATED' | 'IN_PROGRESS' | 'COMPLETED' | 'SHOWCASE';
+  paintingStatus:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
   notes?: string;
   tags: string[]; // User's custom tags (renamed from userTags)
-  
+
   // Purchase Information
   purchasePrice?: number;
   purchaseDate?: string;
-  
+
   // Custom user fields
   customPointsCost?: number; // User's custom point cost override
-  
+
   // Visibility
   isPublic: boolean;
-  
+
   // Timestamps
   createdAt: string;
   updatedAt: string;
-  
+
   // Relations
   model?: LibraryModel; // Renamed from libraryModel
   collection?: {
@@ -155,7 +161,13 @@ export interface CreateUserModelData {
   modelId: string; // Renamed from libraryModelId
   collectionId: string;
   customName?: string;
-  paintingStatus?: 'UNPAINTED' | 'PRIMED' | 'BASE_COATED' | 'IN_PROGRESS' | 'COMPLETED' | 'SHOWCASE';
+  paintingStatus?:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
   notes?: string;
   tags?: string[]; // Renamed from userTags
   purchasePrice?: number;
@@ -171,7 +183,13 @@ export interface CreateModelRequest {
   gameSystemId: string;
   factionId?: string;
   collectionId: string;
-  paintingStatus?: 'UNPAINTED' | 'PRIMED' | 'BASE_COATED' | 'IN_PROGRESS' | 'COMPLETED' | 'SHOWCASE';
+  paintingStatus?:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
   notes?: string;
   tags?: string[];
   purchasePrice?: number;

@@ -66,7 +66,10 @@ class LibraryModelService {
     return response.data.data;
   }
 
-  async searchModels(query: string, limit: number = 10): Promise<LibraryModel[]> {
+  async searchModels(
+    query: string,
+    limit: number = 10
+  ): Promise<LibraryModel[]> {
     const params = new URLSearchParams({
       q: query,
       limit: limit.toString(),
@@ -95,7 +98,10 @@ class LibraryModelService {
     return response.data.data;
   }
 
-  async getModelsByGameSystem(gameSystemId: string, limit?: number): Promise<LibraryModel[]> {
+  async getModelsByGameSystem(
+    gameSystemId: string,
+    limit?: number
+  ): Promise<LibraryModel[]> {
     const params = new URLSearchParams();
     if (limit) {
       params.append('limit', limit.toString());
@@ -111,7 +117,10 @@ class LibraryModelService {
     return response.data.data;
   }
 
-  async getModelsByFaction(factionId: string, limit?: number): Promise<LibraryModel[]> {
+  async getModelsByFaction(
+    factionId: string,
+    limit?: number
+  ): Promise<LibraryModel[]> {
     const params = new URLSearchParams();
     if (limit) {
       params.append('limit', limit.toString());

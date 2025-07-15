@@ -56,19 +56,21 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
         flexDirection: 'column',
         transition: 'all 0.2s ease-in-out',
         cursor: onViewDetails ? 'pointer' : 'default',
-        '&:hover': onViewDetails ? {
-          transform: 'translateY(-2px)',
-          boxShadow: 4,
-        } : {},
+        '&:hover': onViewDetails
+          ? {
+              transform: 'translateY(-2px)',
+              boxShadow: 4,
+            }
+          : {},
       }}
       onClick={handleCardClick}
     >
       {/* Model Image */}
       <CardMedia
-        component="div"
+        component='div'
         sx={{
           height: compact ? 120 : 200,
-          backgroundImage: model.officialImageUrl 
+          backgroundImage: model.officialImageUrl
             ? `url(${model.officialImageUrl})`
             : 'linear-gradient(45deg, #f5f5f5 25%, #e0e0e0 25%, #e0e0e0 50%, #f5f5f5 50%, #f5f5f5 75%, #e0e0e0 75%)',
           backgroundSize: model.officialImageUrl ? 'cover' : '20px 20px',
@@ -82,9 +84,9 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
       >
         {!model.officialImageUrl && (
           <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ 
+            variant='body2'
+            color='text.secondary'
+            sx={{
               textAlign: 'center',
               backgroundColor: 'rgba(255, 255, 255, 0.8)',
               padding: 1,
@@ -94,14 +96,14 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
             No Image
           </Typography>
         )}
-        
+
         {/* Official Badge */}
         {model.isOfficial && (
           <Chip
             icon={<StarIcon sx={{ fontSize: 16 }} />}
-            label="Official"
-            size="small"
-            color="primary"
+            label='Official'
+            size='small'
+            color='primary'
             sx={{
               position: 'absolute',
               top: 8,
@@ -122,10 +124,10 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
           }}
         >
           {onViewDetails && (
-            <Tooltip title="View Details">
+            <Tooltip title='View Details'>
               <IconButton
-                size="small"
-                onClick={(e) => {
+                size='small'
+                onClick={e => {
                   e.stopPropagation();
                   handleViewDetails();
                 }}
@@ -136,7 +138,7 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
                   },
                 }}
               >
-                <InfoIcon fontSize="small" />
+                <InfoIcon fontSize='small' />
               </IconButton>
             </Tooltip>
           )}
@@ -148,8 +150,8 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
         <Stack spacing={1}>
           {/* Model Name */}
           <Typography
-            variant={compact ? "subtitle2" : "h6"}
-            component="h3"
+            variant={compact ? 'subtitle2' : 'h6'}
+            component='h3'
             sx={{
               fontWeight: 600,
               lineHeight: 1.2,
@@ -164,28 +166,28 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
           </Typography>
 
           {/* Game System and Faction */}
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Stack direction='row' spacing={1} flexWrap='wrap' useFlexGap>
             {model.gameSystem && (
               <Chip
                 label={model.gameSystem.shortName || model.gameSystem.name}
-                size="small"
-                variant="outlined"
-                color="primary"
+                size='small'
+                variant='outlined'
+                color='primary'
               />
             )}
             {model.faction && (
               <Chip
                 label={model.faction.name}
-                size="small"
-                variant="outlined"
-                color="secondary"
+                size='small'
+                variant='outlined'
+                color='secondary'
               />
             )}
           </Stack>
 
           {/* Points Cost */}
           {model.pointsCost && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               <strong>{model.pointsCost} pts</strong>
             </Typography>
           )}
@@ -193,8 +195,8 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
           {/* Description */}
           {model.description && !compact && (
             <Typography
-              variant="body2"
-              color="text.secondary"
+              variant='body2'
+              color='text.secondary'
               sx={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -210,21 +212,21 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
 
           {/* Tags */}
           {model.tags && model.tags.length > 0 && !compact && (
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-              {model.tags.slice(0, 3).map((tag) => (
+            <Stack direction='row' spacing={0.5} flexWrap='wrap' useFlexGap>
+              {model.tags.slice(0, 3).map(tag => (
                 <Chip
                   key={tag}
                   label={tag}
-                  size="small"
-                  variant="outlined"
+                  size='small'
+                  variant='outlined'
                   sx={{ fontSize: '0.7rem', height: 20 }}
                 />
               ))}
               {model.tags.length > 3 && (
                 <Chip
                   label={`+${model.tags.length - 3}`}
-                  size="small"
-                  variant="outlined"
+                  size='small'
+                  variant='outlined'
                   sx={{ fontSize: '0.7rem', height: 20 }}
                 />
               )}
@@ -238,10 +240,10 @@ const LibraryModelCard: React.FC<LibraryModelCardProps> = ({
         <Box sx={{ p: compact ? 1 : 2, pt: 0 }}>
           <Button
             fullWidth
-            variant="contained"
+            variant='contained'
             startIcon={<AddIcon />}
             onClick={handleAddToCollection}
-            size={compact ? "small" : "medium"}
+            size={compact ? 'small' : 'medium'}
           >
             Add to Collection
           </Button>

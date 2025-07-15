@@ -271,21 +271,22 @@ const validateAddLibraryModel = [
     .withMessage('Custom name must be a string with max 255 characters'),
   body('paintingStatus')
     .optional()
-    .isIn(['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'])
+    .isIn([
+      'UNPAINTED',
+      'PRIMED',
+      'BASE_COATED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'SHOWCASE',
+    ])
     .withMessage('Invalid painting status'),
   body('notes')
     .optional()
     .isString()
     .isLength({ max: 1000 })
     .withMessage('Notes must be a string with max 1000 characters'),
-  body('tags')
-    .optional()
-    .isArray()
-    .withMessage('Tags must be an array'),
-  body('tags.*')
-    .optional()
-    .isString()
-    .withMessage('Each tag must be a string'),
+  body('tags').optional().isArray().withMessage('Tags must be an array'),
+  body('tags.*').optional().isString().withMessage('Each tag must be a string'),
   body('purchasePrice')
     .optional()
     .isNumeric()
@@ -320,7 +321,10 @@ router.post(
         throw new AppError('User not authenticated', 401);
       }
 
-      const userModel = await modelService.addLibraryModelToCollection(userId, req.body);
+      const userModel = await modelService.addLibraryModelToCollection(
+        userId,
+        req.body
+      );
 
       res.status(201).json({
         success: true,
@@ -368,9 +372,18 @@ router.post(
 router.get(
   '/collection/:collectionId',
   authenticateToken,
-  param('collectionId').isString().notEmpty().withMessage('Collection ID is required'),
-  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1-100'),
+  param('collectionId')
+    .isString()
+    .notEmpty()
+    .withMessage('Collection ID is required'),
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1-100'),
   query('search').optional().trim(),
   query('paintingStatus').optional().isIn(Object.values(PaintingStatus)),
   query('isPublic').optional().isBoolean(),
@@ -383,16 +396,22 @@ router.get(
       if (!userId) {
         throw new AppError('Authentication required', 401);
       }
-      
+
       const filters = {
         page: req.query.page ? parseInt(req.query.page as string) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
         search: req.query.search as string,
         paintingStatus: req.query.paintingStatus as string,
-        isPublic: req.query.isPublic ? req.query.isPublic === 'true' : undefined,
+        isPublic: req.query.isPublic
+          ? req.query.isPublic === 'true'
+          : undefined,
       };
 
-      const result = await modelService.getUserModelsByCollection(collectionId, userId, filters);
+      const result = await modelService.getUserModelsByCollection(
+        collectionId,
+        userId,
+        filters
+      );
 
       res.json({
         success: true,

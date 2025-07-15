@@ -48,16 +48,17 @@ const validateGetModels = [
 ];
 
 const validateModelId = [
-  param('id')
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('Model ID is required'),
+  param('id').trim().isLength({ min: 1 }).withMessage('Model ID is required'),
 ];
 
 /**
  * Error handling middleware
  */
-const handleValidationErrors = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const handleValidationErrors = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -86,10 +87,17 @@ router.get(
       const search = req.query.search as string;
       const gameSystemId = req.query.gameSystemId as string;
       const factionId = req.query.factionId as string;
-      const isOfficial = req.query.isOfficial === 'true' ? true : 
-                        req.query.isOfficial === 'false' ? false : undefined;
-      const tags = Array.isArray(req.query.tags) ? req.query.tags as string[] : 
-                   req.query.tags ? [req.query.tags as string] : undefined;
+      const isOfficial =
+        req.query.isOfficial === 'true'
+          ? true
+          : req.query.isOfficial === 'false'
+            ? false
+            : undefined;
+      const tags = Array.isArray(req.query.tags)
+        ? (req.query.tags as string[])
+        : req.query.tags
+          ? [req.query.tags as string]
+          : undefined;
 
       const filters = {
         search,
@@ -124,7 +132,9 @@ router.get(
     query('q')
       .trim()
       .isLength({ min: 1, max: 100 })
-      .withMessage('Search query is required and must be between 1-100 characters'),
+      .withMessage(
+        'Search query is required and must be between 1-100 characters'
+      ),
     query('limit')
       .optional()
       .isInt({ min: 1, max: 50 })
@@ -204,9 +214,14 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const gameSystemId = req.params.gameSystemId;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const limit = req.query.limit
+        ? parseInt(req.query.limit as string)
+        : undefined;
 
-      const models = await libraryModelService.getModelsByGameSystem(gameSystemId, limit);
+      const models = await libraryModelService.getModelsByGameSystem(
+        gameSystemId,
+        limit
+      );
 
       res.json({
         success: true,
@@ -241,9 +256,14 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const factionId = req.params.factionId;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const limit = req.query.limit
+        ? parseInt(req.query.limit as string)
+        : undefined;
 
-      const models = await libraryModelService.getModelsByFaction(factionId, limit);
+      const models = await libraryModelService.getModelsByFaction(
+        factionId,
+        limit
+      );
 
       res.json({
         success: true,

@@ -29,7 +29,9 @@ class GameSystemService {
   }
 
   async getGameSystemById(id: string): Promise<GameSystem> {
-    const response = await api.get<ApiResponse<GameSystem>>(`${this.baseUrl}/${id}`);
+    const response = await api.get<ApiResponse<GameSystem>>(
+      `${this.baseUrl}/${id}`
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch game system');
     }
@@ -37,7 +39,9 @@ class GameSystemService {
   }
 
   async getFactions(gameSystemId: string): Promise<Faction[]> {
-    const response = await api.get<ApiResponse<Faction[]>>(`${this.baseUrl}/${gameSystemId}/factions`);
+    const response = await api.get<ApiResponse<Faction[]>>(
+      `${this.baseUrl}/${gameSystemId}/factions`
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch factions');
     }

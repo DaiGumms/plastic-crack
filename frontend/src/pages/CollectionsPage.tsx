@@ -359,13 +359,14 @@ export const CollectionsPage: React.FC = () => {
       <TabPanel value={activeTab} index={0}>
         {!user ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant='h6' gutterBottom>
               Sign in to view your collections
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              You need to be logged in to view and manage your personal collections.
+            <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
+              You need to be logged in to view and manage your personal
+              collections.
             </Typography>
-            <Button variant="contained" href="/login">
+            <Button variant='contained' href='/login'>
               Sign In
             </Button>
           </Box>

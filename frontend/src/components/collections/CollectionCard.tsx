@@ -129,7 +129,9 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           {viewMode === 'grid' ? (
             <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
           ) : (
-            getGameSystemIconFromCollection(collection, { sx: { fontSize: 48 } })
+            getGameSystemIconFromCollection(collection, {
+              sx: { fontSize: 48 },
+            })
           )}
         </Box>
       )}

@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -22,7 +22,7 @@ services:
     image: redis:7-alpine
     container_name: plastic-crack-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
@@ -30,7 +30,7 @@ services:
 
   # Backend API (for production)
   api:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: plastic-crack-api
@@ -42,7 +42,7 @@ services:
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       - postgres
       - redis
@@ -63,7 +63,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:8000/api/v1
     ports:
-      - "3000:80"
+      - '3000:80'
     depends_on:
       - api
     networks:
@@ -76,8 +76,8 @@ services:
     image: nginx:alpine
     container_name: plastic-crack-nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
@@ -97,8 +97,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

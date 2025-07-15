@@ -15,7 +15,10 @@ import {
   Pagination,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import { Add as AddIcon, ViewModule as GridViewIcon } from '@mui/icons-material';
+import {
+  Add as AddIcon,
+  ViewModule as GridViewIcon,
+} from '@mui/icons-material';
 import type { UserModel } from '../../types';
 import ModelCard from './ModelCard';
 
@@ -30,12 +33,12 @@ export interface ModelGridProps {
   onEditModel?: (model: UserModel) => void;
   onDeleteModel?: (model: UserModel) => void;
   onModelClick?: (model: UserModel) => void;
-  
+
   // Pagination
   page?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
-  
+
   // Filtering
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
@@ -45,7 +48,7 @@ export interface ModelGridProps {
   onGameSystemFilterChange?: (gameSystem: string) => void;
   tagFilter?: string[];
   onTagFilterChange?: (tags: string[]) => void;
-  
+
   // Available filter options
   availableGameSystems?: Array<{ id: string; name: string }>;
   availableTags?: string[];
@@ -62,12 +65,12 @@ const ModelGrid: React.FC<ModelGridProps> = ({
   onEditModel,
   onDeleteModel,
   onModelClick,
-  
+
   // Pagination
   page = 1,
   totalPages = 1,
   onPageChange,
-  
+
   // Filtering
   searchQuery = '',
   onSearchChange,
@@ -77,36 +80,51 @@ const ModelGrid: React.FC<ModelGridProps> = ({
   onGameSystemFilterChange,
   tagFilter = [],
   onTagFilterChange,
-  
+
   // Available filter options
   availableGameSystems = [],
   // availableTags = [], // Commented out as it's not used yet
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange?.(event.target.value);
-  }, [onSearchChange]);
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onSearchChange?.(event.target.value);
+    },
+    [onSearchChange]
+  );
 
-  const handlePaintingStatusFilterChange = useCallback((event: SelectChangeEvent) => {
-    onPaintingStatusFilterChange?.(event.target.value as string);
-  }, [onPaintingStatusFilterChange]);
+  const handlePaintingStatusFilterChange = useCallback(
+    (event: SelectChangeEvent) => {
+      onPaintingStatusFilterChange?.(event.target.value as string);
+    },
+    [onPaintingStatusFilterChange]
+  );
 
-  const handleGameSystemFilterChange = useCallback((event: SelectChangeEvent) => {
-    onGameSystemFilterChange?.(event.target.value as string);
-  }, [onGameSystemFilterChange]);
+  const handleGameSystemFilterChange = useCallback(
+    (event: SelectChangeEvent) => {
+      onGameSystemFilterChange?.(event.target.value as string);
+    },
+    [onGameSystemFilterChange]
+  );
 
-  const handleTagRemove = useCallback((tagToRemove: string) => {
-    onTagFilterChange?.(tagFilter.filter(tag => tag !== tagToRemove));
-  }, [tagFilter, onTagFilterChange]);
+  const handleTagRemove = useCallback(
+    (tagToRemove: string) => {
+      onTagFilterChange?.(tagFilter.filter(tag => tag !== tagToRemove));
+    },
+    [tagFilter, onTagFilterChange]
+  );
 
-  const handlePageChange = useCallback((_: React.ChangeEvent<unknown>, newPage: number) => {
-    onPageChange?.(newPage);
-  }, [onPageChange]);
+  const handlePageChange = useCallback(
+    (_: React.ChangeEvent<unknown>, newPage: number) => {
+      onPageChange?.(newPage);
+    },
+    [onPageChange]
+  );
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity='error' sx={{ mb: 2 }}>
         {error}
       </Alert>
     );
@@ -115,19 +133,24 @@ const ModelGrid: React.FC<ModelGridProps> = ({
   return (
     <Box>
       {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" component="h2">
+      <Box
+        display='flex'
+        justifyContent='space-between'
+        alignItems='center'
+        mb={3}
+      >
+        <Typography variant='h5' component='h2'>
           Models
           {!loading && (
-            <Typography component="span" color="text.secondary" ml={1}>
+            <Typography component='span' color='text.secondary' ml={1}>
               ({models.length})
             </Typography>
           )}
         </Typography>
-        
+
         {showAddButton && (
           <Button
-            variant="contained"
+            variant='contained'
             startIcon={<AddIcon />}
             onClick={onAddModel}
             disabled={loading}
@@ -139,13 +162,13 @@ const ModelGrid: React.FC<ModelGridProps> = ({
 
       {/* Filters */}
       <Box mb={3}>
-        <Box display="flex" flexWrap="wrap" gap={2} alignItems="center">
+        <Box display='flex' flexWrap='wrap' gap={2} alignItems='center'>
           {/* Search */}
-          <Box flex="1" minWidth="200px">
+          <Box flex='1' minWidth='200px'>
             <TextField
               fullWidth
-              size="small"
-              placeholder="Search models..."
+              size='small'
+              placeholder='Search models...'
               value={searchQuery}
               onChange={handleSearchChange}
               disabled={loading}
@@ -153,36 +176,36 @@ const ModelGrid: React.FC<ModelGridProps> = ({
           </Box>
 
           {/* Painting Status Filter */}
-          <Box minWidth="120px">
-            <FormControl fullWidth size="small">
+          <Box minWidth='120px'>
+            <FormControl fullWidth size='small'>
               <InputLabel>Status</InputLabel>
               <Select
                 value={paintingStatusFilter}
-                label="Status"
+                label='Status'
                 onChange={handlePaintingStatusFilterChange}
                 disabled={loading}
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="UNPAINTED">Unpainted</MenuItem>
-                <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-                <MenuItem value="COMPLETED">Completed</MenuItem>
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='UNPAINTED'>Unpainted</MenuItem>
+                <MenuItem value='IN_PROGRESS'>In Progress</MenuItem>
+                <MenuItem value='COMPLETED'>Completed</MenuItem>
               </Select>
             </FormControl>
           </Box>
 
           {/* Game System Filter */}
           {showCollectionFilter && availableGameSystems.length > 0 && (
-            <Box minWidth="150px">
-              <FormControl fullWidth size="small">
+            <Box minWidth='150px'>
+              <FormControl fullWidth size='small'>
                 <InputLabel>Game System</InputLabel>
                 <Select
                   value={gameSystemFilter}
-                  label="Game System"
+                  label='Game System'
                   onChange={handleGameSystemFilterChange}
                   disabled={loading}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  {availableGameSystems.map((gameSystem) => (
+                  <MenuItem value=''>All</MenuItem>
+                  {availableGameSystems.map(gameSystem => (
                     <MenuItem key={gameSystem.id} value={gameSystem.id}>
                       {gameSystem.name}
                     </MenuItem>
@@ -195,7 +218,7 @@ const ModelGrid: React.FC<ModelGridProps> = ({
           {/* View Mode Toggle */}
           <Box>
             <Button
-              variant="outlined"
+              variant='outlined'
               startIcon={<GridViewIcon />}
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
               disabled={loading}
@@ -208,15 +231,15 @@ const ModelGrid: React.FC<ModelGridProps> = ({
         {/* Active Tag Filters */}
         {tagFilter.length > 0 && (
           <Box mt={2}>
-            <Typography variant="body2" color="text.secondary" mb={1}>
+            <Typography variant='body2' color='text.secondary' mb={1}>
               Active filters:
             </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-              {tagFilter.map((tag) => (
+            <Stack direction='row' spacing={1} flexWrap='wrap'>
+              {tagFilter.map(tag => (
                 <Chip
                   key={tag}
                   label={tag}
-                  size="small"
+                  size='small'
                   onDelete={() => handleTagRemove(tag)}
                   disabled={loading}
                 />
@@ -243,36 +266,47 @@ const ModelGrid: React.FC<ModelGridProps> = ({
         >
           {Array.from({ length: 8 }).map((_, index) => (
             <Box key={index}>
-              <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 1 }} />
+              <Skeleton
+                variant='rectangular'
+                height={300}
+                sx={{ borderRadius: 1 }}
+              />
             </Box>
           ))}
         </Box>
       ) : models.length === 0 ? (
         <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
+          display='flex'
+          flexDirection='column'
+          alignItems='center'
+          justifyContent='center'
           py={8}
-          textAlign="center"
+          textAlign='center'
         >
-          <Typography variant="h6" color="text.secondary" mb={2}>
+          <Typography variant='h6' color='text.secondary' mb={2}>
             No models found
           </Typography>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            {searchQuery || paintingStatusFilter || gameSystemFilter || tagFilter.length > 0
+          <Typography variant='body2' color='text.secondary' mb={3}>
+            {searchQuery ||
+            paintingStatusFilter ||
+            gameSystemFilter ||
+            tagFilter.length > 0
               ? 'Try adjusting your filters to see more results.'
               : 'Get started by adding your first model.'}
           </Typography>
-          {showAddButton && !searchQuery && !paintingStatusFilter && !gameSystemFilter && tagFilter.length === 0 && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onAddModel}
-            >
-              Add Your First Model
-            </Button>
-          )}
+          {showAddButton &&
+            !searchQuery &&
+            !paintingStatusFilter &&
+            !gameSystemFilter &&
+            tagFilter.length === 0 && (
+              <Button
+                variant='contained'
+                startIcon={<AddIcon />}
+                onClick={onAddModel}
+              >
+                Add Your First Model
+              </Button>
+            )}
         </Box>
       ) : (
         <Box
@@ -292,7 +326,7 @@ const ModelGrid: React.FC<ModelGridProps> = ({
             gap: viewMode === 'grid' ? 3 : 2,
           }}
         >
-          {models.map((model) => (
+          {models.map(model => (
             <ModelCard
               key={model.id}
               model={model}
@@ -307,13 +341,13 @@ const ModelGrid: React.FC<ModelGridProps> = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
+        <Box display='flex' justifyContent='center' mt={4}>
           <Pagination
             count={totalPages}
             page={page}
             onChange={handlePageChange}
-            color="primary"
-            size="large"
+            color='primary'
+            size='large'
             disabled={loading}
           />
         </Box>

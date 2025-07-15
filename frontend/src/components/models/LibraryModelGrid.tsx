@@ -34,7 +34,7 @@ export interface LibraryModelGridProps {
   onFilterChange?: (filters: LibraryModelFilters) => void;
   onAddToCollection?: (model: LibraryModel) => void;
   onViewDetails?: (model: LibraryModel) => void;
-  
+
   // Filter options
   gameSystems?: GameSystem[];
   factions?: Faction[];
@@ -77,11 +77,14 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
     : factions;
 
   // Handle search input change
-  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchQuery(value);
-    onSearch?.(value);
-  }, [onSearch]);
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setSearchQuery(value);
+      onSearch?.(value);
+    },
+    [onSearch]
+  );
 
   // Handle filter changes
   const handleFilterChange = useCallback(() => {
@@ -92,7 +95,13 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
       isOfficial: selectedOfficial ? selectedOfficial === 'true' : undefined,
     };
     onFilterChange?.(filters);
-  }, [searchQuery, selectedGameSystem, selectedFaction, selectedOfficial, onFilterChange]);
+  }, [
+    searchQuery,
+    selectedGameSystem,
+    selectedFaction,
+    selectedOfficial,
+    onFilterChange,
+  ]);
 
   // Apply filters when they change
   useEffect(() => {
@@ -103,12 +112,14 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
   const handleGameSystemChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value;
     setSelectedGameSystem(value);
-    
+
     // Reset faction if it's not available for the new game system
     if (value && availableFactions.length === 0) {
       setSelectedFaction('');
     } else if (value && selectedFaction) {
-      const factionExists = availableFactions.some(f => f.id === selectedFaction);
+      const factionExists = availableFactions.some(
+        f => f.id === selectedFaction
+      );
       if (!factionExists) {
         setSelectedFaction('');
       }
@@ -135,13 +146,14 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
   };
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery || selectedGameSystem || selectedFaction || selectedOfficial;
+  const hasActiveFilters =
+    searchQuery || selectedGameSystem || selectedFaction || selectedOfficial;
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mt: 2 }}>
+      <Alert severity='error' sx={{ mt: 2 }}>
         {error}
       </Alert>
     );
@@ -155,37 +167,41 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
           {/* Search Bar */}
           <TextField
             fullWidth
-            label="Search models..."
+            label='Search models...'
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="Search by name, description, or tags"
+            placeholder='Search by name, description, or tags'
             disabled={loading}
           />
 
           {/* Filter Toggle and Clear */}
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction='row' spacing={1} alignItems='center'>
             <Button
               startIcon={<FilterIcon />}
               onClick={() => setShowFilters(!showFilters)}
-              variant={showFilters ? "contained" : "outlined"}
-              size="small"
+              variant={showFilters ? 'contained' : 'outlined'}
+              size='small'
             >
               Filters
             </Button>
-            
+
             {hasActiveFilters && (
               <Button
                 startIcon={<ClearIcon />}
                 onClick={handleClearFilters}
-                variant="outlined"
-                size="small"
-                color="secondary"
+                variant='outlined'
+                size='small'
+                color='secondary'
               >
                 Clear Filters
               </Button>
             )}
 
-            <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+            <Typography
+              variant='body2'
+              color='text.secondary'
+              sx={{ ml: 'auto' }}
+            >
               {totalCount} models found
             </Typography>
           </Stack>
@@ -197,12 +213,12 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
                 <InputLabel>Game System</InputLabel>
                 <Select
                   value={selectedGameSystem}
-                  label="Game System"
+                  label='Game System'
                   onChange={handleGameSystemChange}
                   disabled={loading}
                 >
-                  <MenuItem value="">All Game Systems</MenuItem>
-                  {gameSystems.map((gameSystem) => (
+                  <MenuItem value=''>All Game Systems</MenuItem>
+                  {gameSystems.map(gameSystem => (
                     <MenuItem key={gameSystem.id} value={gameSystem.id}>
                       {gameSystem.name}
                     </MenuItem>
@@ -210,16 +226,23 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ minWidth: 200 }} disabled={!selectedGameSystem || availableFactions.length === 0}>
+              <FormControl
+                sx={{ minWidth: 200 }}
+                disabled={!selectedGameSystem || availableFactions.length === 0}
+              >
                 <InputLabel>Faction</InputLabel>
                 <Select
                   value={selectedFaction}
-                  label="Faction"
+                  label='Faction'
                   onChange={handleFactionChange}
-                  disabled={loading || !selectedGameSystem || availableFactions.length === 0}
+                  disabled={
+                    loading ||
+                    !selectedGameSystem ||
+                    availableFactions.length === 0
+                  }
                 >
-                  <MenuItem value="">All Factions</MenuItem>
-                  {availableFactions.map((faction) => (
+                  <MenuItem value=''>All Factions</MenuItem>
+                  {availableFactions.map(faction => (
                     <MenuItem key={faction.id} value={faction.id}>
                       {faction.name}
                     </MenuItem>
@@ -231,13 +254,13 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
                 <InputLabel>Type</InputLabel>
                 <Select
                   value={selectedOfficial}
-                  label="Type"
+                  label='Type'
                   onChange={handleOfficialChange}
                   disabled={loading}
                 >
-                  <MenuItem value="">All Types</MenuItem>
-                  <MenuItem value="true">Official Only</MenuItem>
-                  <MenuItem value="false">Community Only</MenuItem>
+                  <MenuItem value=''>All Types</MenuItem>
+                  <MenuItem value='true'>Official Only</MenuItem>
+                  <MenuItem value='false'>Community Only</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
@@ -245,7 +268,7 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
 
           {/* Active Filter Chips */}
           {hasActiveFilters && (
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction='row' spacing={1} flexWrap='wrap' useFlexGap>
               {searchQuery && (
                 <Chip
                   label={`Search: "${searchQuery}"`}
@@ -253,28 +276,28 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
                     setSearchQuery('');
                     onSearch?.('');
                   }}
-                  size="small"
+                  size='small'
                 />
               )}
               {selectedGameSystem && (
                 <Chip
                   label={`Game System: ${gameSystems.find(g => g.id === selectedGameSystem)?.name}`}
                   onDelete={() => setSelectedGameSystem('')}
-                  size="small"
+                  size='small'
                 />
               )}
               {selectedFaction && (
                 <Chip
                   label={`Faction: ${factions.find(f => f.id === selectedFaction)?.name}`}
                   onDelete={() => setSelectedFaction('')}
-                  size="small"
+                  size='small'
                 />
               )}
               {selectedOfficial && (
                 <Chip
                   label={`Type: ${selectedOfficial === 'true' ? 'Official' : 'Community'}`}
                   onDelete={() => setSelectedOfficial('')}
-                  size="small"
+                  size='small'
                 />
               )}
             </Stack>
@@ -299,7 +322,7 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
           {Array.from({ length: 8 }).map((_, index) => (
             <Skeleton
               key={index}
-              variant="rectangular"
+              variant='rectangular'
               height={400}
               sx={{ borderRadius: 1 }}
             />
@@ -313,10 +336,10 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
             color: 'text.secondary',
           }}
         >
-          <Typography variant="h6" gutterBottom>
+          <Typography variant='h6' gutterBottom>
             No models found
           </Typography>
-          <Typography variant="body2">
+          <Typography variant='body2'>
             {hasActiveFilters
               ? 'Try adjusting your search or filters to find more models.'
               : 'No models are available in the library yet.'}
@@ -335,7 +358,7 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
             gap: 2,
           }}
         >
-          {models.map((model) => (
+          {models.map(model => (
             <LibraryModelCard
               key={model.id}
               model={model}
@@ -354,8 +377,8 @@ const LibraryModelGrid: React.FC<LibraryModelGridProps> = ({
             count={totalPages}
             page={currentPage}
             onChange={(_, page) => onPageChange?.(page)}
-            color="primary"
-            size="large"
+            color='primary'
+            size='large'
             showFirstButton
             showLastButton
             disabled={loading}

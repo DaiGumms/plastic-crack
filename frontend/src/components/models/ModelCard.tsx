@@ -80,7 +80,16 @@ export const ModelCard: React.FC<ModelCardProps> = ({
     }
   };
 
-  const getPaintingStatusColor = (status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+  const getPaintingStatusColor = (
+    status: string
+  ):
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'error'
+    | 'info'
+    | 'success'
+    | 'warning' => {
     switch (status) {
       case 'UNPAINTED':
         return 'default';
@@ -100,11 +109,15 @@ export const ModelCard: React.FC<ModelCardProps> = ({
   };
 
   const formatPaintingStatus = (status: string) => {
-    return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    return status
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const primaryImageUrl = model.photos?.find(p => p.isPrimary)?.originalUrl || 
-                      model.photos?.[0]?.originalUrl;
+  const primaryImageUrl =
+    model.photos?.find(p => p.isPrimary)?.originalUrl ||
+    model.photos?.[0]?.originalUrl;
 
   return (
     <Card
@@ -125,7 +138,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
       <Box sx={{ position: 'relative', flexShrink: 0 }}>
         {primaryImageUrl ? (
           <CardMedia
-            component="img"
+            component='img'
             sx={{
               height: viewMode === 'grid' ? 200 : 120,
               width: viewMode === 'list' ? 120 : '100%',
@@ -146,7 +159,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
               color: 'grey.500',
             }}
           >
-            <Typography variant="body2">No Image</Typography>
+            <Typography variant='body2'>No Image</Typography>
           </Box>
         )}
 
@@ -183,7 +196,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             }}
           >
             <IconButton
-              size="small"
+              size='small'
               onClick={handleMenuOpen}
               sx={{
                 backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -193,7 +206,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                 },
               }}
             >
-              <MoreVertIcon fontSize="small" />
+              <MoreVertIcon fontSize='small' />
             </IconButton>
           </Box>
         )}
@@ -202,8 +215,8 @@ export const ModelCard: React.FC<ModelCardProps> = ({
       <CardContent sx={{ flexGrow: 1, pb: 2 }}>
         {/* Model Title */}
         <Typography
-          variant="h6"
-          component="h3"
+          variant='h6'
+          component='h3'
           gutterBottom
           sx={{
             fontWeight: 600,
@@ -221,7 +234,11 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         {/* Game System & Faction */}
         <Box sx={{ mb: 1 }}>
           {model.gameSystem && (
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              display='block'
+            >
               {model.gameSystem.name}
               {model.faction && ` • ${model.faction.name}`}
             </Typography>
@@ -231,8 +248,8 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         {/* Model Description */}
         {model.description && (
           <Typography
-            variant="body2"
-            color="text.secondary"
+            variant='body2'
+            color='text.secondary'
             sx={{
               mb: 1,
               overflow: 'hidden',
@@ -250,21 +267,21 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         <Box sx={{ mb: 1 }}>
           <Chip
             label={formatPaintingStatus(model.paintingStatus)}
-            size="small"
+            size='small'
             color={getPaintingStatusColor(model.paintingStatus)}
-            variant="outlined"
+            variant='outlined'
           />
         </Box>
 
         {/* Model Stats */}
         <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
           {model.pointsCost && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant='caption' color='text.secondary'>
               {model.pointsCost} pts
             </Typography>
           )}
           {model.purchasePrice && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant='caption' color='text.secondary'>
               ${model.purchasePrice.toFixed(2)}
             </Typography>
           )}
@@ -277,16 +294,16 @@ export const ModelCard: React.FC<ModelCardProps> = ({
               <Chip
                 key={index}
                 label={tag}
-                size="small"
-                variant="outlined"
+                size='small'
+                variant='outlined'
                 sx={{ height: 20, fontSize: '0.7rem' }}
               />
             ))}
             {model.tags.length > 3 && (
               <Chip
                 label={`+${model.tags.length - 3} more`}
-                size="small"
-                variant="outlined"
+                size='small'
+                variant='outlined'
                 sx={{ height: 20, fontSize: '0.7rem' }}
               />
             )}
@@ -295,21 +312,29 @@ export const ModelCard: React.FC<ModelCardProps> = ({
 
         {/* Owner Information */}
         {showOwner && model.collection?.user && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 'auto' }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 'auto' }}
+          >
             <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
               {model.collection.user.displayName?.[0] ||
                 model.collection.user.username?.[0] ||
                 '?'}
             </Avatar>
-            <Typography variant="caption" color="text.secondary">
-              {model.collection.user.displayName || model.collection.user.username}
+            <Typography variant='caption' color='text.secondary'>
+              {model.collection.user.displayName ||
+                model.collection.user.username}
             </Typography>
           </Box>
         )}
 
         {/* Created Date */}
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-          Added {formatDistanceToNow(new Date(model.createdAt), { addSuffix: true })}
+        <Typography
+          variant='caption'
+          color='text.secondary'
+          sx={{ mt: 1, display: 'block' }}
+        >
+          Added{' '}
+          {formatDistanceToNow(new Date(model.createdAt), { addSuffix: true })}
         </Typography>
       </CardContent>
 
@@ -318,23 +343,23 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleMenuClose}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {onView && (
           <MenuItem onClick={handleCardClick}>
-            <ViewIcon sx={{ mr: 1 }} fontSize="small" />
+            <ViewIcon sx={{ mr: 1 }} fontSize='small' />
             View Details
           </MenuItem>
         )}
         {canEdit && (
           <MenuItem onClick={handleEdit}>
-            <EditIcon sx={{ mr: 1 }} fontSize="small" />
+            <EditIcon sx={{ mr: 1 }} fontSize='small' />
             Edit Model
           </MenuItem>
         )}
         {canDelete && (
           <MenuItem onClick={handleDelete}>
-            <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
+            <DeleteIcon sx={{ mr: 1 }} fontSize='small' />
             Delete Model
           </MenuItem>
         )}

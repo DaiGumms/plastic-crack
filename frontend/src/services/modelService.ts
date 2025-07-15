@@ -1,4 +1,10 @@
-import type { ApiResponse, PaginatedResponse, UserModel, CreateModelData, LibraryModel } from '../types';
+import type {
+  ApiResponse,
+  PaginatedResponse,
+  UserModel,
+  CreateModelData,
+  LibraryModel,
+} from '../types';
 import api from './api';
 
 export interface ModelPhoto {
@@ -30,9 +36,11 @@ export interface ModelListParams extends ModelFilters {
 class ModelService {
   private baseUrl = '/models';
 
-  async getModels(params: ModelListParams = {}): Promise<PaginatedResponse<UserModel>> {
+  async getModels(
+    params: ModelListParams = {}
+  ): Promise<PaginatedResponse<UserModel>> {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
@@ -54,7 +62,7 @@ class ModelService {
     params: ModelListParams = {}
   ): Promise<PaginatedResponse<UserModel>> {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
@@ -72,7 +80,9 @@ class ModelService {
   }
 
   async getModelById(id: string): Promise<UserModel> {
-    const response = await api.get<ApiResponse<UserModel>>(`${this.baseUrl}/${id}`);
+    const response = await api.get<ApiResponse<UserModel>>(
+      `${this.baseUrl}/${id}`
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch model');
     }
@@ -87,8 +97,14 @@ class ModelService {
     return response.data.data;
   }
 
-  async updateModel(id: string, data: Partial<CreateModelData>): Promise<UserModel> {
-    const response = await api.put<ApiResponse<UserModel>>(`${this.baseUrl}/${id}`, data);
+  async updateModel(
+    id: string,
+    data: Partial<CreateModelData>
+  ): Promise<UserModel> {
+    const response = await api.put<ApiResponse<UserModel>>(
+      `${this.baseUrl}/${id}`,
+      data
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to update model');
     }
@@ -102,11 +118,17 @@ class ModelService {
     }
   }
 
-  async uploadModelPhoto(modelId: string, file: File, description?: string, isPrimary?: boolean): Promise<ModelPhoto> {
+  async uploadModelPhoto(
+    modelId: string,
+    file: File,
+    description?: string,
+    isPrimary?: boolean
+  ): Promise<ModelPhoto> {
     const formData = new FormData();
     formData.append('photo', file);
     if (description) formData.append('description', description);
-    if (isPrimary !== undefined) formData.append('isPrimary', isPrimary.toString());
+    if (isPrimary !== undefined)
+      formData.append('isPrimary', isPrimary.toString());
 
     const response = await api.post<ApiResponse<ModelPhoto>>(
       `${this.baseUrl}/${modelId}/photos`,
@@ -117,7 +139,7 @@ class ModelService {
         },
       }
     );
-    
+
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to upload photo');
     }
@@ -133,13 +155,19 @@ class ModelService {
     }
   }
 
-  async updateModelPhotoDescription(modelId: string, photoId: string, description: string): Promise<ModelPhoto> {
+  async updateModelPhotoDescription(
+    modelId: string,
+    photoId: string,
+    description: string
+  ): Promise<ModelPhoto> {
     const response = await api.put<ApiResponse<ModelPhoto>>(
       `${this.baseUrl}/${modelId}/photos/${photoId}`,
       { description }
     );
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to update photo description');
+      throw new Error(
+        response.data.message || 'Failed to update photo description'
+      );
     }
     return response.data.data;
   }
@@ -154,25 +182,39 @@ class ModelService {
     return response.data.data;
   }
 
-  async searchModels(query: string, filters: ModelFilters = {}): Promise<UserModel[]> {
+  async searchModels(
+    query: string,
+    filters: ModelFilters = {}
+  ): Promise<UserModel[]> {
     const params = { ...filters, search: query };
     const response = await this.getModels(params);
     return response.data;
   }
 
-  async getModelsByCollection(collectionId: string, params: Omit<ModelListParams, 'collectionId'> = {}): Promise<PaginatedResponse<UserModel>> {
+  async getModelsByCollection(
+    collectionId: string,
+    params: Omit<ModelListParams, 'collectionId'> = {}
+  ): Promise<PaginatedResponse<UserModel>> {
     return this.getUserModelsByCollection(collectionId, params);
   }
 
-  async getPublicModels(params: Omit<ModelListParams, 'isPublic'> = {}): Promise<PaginatedResponse<UserModel>> {
+  async getPublicModels(
+    params: Omit<ModelListParams, 'isPublic'> = {}
+  ): Promise<PaginatedResponse<UserModel>> {
     return this.getModels({ ...params, isPublic: true });
   }
 
-  async getUserModels(userId: string, params: Omit<ModelListParams, 'userId'> = {}): Promise<PaginatedResponse<UserModel>> {
+  async getUserModels(
+    userId: string,
+    params: Omit<ModelListParams, 'userId'> = {}
+  ): Promise<PaginatedResponse<UserModel>> {
     return this.getModels({ ...params, userId });
   }
 
-  async addLibraryModelToCollection(libraryModel: LibraryModel, collectionId: string): Promise<UserModel> {
+  async addLibraryModelToCollection(
+    libraryModel: LibraryModel,
+    collectionId: string
+  ): Promise<UserModel> {
     const data = {
       modelId: libraryModel.id,
       collectionId: collectionId,
@@ -181,11 +223,13 @@ class ModelService {
     };
 
     const response = await api.post<ApiResponse<UserModel>>(
-      `${this.baseUrl}/add-library-model`, 
+      `${this.baseUrl}/add-library-model`,
       data
     );
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to add library model to collection');
+      throw new Error(
+        response.data.message || 'Failed to add library model to collection'
+      );
     }
     return response.data.data;
   }

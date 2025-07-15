@@ -8,9 +8,7 @@ import { Router, Response, NextFunction } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 
 import { prisma } from '../../lib/database';
-import {
-  authenticateToken,
-} from '../../middleware/auth.middleware';
+import { authenticateToken } from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
 import { CollectionService } from '../../services/collection.service';
 import { AuthenticatedRequest } from '../../types/auth';
