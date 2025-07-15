@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse, UserModel, CreateModelData } from '../types';
+import type { ApiResponse, PaginatedResponse, UserModel, CreateModelData, LibraryModel } from '../types';
 import api from './api';
 
 export interface ModelPhoto {
@@ -28,7 +28,7 @@ export interface ModelListParams extends ModelFilters {
 }
 
 class ModelService {
-  private baseUrl = '/api/v1/models';
+  private baseUrl = '/models';
 
   async getModels(params: ModelListParams = {}): Promise<PaginatedResponse<UserModel>> {
     const searchParams = new URLSearchParams();
@@ -45,6 +45,28 @@ class ModelService {
 
     const response = await api.get<PaginatedResponse<UserModel>>(
       `${this.baseUrl}?${searchParams.toString()}`
+    );
+    return response.data;
+  }
+
+  async getUserModelsByCollection(
+    collectionId: string,
+    params: ModelListParams = {}
+  ): Promise<PaginatedResponse<UserModel>> {
+    const searchParams = new URLSearchParams();
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach(item => searchParams.append(key, item));
+        } else {
+          searchParams.append(key, value.toString());
+        }
+      }
+    });
+
+    const response = await api.get<PaginatedResponse<UserModel>>(
+      `${this.baseUrl}/collection/${collectionId}?${searchParams.toString()}`
     );
     return response.data;
   }
@@ -139,7 +161,7 @@ class ModelService {
   }
 
   async getModelsByCollection(collectionId: string, params: Omit<ModelListParams, 'collectionId'> = {}): Promise<PaginatedResponse<UserModel>> {
-    return this.getModels({ ...params, collectionId });
+    return this.getUserModelsByCollection(collectionId, params);
   }
 
   async getPublicModels(params: Omit<ModelListParams, 'isPublic'> = {}): Promise<PaginatedResponse<UserModel>> {
@@ -148,6 +170,24 @@ class ModelService {
 
   async getUserModels(userId: string, params: Omit<ModelListParams, 'userId'> = {}): Promise<PaginatedResponse<UserModel>> {
     return this.getModels({ ...params, userId });
+  }
+
+  async addLibraryModelToCollection(libraryModel: LibraryModel, collectionId: string): Promise<UserModel> {
+    const data = {
+      modelId: libraryModel.id,
+      collectionId: collectionId,
+      paintingStatus: 'UNPAINTED' as const,
+      isPublic: false,
+    };
+
+    const response = await api.post<ApiResponse<UserModel>>(
+      `${this.baseUrl}/add-library-model`, 
+      data
+    );
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to add library model to collection');
+    }
+    return response.data.data;
   }
 }
 

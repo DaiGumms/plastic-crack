@@ -107,6 +107,7 @@ export const CollectionsPage: React.FC = () => {
   } = useQuery({
     queryKey: ['collections', activeTab, page, searchQuery, filters],
     queryFn: getCollectionsQuery,
+    enabled: activeTab !== 0 || !!user, // Only run for My Collections if user is authenticated
     placeholderData: {
       data: [],
       pagination: { page: 1, limit: 12, total: 0, totalPages: 0 },
@@ -261,6 +262,7 @@ export const CollectionsPage: React.FC = () => {
             variant='contained'
             startIcon={<AddIcon />}
             onClick={() => setFormOpen(true)}
+            disabled={!user}
           >
             New Collection
           </Button>
@@ -355,17 +357,31 @@ export const CollectionsPage: React.FC = () => {
 
       {/* Tab Panels */}
       <TabPanel value={activeTab} index={0}>
-        <CollectionGrid
-          collections={safeCollectionsData}
-          loading={isLoading}
-          showOwner={false}
-          onEdit={handleEditCollection}
-          onDelete={handleDeleteCollection}
-          currentUserId={user?.id}
-          emptyMessage="You haven't created any collections yet"
-          emptySubMessage='Create your first collection to organize your Warhammer models'
-          viewMode={viewMode}
-        />
+        {!user ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" gutterBottom>
+              Sign in to view your collections
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              You need to be logged in to view and manage your personal collections.
+            </Typography>
+            <Button variant="contained" href="/login">
+              Sign In
+            </Button>
+          </Box>
+        ) : (
+          <CollectionGrid
+            collections={safeCollectionsData}
+            loading={isLoading}
+            showOwner={false}
+            onEdit={handleEditCollection}
+            onDelete={handleDeleteCollection}
+            currentUserId={user?.id}
+            emptyMessage="You haven't created any collections yet"
+            emptySubMessage='Create your first collection to organize your Warhammer models'
+            viewMode={viewMode}
+          />
+        )}
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>

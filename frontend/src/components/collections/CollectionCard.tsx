@@ -80,7 +80,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   };
 
   const modelCount =
-    collection._count?.models || collection.models?.length || 0;
+    collection._count?.userModels || collection.userModels?.length || 0;
 
   return (
     <Card

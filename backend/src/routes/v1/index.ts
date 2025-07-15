@@ -5,6 +5,7 @@ import authRoutes from '../auth.routes';
 import { collectionRoutes } from './collection.routes';
 import gameSystemRoutes from './gameSystem.routes';
 import { healthRoutes } from './health';
+import libraryModelRoutes from './libraryModel.routes';
 import { modelRoutes } from './model.routes';
 import { redisRoutes } from './redis';
 import { userRoutes } from './user.routes';
@@ -31,7 +32,10 @@ router.use('/collections', collectionRoutes);
 // Game system routes
 router.use('/game-systems', gameSystemRoutes);
 
-// Model management routes
+// Library model routes (read-only catalog)
+router.use('/library/models', libraryModelRoutes);
+
+// Model management routes (user models)
 router.use('/models', modelRoutes);
 
 // Placeholder for future routes
@@ -46,6 +50,8 @@ router.get('/', (req, res) => {
       auth: '/api/v1/auth',
       users: '/api/v1/users',
       collections: '/api/v1/collections',
+      gameSystems: '/api/v1/game-systems',
+      libraryModels: '/api/v1/library/models',
       models: '/api/v1/models',
       ...(process.env.NODE_ENV === 'development' && { redis: '/api/v1/redis' }),
       // Future endpoints will be listed here

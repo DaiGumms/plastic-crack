@@ -10,7 +10,6 @@ import { body, param, query, validationResult } from 'express-validator';
 import { prisma } from '../../lib/database';
 import {
   authenticateToken,
-  optionalAuth,
 } from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
 import { CollectionService } from '../../services/collection.service';
@@ -377,13 +376,17 @@ router.get(
  */
 router.get(
   '/:id',
-  optionalAuth,
+  authenticateToken,
   validateCollectionId,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const collectionId = req.params.id;
       const userId = req.user?.id;
+
+      if (!userId) {
+        throw new AppError('Authentication required', 401);
+      }
 
       const collection = await collectionService.getCollectionById(
         collectionId,

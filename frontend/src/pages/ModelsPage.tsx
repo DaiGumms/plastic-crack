@@ -1,290 +1,351 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
-  Alert,
-  Snackbar,
+  Typography,
+  Box,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
-  Typography,
+  Alert,
+  Stack,
+  Breadcrumbs,
+  Link,
 } from '@mui/material';
-import { ModelGrid, ModelForm } from '../components/models';
-import { useAuth } from '../hooks/useAuth';
-import { modelService, type ModelListParams } from '../services/modelService';
+import {
+  Add as AddIcon,
+  Home as HomeIcon,
+  Category as CategoryIcon,
+} from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
+import LibraryModelList from '../components/models/LibraryModelList';
+import type { LibraryModel, Collection, PaginatedResponse } from '../types';
+import { libraryModelService, type LibraryModelFilters } from '../services/libraryModelService';
 import CollectionService from '../services/collectionService';
-// import gameSystemService from '../services/gameSystemService';
-import type { UserModel, CreateModelData, Collection } from '../types';
-// import type { GameSystem, Faction } from '../services/gameSystemService';
+import { modelService } from '../services/modelService';
 
 const ModelsPage: React.FC = () => {
-  const { collectionId } = useParams<{ collectionId?: string }>();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  // State
-  const [models, setModels] = useState<UserModel[]>([]);
+  const [models, setModels] = useState<LibraryModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [collections, setCollections] = useState<Collection[]>([]);
   
-  // Form state
-  const [formOpen, setFormOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<UserModel | null>(null);
-  const [formLoading, setFormLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  // Filter state
+  const [filters, setFilters] = useState<LibraryModelFilters>({});
   
-  // Delete confirmation
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [modelToDelete, setModelToDelete] = useState<UserModel | null>(null);
-  
-  // Success message
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [paintingStatusFilter, setPaintingStatusFilter] = useState('');
-  const [gameSystemFilter, setGameSystemFilter] = useState('');
-  const [tagFilter, setTagFilter] = useState<string[]>([]);
-  
-  // Options for form
-  const [collections, setCollections] = useState<Array<{ id: string; name: string; gameSystemId: string }>>([]);
-  const [gameSystems, setGameSystems] = useState<Array<{ id: string; name: string; shortName: string }>>([]);
-  const [factions, setFactions] = useState<Array<{ id: string; name: string; gameSystemId: string }>>([]);
-
-  // Load models
-  const loadModels = useCallback(async () => {
-    try {
-      setError(null);
-      setLoading(true);
-
-      const params: ModelListParams = {
-        page,
-        limit: 12,
-        search: searchQuery || undefined,
-        paintingStatus: paintingStatusFilter || undefined,
-        gameSystemId: gameSystemFilter || undefined,
-        collectionId: collectionId || undefined,
-        tags: tagFilter.length > 0 ? tagFilter : undefined,
-      };
-
-      // Only show user's own models if not viewing a specific collection
-      if (!collectionId && user) {
-        params.userId = user.id;
-      }
-
-      const response = await modelService.getModels(params);
-      setModels(response.data);
-      setTotalPages(response.pagination.totalPages);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load models');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchQuery, paintingStatusFilter, gameSystemFilter, tagFilter, collectionId, user]);
-
-  // Load form options
-  const loadFormOptions = useCallback(async () => {
-    try {
-      // For now, we'll use mock data since we need to implement game systems properly
-      const collectionsRes = await CollectionService.getCollections(1, 100);
-      
-      setCollections(collectionsRes.data.map((c: Collection) => ({
-        id: c.id,
-        name: c.name,
-        gameSystemId: c.gameSystemId,
-      })));
-      
-      // Mock game systems for now
-      setGameSystems([
-        { id: '1', name: 'Warhammer 40,000', shortName: 'WH40K' },
-        { id: '2', name: 'Age of Sigmar', shortName: 'AOS' },
-        { id: '3', name: 'Kill Team', shortName: 'KT' },
-      ]);
-
-      // Mock factions for now
-      setFactions([
-        { id: '1', name: 'Space Marines', gameSystemId: '1' },
-        { id: '2', name: 'Orks', gameSystemId: '1' },
-        { id: '3', name: 'Stormcast Eternals', gameSystemId: '2' },
-      ]);
-    } catch (err) {
-      console.error('Failed to load form options:', err);
-    }
-  }, []);
+  // Add to collection dialog state
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<LibraryModel | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<string>('');
+  const [addingToCollection, setAddingToCollection] = useState(false);
 
   // Load initial data
   useEffect(() => {
-    loadModels();
-    loadFormOptions();
-  }, [loadModels, loadFormOptions]);
-
-  // Handlers
-  const handleAddModel = () => {
-    setSelectedModel(null);
-    setFormError(null);
-    setFormOpen(true);
-  };
-
-  const handleEditModel = (model: UserModel) => {
-    setSelectedModel(model);
-    setFormError(null);
-    setFormOpen(true);
-  };
-
-  const handleDeleteModel = (model: UserModel) => {
-    setModelToDelete(model);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleModelClick = (model: UserModel) => {
-    navigate(`/models/${model.id}`);
-  };
-
-  const handleFormSubmit = async (data: CreateModelData) => {
-    try {
-      setFormLoading(true);
-      setFormError(null);
-
-      if (selectedModel) {
-        await modelService.updateModel(selectedModel.id, data);
-        setSuccessMessage('Model updated successfully!');
-      } else {
-        await modelService.createModel(data);
-        setSuccessMessage('Model created successfully!');
+    const loadInitialData = async () => {
+      try {
+        setLoading(true);
+        // Load all user collections (use large limit to get all)
+        const collectionsResponse = await CollectionService.getMyCollections(1, 100);
+        setCollections(collectionsResponse.data);
+      } catch (err) {
+        console.error('Error loading initial data:', err);
+        setError('Failed to load initial data. Please refresh the page.');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setFormOpen(false);
-      setSelectedModel(null);
-      loadModels();
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to save model');
-    } finally {
-      setFormLoading(false);
-    }
-  };
+    loadInitialData();
+  }, []);
 
-  const confirmDelete = async () => {
-    if (!modelToDelete) return;
-
+  // Function to reload collections
+  const reloadCollections = useCallback(async () => {
     try {
-      await modelService.deleteModel(modelToDelete.id);
-      setSuccessMessage('Model deleted successfully!');
-      setDeleteDialogOpen(false);
-      setModelToDelete(null);
-      loadModels();
+      const collectionsResponse = await CollectionService.getMyCollections(1, 100);
+      setCollections(collectionsResponse.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete model');
-      setDeleteDialogOpen(false);
-      setModelToDelete(null);
+      console.error('Error reloading collections:', err);
+    }
+  }, []);
+
+  // Reload collections when window gains focus (user might have created a collection in another tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      reloadCollections();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [reloadCollections]);
+
+  // Load models when filters change - loads ALL models by making multiple API calls
+  const loadModels = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      let allModels: LibraryModel[] = [];
+      let currentPage = 1;
+      const pageSize = 100; // Use maximum allowed by backend
+      let hasMoreData = true;
+
+      // Keep fetching until we get all models
+      while (hasMoreData) {
+        const response: PaginatedResponse<LibraryModel> = await libraryModelService.getModels(
+          currentPage,
+          pageSize,
+          filters
+        );
+        
+        allModels = [...allModels, ...response.data];
+        
+        // Check if we've loaded all models
+        hasMoreData = response.data.length === pageSize && 
+                      allModels.length < response.pagination.total;
+        
+        currentPage++;
+      }
+      
+      setModels(allModels);
+    } catch (err) {
+      console.error('Error loading models:', err);
+      setError('Failed to load models. Please try again.');
+      setModels([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    loadModels();
+  }, [loadModels]);
+
+  // Handle search
+  const handleSearch = useCallback((query: string) => {
+    setFilters(prev => ({ ...prev, search: query }));
+  }, []);
+
+  // Handle filter changes
+  const handleFilterChange = useCallback((newFilters: LibraryModelFilters) => {
+    setFilters(newFilters);
+  }, []);
+
+  // Handle add to collection
+  const handleAddToCollection = useCallback((model: LibraryModel) => {
+    setSelectedModel(model);
+    setAddDialogOpen(true);
+    setSelectedCollection(collections[0]?.id || '');
+  }, [collections]);
+
+  // Handle confirm add to collection
+  const handleConfirmAddToCollection = async () => {
+    if (!selectedModel || !selectedCollection) return;
+    
+    try {
+      setAddingToCollection(true);
+      
+      // Use the proper method to add library model to collection
+      await modelService.addLibraryModelToCollection(selectedModel, selectedCollection);
+      
+      console.log(`Added ${selectedModel.name} to collection successfully!`);
+      
+      // Close dialog and reset state
+      setAddDialogOpen(false);
+      setSelectedModel(null);
+      setSelectedCollection('');
+      
+      // Refresh collections to show updated counts
+      await reloadCollections();
+      
+    } catch (err) {
+      console.error('Error adding model to collection:', err);
+      // TODO: Show error notification to user
+    } finally {
+      setAddingToCollection(false);
     }
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  // Handle cancel add to collection
+  const handleCancelAddToCollection = () => {
+    setAddDialogOpen(false);
+    setSelectedModel(null);
+    setSelectedCollection('');
+    // Refresh collections in case user created one in another tab
+    reloadCollections();
   };
 
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setPage(1); // Reset to first page
-  };
+  // Extract unique game systems and factions from models
+  const gameSystems = React.useMemo(() => {
+    const uniqueSystems = new Map();
+    models.forEach(model => {
+      if (model.gameSystem) {
+        uniqueSystems.set(model.gameSystem.id, model.gameSystem);
+      }
+    });
+    return Array.from(uniqueSystems.values());
+  }, [models]);
 
-  const handleFilterChange = (filterType: string, value: string) => {
-    switch (filterType) {
-      case 'paintingStatus':
-        setPaintingStatusFilter(value);
-        break;
-      case 'gameSystem':
-        setGameSystemFilter(value);
-        break;
-    }
-    setPage(1); // Reset to first page
-  };
-
-  const handleTagFilterChange = (tags: string[]) => {
-    setTagFilter(tags);
-    setPage(1); // Reset to first page
-  };
+  const factions = React.useMemo(() => {
+    const uniqueFactions = new Map();
+    models.forEach(model => {
+      if (model.faction) {
+        uniqueFactions.set(model.faction.id, model.faction);
+      }
+    });
+    return Array.from(uniqueFactions.values());
+  }, [models]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <ModelGrid
+      {/* Breadcrumbs */}
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Link
+          component={RouterLink}
+          to="/"
+          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+        >
+          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Home
+        </Link>
+        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+          <CategoryIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Model Library
+        </Typography>
+      </Breadcrumbs>
+
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
+          <Box>
+            <Typography variant="h3" component="h1" gutterBottom>
+              Model Library
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Browse and discover models to add to your collections
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
+      {/* Models List */}
+      <LibraryModelList
         models={models}
         loading={loading}
         error={error}
-        showAddButton={Boolean(user)}
-        showOwner={!collectionId}
-        showCollectionFilter={!collectionId}
-        onAddModel={handleAddModel}
-        onEditModel={handleEditModel}
-        onDeleteModel={handleDeleteModel}
-        onModelClick={handleModelClick}
-        
-        // Pagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        
-        // Filtering
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        paintingStatusFilter={paintingStatusFilter}
-        onPaintingStatusFilterChange={(status) => handleFilterChange('paintingStatus', status)}
-        gameSystemFilter={gameSystemFilter}
-        onGameSystemFilterChange={(gameSystem) => handleFilterChange('gameSystem', gameSystem)}
-        tagFilter={tagFilter}
-        onTagFilterChange={handleTagFilterChange}
-        
-        // Available filter options
-        availableGameSystems={gameSystems}
-      />
-
-      {/* Model Form Dialog */}
-      <ModelForm
-        open={formOpen}
-        onClose={() => {
-          setFormOpen(false);
-          setSelectedModel(null);
-          setFormError(null);
-        }}
-        onSubmit={handleFormSubmit}
-        model={selectedModel}
-        loading={formLoading}
-        error={formError}
-        collections={collections}
+        onSearch={handleSearch}
+        onFilterChange={handleFilterChange}
+        onAddToCollection={handleAddToCollection}
         gameSystems={gameSystems}
         factions={factions}
+        showAddButtons={collections.length > 0}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Model</DialogTitle>
+      {/* Add to Collection Dialog */}
+      <Dialog
+        open={addDialogOpen}
+        onClose={handleCancelAddToCollection}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Add "{selectedModel?.name}" to Collection
+        </DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete "{modelToDelete?.name}"? This action cannot be undone.
-          </Typography>
+          {(() => {
+            // Debug logging
+            console.log('Selected model:', selectedModel);
+            console.log('Available collections:', collections);
+            console.log('Model game system ID:', selectedModel?.gameSystem?.id);
+            collections.forEach(c => console.log('Collection:', c.name, 'Game System ID:', c.gameSystemId));
+            
+            // Filter collections to only show those that match the model's game system
+            const compatibleCollections = collections.filter(collection => 
+              collection.gameSystemId === selectedModel?.gameSystem?.id
+            );
+            
+            if (collections.length === 0) {
+              return (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  You need to create a collection first before adding models.
+                  <Button
+                    component={RouterLink}
+                    to="/collections"
+                    sx={{ ml: 1 }}
+                  >
+                    Go to Collections
+                  </Button>
+                </Alert>
+              );
+            }
+            
+            if (compatibleCollections.length === 0) {
+              return (
+                <Alert severity="warning" sx={{ mt: 1 }}>
+                  You don't have any collections for{' '}
+                  <strong>{selectedModel?.gameSystem?.name || 'this game system'}</strong>.
+                  Create a collection for this game system first.
+                  <Button
+                    component={RouterLink}
+                    to="/collections"
+                    sx={{ ml: 1 }}
+                  >
+                    Create Collection
+                  </Button>
+                </Alert>
+              );
+            }
+            
+            return (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Choose which <strong>{selectedModel?.gameSystem?.name}</strong> collection to add this model to:
+                </Typography>
+                
+                <Stack spacing={1} sx={{ mt: 2 }}>
+                  {compatibleCollections.map((collection) => (
+                    <Button
+                      key={collection.id}
+                      variant={selectedCollection === collection.id ? "contained" : "outlined"}
+                      onClick={() => setSelectedCollection(collection.id)}
+                      sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle2">
+                          {collection.name}
+                        </Typography>
+                        {collection.description && (
+                          <Typography variant="caption" color="text.secondary">
+                            {collection.description}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Button>
+                  ))}
+                </Stack>
+              </Box>
+            );
+          })()}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
+          <Button onClick={handleCancelAddToCollection}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmAddToCollection}
+            variant="contained"
+            disabled={
+              !selectedCollection || 
+              addingToCollection || 
+              collections.length === 0 ||
+              collections.filter(c => c.gameSystemId === selectedModel?.gameSystem?.id).length === 0
+            }
+            startIcon={addingToCollection ? undefined : <AddIcon />}
+          >
+            {addingToCollection ? 'Adding...' : 'Add to Collection'}
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Success Message */}
-      <Snackbar
-        open={Boolean(successMessage)}
-        autoHideDuration={6000}
-        onClose={() => setSuccessMessage('')}
-      >
-        <Alert onClose={() => setSuccessMessage('')} severity="success">
-          {successMessage}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };

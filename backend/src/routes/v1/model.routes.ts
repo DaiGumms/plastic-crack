@@ -254,6 +254,85 @@ const handleValidationErrors = (
   next();
 };
 
+// Validation for adding library model to collection
+const validateAddLibraryModel = [
+  body('modelId')
+    .isString()
+    .notEmpty()
+    .withMessage('Library model ID is required'),
+  body('collectionId')
+    .isString()
+    .notEmpty()
+    .withMessage('Collection ID is required'),
+  body('customName')
+    .optional()
+    .isString()
+    .isLength({ max: 255 })
+    .withMessage('Custom name must be a string with max 255 characters'),
+  body('paintingStatus')
+    .optional()
+    .isIn(['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'])
+    .withMessage('Invalid painting status'),
+  body('notes')
+    .optional()
+    .isString()
+    .isLength({ max: 1000 })
+    .withMessage('Notes must be a string with max 1000 characters'),
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  body('tags.*')
+    .optional()
+    .isString()
+    .withMessage('Each tag must be a string'),
+  body('purchasePrice')
+    .optional()
+    .isNumeric()
+    .withMessage('Purchase price must be a number'),
+  body('purchaseDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Purchase date must be a valid date'),
+  body('customPointsCost')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Custom points cost must be a positive integer'),
+  body('isPublic')
+    .optional()
+    .isBoolean()
+    .withMessage('isPublic must be a boolean'),
+];
+
+/**
+ * POST /api/v1/models/add-library-model
+ * Add a library model to a user's collection
+ */
+router.post(
+  '/add-library-model',
+  authenticateToken,
+  validateAddLibraryModel,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new AppError('User not authenticated', 401);
+      }
+
+      const userModel = await modelService.addLibraryModelToCollection(userId, req.body);
+
+      res.status(201).json({
+        success: true,
+        data: userModel,
+        message: 'Library model added to collection successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 /**
  * POST /api/v1/models
  * Add a new model to a collection
@@ -284,61 +363,41 @@ router.post(
 
 /**
  * GET /api/v1/models/collection/:collectionId
- * Get models in a collection
+ * Get user models in a collection
  */
 router.get(
   '/collection/:collectionId',
-  validateCollectionId,
-  validatePagination,
+  authenticateToken,
+  param('collectionId').isString().notEmpty().withMessage('Collection ID is required'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1-100'),
+  query('search').optional().trim(),
+  query('paintingStatus').optional().isIn(Object.values(PaintingStatus)),
+  query('isPublic').optional().isBoolean(),
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const collectionId = req.params.collectionId;
       const userId = req.user?.id;
 
-      const pagination = {
-        page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit
-          ? parseInt(req.query.limit as string)
-          : undefined,
-        sortBy: req.query.sortBy as
-          | 'name'
-          | 'createdAt'
-          | 'updatedAt'
-          | 'paintingStatus',
-        sortOrder: req.query.sortOrder as 'asc' | 'desc',
-      };
-
-      // Extract filter parameters
+      if (!userId) {
+        throw new AppError('Authentication required', 401);
+      }
+      
       const filters = {
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
         search: req.query.search as string,
-        paintingStatus: req.query.paintingStatus as PaintingStatus,
-        gameSystemId: req.query.gameSystemId as string,
-        factionId: req.query.factionId as string,
-        tags: req.query.tags
-          ? ((Array.isArray(req.query.tags)
-              ? req.query.tags
-              : [req.query.tags]) as string[])
-          : undefined,
+        paintingStatus: req.query.paintingStatus as string,
+        isPublic: req.query.isPublic ? req.query.isPublic === 'true' : undefined,
       };
 
-      // Remove undefined values
-      Object.keys(filters).forEach(key => {
-        if (filters[key as keyof typeof filters] === undefined) {
-          delete filters[key as keyof typeof filters];
-        }
-      });
-
-      const result = await modelService.getModelsByCollection(
-        collectionId,
-        userId,
-        filters,
-        pagination
-      );
+      const result = await modelService.getUserModelsByCollection(collectionId, userId, filters);
 
       res.json({
         success: true,
-        data: result,
+        data: result.data,
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);

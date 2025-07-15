@@ -12,6 +12,7 @@ import {
   Avatar,
   Skeleton,
   Alert,
+  Paper,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -34,6 +35,9 @@ export const CollectionDetailPage: React.FC = () => {
     queryFn: () => CollectionService.getCollection(id!),
     enabled: !!id,
   });
+
+  // Use models from collection response instead of separate API call
+  const models = collection?.userModels || [];
 
   if (isLoading) {
     return (
@@ -88,8 +92,7 @@ export const CollectionDetailPage: React.FC = () => {
     );
   }
 
-  const modelCount =
-    collection._count?.models || collection.models?.length || 0;
+  const modelCount = models.length;
 
   return (
     <Container maxWidth='lg' sx={{ py: 4 }}>
@@ -154,11 +157,69 @@ export const CollectionDetailPage: React.FC = () => {
 
           {modelCount === 0 ? (
             <Alert severity='info'>No models in this collection yet.</Alert>
+          ) : isLoading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {[...Array(3)].map((_, index) => (
+                <Paper key={index} sx={{ p: 2 }}>
+                  <Skeleton variant='text' sx={{ fontSize: '1.25rem', mb: 1 }} />
+                  <Skeleton variant='text' sx={{ fontSize: '1rem', mb: 1 }} />
+                  <Skeleton variant='text' sx={{ fontSize: '0.875rem' }} />
+                </Paper>
+              ))}
+            </Box>
+          ) : error ? (
+            <Alert severity='error'>Failed to load models for this collection.</Alert>
           ) : (
-            <Box>
-              <Typography variant='body2' color='text.secondary'>
-                Model management will be implemented in the next phase.
-              </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {models.map(userModel => (
+                <Paper key={userModel.id} sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='h6' component='h3'>
+                        {userModel.customName || userModel.model?.name}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
+                        {userModel.model?.gameSystem?.name} - {userModel.model?.faction?.name}
+                      </Typography>
+                      {userModel.notes && (
+                        <Typography variant='body2' sx={{ mb: 1 }}>
+                          {userModel.notes}
+                        </Typography>
+                      )}
+                      {userModel.tags.length > 0 && (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                          {userModel.tags.map(tag => (
+                            <Chip key={tag} label={tag} size='small' variant='outlined' />
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                    <Box sx={{ textAlign: 'right', minWidth: 120 }}>
+                      <Chip
+                        label={userModel.paintingStatus.replace('_', ' ')}
+                        color={
+                          userModel.paintingStatus === 'COMPLETED' ? 'success' :
+                          userModel.paintingStatus === 'IN_PROGRESS' ? 'warning' :
+                          userModel.paintingStatus === 'SHOWCASE' ? 'primary' :
+                          'default'
+                        }
+                        size='small'
+                        sx={{ mb: 1 }}
+                      />
+                      {userModel.purchasePrice && (
+                        <Typography variant='body2' color='text.secondary'>
+                          ${userModel.purchasePrice.toFixed(2)}
+                        </Typography>
+                      )}
+                      {userModel.purchaseDate && (
+                        <Typography variant='caption' color='text.secondary' display='block'>
+                          Purchased {formatDistanceToNow(new Date(userModel.purchaseDate), { addSuffix: true })}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Paper>
+              ))}
             </Box>
           )}
         </CardContent>

@@ -70,8 +70,8 @@ model User {
   
   // Relations
   collections       Collection[]
-  models            Model[]
-  modelLikes        ModelLike[]
+  userModels        UserModel[]
+  userModelLikes    UserModelLike[]
   followers         UserRelationship[] @relation("UserFollowers")
   following         UserRelationship[] @relation("UserFollowing")
   
@@ -156,7 +156,7 @@ model Collection {
   // Relations
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   gameSystem   GameSystem @relation(fields: [gameSystemId], references: [id])
-  models       Model[]
+  userModels   UserModel[]
   
   @@map("collections")
 }
@@ -172,24 +172,53 @@ enum PaintingStatus {
   SHOWCASE
 }
 
+// Master model catalog - all available models
 model Model {
   id            String         @id @default(cuid())
   name          String
   description   String?
   gameSystemId  String
   factionId     String?
+  
+  // Model catalog details
+  officialPointsCost Int?
+  modelType      String?        // e.g., "Infantry", "Vehicle", "Monster"
+  tags          String[]       @default([])
+  imageUrl      String?
+  isOfficial    Boolean        @default(true)    // Official vs community models
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  gameSystem    GameSystem @relation(fields: [gameSystemId], references: [id])
+  faction       Faction?   @relation(fields: [factionId], references: [id])
+  userModels    UserModel[]
+  
+  @@unique([name, gameSystemId, factionId])
+  @@map("models")
+}
+
+// User's collection instances of models
+model UserModel {
+  id            String         @id @default(cuid())
+  modelId       String         // Reference to the master model
   collectionId  String
   userId        String
   
-  // Model Details
+  // User-specific attributes
+  customName    String?        // User's custom name for this instance
   paintingStatus PaintingStatus @default(UNPAINTED)
-  pointsCost     Int?
-  notes          String?
+  notes         String?
   tags          String[]      @default([])
   
   // Purchase Information
   purchasePrice  Decimal?      @db.Decimal(10,2)
   purchaseDate   DateTime?
+  
+  // Custom user fields
+  customPointsCost Int?        // User's custom point cost override
   
   // Visibility and Status
   isPublic       Boolean       @default(true)
@@ -199,20 +228,20 @@ model Model {
   updatedAt     DateTime @updatedAt
   
   // Relations
-  gameSystem    GameSystem   @relation(fields: [gameSystemId], references: [id])
-  faction       Faction?     @relation(fields: [factionId], references: [id])
+  model         Model        @relation(fields: [modelId], references: [id])
   collection    Collection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos        ModelPhoto[]
-  likes         ModelLike[]
-  modelTags     ModelTag[]
+  photos        UserModelPhoto[]
+  likes         UserModelLike[]
+  modelTags     UserModelTag[]
   
-  @@map("models")
+  @@unique([modelId, collectionId]) // User can only have one instance of a model per collection
+  @@map("user_models")
 }
 
-model ModelPhoto {
+model UserModelPhoto {
   id          String   @id @default(cuid())
-  modelId     String
+  userModelId String
   fileName    String
   originalUrl String
   thumbnailUrl String?
@@ -229,23 +258,23 @@ model ModelPhoto {
   createdAt   DateTime @default(now())
   
   // Relations
-  model       Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  userModel   UserModel @relation(fields: [userModelId], references: [id], onDelete: Cascade)
   
-  @@map("model_photos")
+  @@map("user_model_photos")
 }
 
-model ModelLike {
-  id        String   @id @default(cuid())
-  modelId   String
-  userId    String
-  createdAt DateTime @default(now())
+model UserModelLike {
+  id          String   @id @default(cuid())
+  userModelId String
+  userId      String
+  createdAt   DateTime @default(now())
   
   // Relations
-  model     Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userModel   UserModel @relation(fields: [userModelId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@unique([modelId, userId])
-  @@map("model_likes")
+  @@unique([userModelId, userId])
+  @@map("user_model_likes")
 }
 
 // ===== TAGGING SYSTEM =====
@@ -262,7 +291,7 @@ model Tag {
   updatedAt   DateTime @updatedAt
   
   // Relations
-  modelTags   ModelTag[]
+  userModelTags UserModelTag[]
   
   @@map("tags")
 }
@@ -278,16 +307,16 @@ enum TagCategory {
   CUSTOM
 }
 
-model ModelTag {
-  id       String   @id @default(cuid())
-  modelId  String
-  tagId    String
-  createdAt DateTime @default(now())
+model UserModelTag {
+  id          String   @id @default(cuid())
+  userModelId String
+  tagId       String
+  createdAt   DateTime @default(now())
   
   // Relations
-  model    Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  tag      Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  userModel   UserModel @relation(fields: [userModelId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
   
-  @@unique([modelId, tagId])
+  @@unique([userModelId, tagId])
   @@map("model_tags")
 }

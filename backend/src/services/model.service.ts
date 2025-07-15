@@ -7,6 +7,7 @@
 import {
   PrismaClient,
   Model,
+  UserModel,
   Prisma,
   PaintingStatus,
 } from '../generated/prisma';
@@ -24,6 +25,19 @@ export interface CreateModelData {
   tags?: string[];
   purchasePrice?: number;
   purchaseDate?: Date;
+  isPublic?: boolean;
+}
+
+export interface AddLibraryModelData {
+  modelId: string;       // ID of the library model to add
+  collectionId: string;  // Collection to add it to
+  customName?: string;   // User's custom name for this instance
+  paintingStatus?: PaintingStatus;
+  notes?: string;
+  tags?: string[];
+  purchasePrice?: number;
+  purchaseDate?: Date;
+  customPointsCost?: number;
   isPublic?: boolean;
 }
 
@@ -82,6 +96,113 @@ export class ModelService {
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
+  }
+
+  /**
+   * Add a library model to a user's collection (create UserModel instance)
+   */
+  async addLibraryModelToCollection(
+    userId: string, 
+    data: AddLibraryModelData
+  ): Promise<UserModel> {
+    // Verify the library model exists
+    const libraryModel = await this.prisma.model.findUnique({
+      where: { id: data.modelId },
+      include: {
+        gameSystem: true,
+        faction: true,
+      },
+    });
+
+    if (!libraryModel) {
+      throw new AppError('Library model not found', 404);
+    }
+
+    // Verify collection exists and user owns it
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: data.collectionId },
+    });
+
+    if (!collection) {
+      throw new AppError('Collection not found', 404);
+    }
+
+    if (collection.userId !== userId) {
+      throw new AppError('Access denied', 403);
+    }
+
+    // Verify the model's game system matches the collection's game system
+    if (libraryModel.gameSystemId !== collection.gameSystemId) {
+      throw new AppError(
+        'Model game system does not match collection game system',
+        400
+      );
+    }
+
+    // Check if user already has this model in this collection
+    const existingUserModel = await this.prisma.userModel.findUnique({
+      where: {
+        modelId_collectionId: {
+          modelId: data.modelId,
+          collectionId: data.collectionId,
+        },
+      },
+    });
+
+    if (existingUserModel) {
+      throw new AppError('Model already exists in this collection', 400);
+    }
+
+    try {
+      // Create the user model instance
+      const userModel = await this.prisma.userModel.create({
+        data: {
+          modelId: data.modelId,
+          collectionId: data.collectionId,
+          userId,
+          customName: data.customName,
+          paintingStatus: data.paintingStatus || 'UNPAINTED',
+          notes: data.notes,
+          tags: data.tags || [],
+          purchasePrice: data.purchasePrice
+            ? new Prisma.Decimal(data.purchasePrice)
+            : null,
+          purchaseDate: data.purchaseDate,
+          customPointsCost: data.customPointsCost,
+          isPublic: data.isPublic ?? true,
+        },
+        include: {
+          model: {
+            include: {
+              gameSystem: true,
+              faction: true,
+            },
+          },
+          collection: {
+            select: {
+              id: true,
+              name: true,
+              userId: true,
+            },
+          },
+          photos: true,
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
+        },
+      });
+
+      return userModel;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new AppError('Model already exists in this collection', 400);
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -655,5 +776,91 @@ export class ModelService {
     };
 
     return this.searchModels(filters, pagination);
+  }
+
+  /**
+   * Get user models in a collection (UserModel instances) - simplified version
+   */
+  async getUserModelsByCollection(
+    collectionId: string,
+    userId?: string,
+    filters: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      paintingStatus?: string;
+      isPublic?: boolean;
+    } = {}
+  ): Promise<{
+    data: UserModel[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    // Verify collection access
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+    });
+
+    if (!collection) {
+      throw new AppError('Collection not found', 404);
+    }
+
+    // Check privacy - if collection is private, only owner can view
+    if (!collection.isPublic && collection.userId !== userId) {
+      throw new AppError('Collection not found or access denied', 404);
+    }
+
+    const page = filters.page || 1;
+    const limit = Math.min(filters.limit || 20, 100);
+    const skip = (page - 1) * limit;
+
+    // Build where clause for UserModel
+    const where = {
+      collectionId,
+    };
+
+    // Get total count
+    const total = await this.prisma.userModel.count({ where });
+
+    // Get user models with related data
+    const userModels = await this.prisma.userModel.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        model: {
+          include: {
+            gameSystem: true,
+            faction: true,
+          },
+        },
+        collection: {
+          select: {
+            id: true,
+            name: true,
+            userId: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: userModels,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 }
