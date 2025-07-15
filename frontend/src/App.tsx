@@ -21,6 +21,7 @@ import { PublicProfilePage } from './pages/PublicProfilePage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { CollectionsPage } from './pages/CollectionsPage';
 import { CollectionDetailPage } from './pages/CollectionDetailPage';
+import { ModelDetailPage } from './pages/models/ModelDetailPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -128,6 +129,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <CollectionDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/models/:id'
+                  element={
+                    <ProtectedRoute>
+                      <ModelDetailPage />
                     </ProtectedRoute>
                   }
                 />

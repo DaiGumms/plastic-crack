@@ -56,7 +56,7 @@ export const renderWithProviders = (
 
 // Mock server response helpers
 export const mockApiResponse = {
-  success: function<T>(data: T) {
+  success: function <T>(data: T) {
     return {
       data,
       success: true,

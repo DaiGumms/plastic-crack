@@ -59,27 +59,124 @@ export interface RegisterData {
 }
 
 // Model/Collection types
-export interface UserModel {
+export type PaintingStatus = 'UNPAINTED' | 'PRIMED' | 'BASE_COATED' | 'IN_PROGRESS' | 'COMPLETED' | 'SHOWCASE';
+
+export interface ModelPhoto {
   id: string;
-  userId: string;
+  modelId: string;
+  fileName: string;
+  originalUrl: string;
+  thumbnailUrl?: string;
+  description?: string;
+  isPrimary: boolean;
+  sortOrder: number;
+  fileSize?: number;
+  width?: number;
+  height?: number;
+  mimeType?: string;
+  createdAt: string;
+}
+
+export interface Model {
+  id: string;
   name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus: 'unpainted' | 'in_progress' | 'completed';
+  description?: string;
+  gameSystemId: string;
+  factionId?: string;
+  collectionId: string;
+  userId: string;
+  paintingStatus: PaintingStatus;
+  pointsCost?: number;
   notes?: string;
-  imageUrls?: string[];
+  tags: string[];
+  purchasePrice?: number;
+  purchaseDate?: string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
+  gameSystem?: {
+    id: string;
+    name: string;
+    shortName: string;
+  };
+  faction?: {
+    id: string;
+    name: string;
+  };
+  collection?: {
+    id: string;
+    name: string;
+  };
+  user?: {
+    id: string;
+    username: string;
+    displayName?: string;
+  };
+  photos: ModelPhoto[];
+  _count?: {
+    likes: number;
+  };
 }
 
 export interface CreateModelData {
   name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus?: 'unpainted' | 'in_progress' | 'completed';
+  description?: string;
+  gameSystemId: string;
+  factionId?: string;
+  collectionId: string;
+  paintingStatus?: PaintingStatus;
+  pointsCost?: number;
   notes?: string;
+  tags?: string[];
+  purchasePrice?: number;
+  purchaseDate?: string;
+  isPublic?: boolean;
+}
+
+export interface UpdateModelData {
+  name?: string;
+  description?: string;
+  gameSystemId?: string;
+  factionId?: string;
+  paintingStatus?: PaintingStatus;
+  pointsCost?: number;
+  notes?: string;
+  tags?: string[];
+  purchasePrice?: number;
+  purchaseDate?: string;
+  isPublic?: boolean;
+}
+
+export interface ModelFilters {
+  search?: string;
+  gameSystemId?: string;
+  factionId?: string;
+  paintingStatus?: PaintingStatus;
+  tags?: string[];
+  isPublic?: boolean;
+  collectionId?: string;
+}
+
+export interface ModelPhotoData {
+  fileName: string;
+  originalUrl: string;
+  thumbnailUrl?: string;
+  description?: string;
+  isPrimary?: boolean;
+  sortOrder?: number;
+  fileSize?: number;
+  width?: number;
+  height?: number;
+  mimeType?: string;
+}
+
+// Legacy interface for backward compatibility (to be removed in future versions)
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UserModel extends Model {}
+
+export interface BulkUpdateData {
+  modelIds: string[];
+  updates: Partial<UpdateModelData>;
 }
 
 export interface Collection {
