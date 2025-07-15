@@ -11,6 +11,7 @@ export interface CreateCollectionData {
   name: string;
   description?: string;
   isPublic?: boolean;
+  gameSystemId: string;
   tags?: string[];
   imageUrl?: string;
 }
@@ -19,6 +20,7 @@ export interface UpdateCollectionData {
   name?: string;
   description?: string;
   isPublic?: boolean;
+  gameSystemId?: string;
   tags?: string[];
   imageUrl?: string;
 }
@@ -28,6 +30,7 @@ export interface CollectionFilters {
   isPublic?: boolean;
   tags?: string[];
   userId?: string;
+  gameSystem?: string;
 }
 
 export interface PaginationOptions {
@@ -74,6 +77,15 @@ export class CollectionService {
               username: true,
               displayName: true,
               profileImageUrl: true,
+            },
+          },
+          gameSystem: {
+            select: {
+              id: true,
+              name: true,
+              shortName: true,
+              description: true,
+              publisher: true,
             },
           },
           _count: {
@@ -142,6 +154,12 @@ export class CollectionService {
       where.userId = filters.userId;
     }
 
+    if (filters.gameSystem) {
+      where.gameSystem = {
+        shortName: { equals: filters.gameSystem, mode: 'insensitive' },
+      };
+    }
+
     // Get total count for pagination
     const total = await this.prisma.collection.count({ where });
 
@@ -160,6 +178,15 @@ export class CollectionService {
             profileImageUrl: true,
           },
         },
+        gameSystem: {
+          select: {
+            id: true,
+            name: true,
+            shortName: true,
+            description: true,
+            publisher: true,
+          },
+        },
         _count: {
           select: {
             models: true,
@@ -175,7 +202,7 @@ export class CollectionService {
 
     // Calculate total value for each collection
     const collectionsWithStats: CollectionWithStats[] = collections.map(
-      (collection) => {
+      collection => {
         const totalValue = collection.models.reduce((sum, model) => {
           return sum + (model.purchasePrice?.toNumber() || 0);
         }, 0);
@@ -214,6 +241,15 @@ export class CollectionService {
             username: true,
             displayName: true,
             profileImageUrl: true,
+          },
+        },
+        gameSystem: {
+          select: {
+            id: true,
+            name: true,
+            shortName: true,
+            description: true,
+            publisher: true,
           },
         },
         models: {
@@ -297,6 +333,15 @@ export class CollectionService {
               username: true,
               displayName: true,
               profileImageUrl: true,
+            },
+          },
+          gameSystem: {
+            select: {
+              id: true,
+              name: true,
+              shortName: true,
+              description: true,
+              publisher: true,
             },
           },
           _count: {
@@ -416,6 +461,15 @@ export class CollectionService {
     const collections = await this.prisma.collection.findMany({
       where,
       include: {
+        gameSystem: {
+          select: {
+            id: true,
+            name: true,
+            shortName: true,
+            description: true,
+            publisher: true,
+          },
+        },
         _count: {
           select: {
             models: true,
@@ -430,7 +484,7 @@ export class CollectionService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return collections.map((collection) => {
+    return collections.map(collection => {
       const totalValue = collection.models.reduce((sum, model) => {
         return sum + (model.purchasePrice?.toNumber() || 0);
       }, 0);

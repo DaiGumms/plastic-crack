@@ -1,5 +1,14 @@
 import { useEffect } from 'react';
 
+// Global gtag declaration for Google Analytics
+declare global {
+  function gtag(
+    command: string,
+    eventName: string,
+    parameters?: Record<string, unknown>
+  ): void;
+}
+
 interface PerformanceMetrics {
   fcp?: number; // First Contentful Paint
   lcp?: number; // Largest Contentful Paint
@@ -81,7 +90,7 @@ class PerformanceMonitor {
     // First Input Delay
     const fidObserver = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
-        // @ts-ignore - processingStart is not in the types yet
+        // @ts-expect-error - processingStart is not in the types yet
         const fid = entry.processingStart - entry.startTime;
         this.metrics.fid = fid;
         this.logMetric('FID', fid, this.config.thresholds!.fid);
@@ -94,9 +103,9 @@ class PerformanceMonitor {
     let clsValue = 0;
     const clsObserver = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
-        // @ts-ignore - value is not in the types yet
+        // @ts-expect-error - value is not in the types yet
         if (!entry.hadRecentInput) {
-          // @ts-ignore
+          // @ts-expect-error - value property not in official types
           clsValue += entry.value;
         }
       }
@@ -167,7 +176,6 @@ class PerformanceMonitor {
     // In a real application, you would send this to your analytics service
     // For example: Google Analytics, Mixpanel, or custom analytics
     if (typeof gtag !== 'undefined') {
-      // @ts-ignore
       gtag('event', 'web_vitals', {
         metric_name: metric,
         metric_value: Math.round(value),
@@ -235,11 +243,13 @@ export const markPerformanceEnd = (label: string, logResult = true) => {
 
 // Component for displaying performance metrics in development
 export const PerformanceDebugger: React.FC = () => {
+  usePerformanceMonitor({
+    enableLogging: process.env.NODE_ENV === 'development',
+  });
+
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
-
-  usePerformanceMonitor({ enableLogging: true });
 
   return null;
 };

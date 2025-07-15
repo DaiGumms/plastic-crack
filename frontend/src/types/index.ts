@@ -82,6 +82,72 @@ export interface CreateModelData {
   notes?: string;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  isPublic: boolean;
+  userId: string;
+  gameSystemId: string;
+  gameSystem?: {
+    id: string;
+    name: string;
+    shortName: string;
+    description?: string;
+    publisher?: string;
+  };
+  tags: string[];
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    username: string;
+    displayName?: string;
+    profileImageUrl?: string;
+  };
+  models?: UserModel[];
+  _count?: {
+    models: number;
+  };
+}
+
+export interface CreateCollectionData {
+  name: string;
+  description?: string;
+  isPublic?: boolean;
+  gameSystemId: string;
+  tags?: string[];
+  imageUrl?: string;
+}
+
+export interface UpdateCollectionData {
+  name?: string;
+  description?: string;
+  isPublic?: boolean;
+  gameSystemId?: string;
+  tags?: string[];
+  imageUrl?: string;
+}
+
+export interface CollectionFilter {
+  search?: string;
+  isPublic?: boolean;
+  tags?: string[];
+  userId?: string;
+  gameSystem?: string;
+}
+
+export interface CollectionStats {
+  totalModels: number;
+  unpainterModels: number;
+  inProgressModels: number;
+  completedModels: number;
+  totalValue: number;
+  averageValue: number;
+  mostRecentModel?: UserModel;
+}
+
 // API response types
 export interface ApiResponse<T = unknown> {
   success: boolean;

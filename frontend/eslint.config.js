@@ -19,5 +19,23 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Disable react-refresh for utility files
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, checkJS: false },
+      ],
+    },
+  },
+  {
+    files: [
+      '**/*.test.{ts,tsx}',
+      '**/test-utils.{ts,tsx}',
+      '**/utils/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/no-namespace': 'off',
+    },
   },
 ]);

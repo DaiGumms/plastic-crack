@@ -8,18 +8,28 @@ const mockAuthStore = {
   user: null,
   token: null,
   isAuthenticated: false,
+  isLoading: false,
+  error: null,
   login: vi.fn(),
   logout: vi.fn(),
+  register: vi.fn(),
   setUser: vi.fn(),
   clearAuth: vi.fn(),
+  clearError: vi.fn(),
+  checkAuthStatus: vi.fn(),
 } as {
   user: unknown;
   token: unknown;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: unknown;
   login: ReturnType<typeof vi.fn>;
   logout: ReturnType<typeof vi.fn>;
+  register: ReturnType<typeof vi.fn>;
   setUser: ReturnType<typeof vi.fn>;
   clearAuth: ReturnType<typeof vi.fn>;
+  clearError: ReturnType<typeof vi.fn>;
+  checkAuthStatus: ReturnType<typeof vi.fn>;
 };
 
 vi.mock('../../store/authStore', () => ({

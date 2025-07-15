@@ -12,8 +12,12 @@ import type {
 } from '../types';
 
 // Create axios instance
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
-console.log('🔧 API Service - Base URL:', baseURL);
+let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+
+// Handle relative URLs in development
+if (baseURL.startsWith('/') && import.meta.env.DEV) {
+  baseURL = `http://localhost:3001${baseURL}`;
+}
 
 const api: AxiosInstance = axios.create({
   baseURL,
@@ -55,7 +59,12 @@ api.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth-storage');
-      window.location.href = '/login';
+
+      // Only redirect if we're not already on the login page
+      if (!window.location.pathname.includes('/login')) {
+        console.log('401 error detected, redirecting to login');
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      }
     }
     return Promise.reject(error);
   }

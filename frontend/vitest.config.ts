@@ -7,6 +7,17 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: true,
     globals: true,
+    // Limit concurrency for Windows file handle limits
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true, // Run tests in single thread to avoid file handle issues
+        minThreads: 1,
+        maxThreads: 1,
+      },
+    },
+    // Reduce file watchers and concurrent operations
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

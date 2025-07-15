@@ -8,19 +8,6 @@ interface User {
   lastName?: string;
 }
 
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface RegistrationData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
 type NavigateFunction = (path: string) => void;
 type AsyncFunction = () => Promise<void>;
 type LogoutFunction = () => Promise<void>;

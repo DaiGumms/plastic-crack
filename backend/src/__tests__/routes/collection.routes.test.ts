@@ -4,7 +4,15 @@
  * Tests Issue #19 implementation - Collection CRUD Routes
  */
 
-import { beforeAll, beforeEach, afterAll, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  afterEach,
+  describe,
+  it,
+  expect,
+} from '@jest/globals';
 import request from 'supertest';
 import { PrismaClient } from '../../generated/prisma';
 import { app } from '../../app';
@@ -17,6 +25,7 @@ describe('Collection Routes - Issue #19', () => {
   let authToken: string;
   let authToken2: string;
   let testCollectionId: string;
+  let testGameSystemId: string;
 
   beforeAll(async () => {
     prisma = new PrismaClient();
@@ -28,9 +37,11 @@ describe('Collection Routes - Issue #19', () => {
   });
 
   beforeEach(async () => {
-    // Clean up database
+    // Clean up database in correct order to handle foreign key constraints
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
+    await prisma.faction.deleteMany();
+    await prisma.gameSystem.deleteMany();
     await prisma.tag.deleteMany();
     await prisma.user.deleteMany();
 
@@ -57,15 +68,35 @@ describe('Collection Routes - Issue #19', () => {
     });
     testUserId2 = user2.id;
 
+    // Create test game system
+    const gameSystem = await prisma.gameSystem.create({
+      data: {
+        name: 'Warhammer 40,000',
+        shortName: 'WH40K',
+        description: 'The grim darkness of the far future',
+      },
+    });
+    testGameSystemId = gameSystem.id;
+
     // Create auth tokens
     authToken = jwt.sign(
-      { userId: testUserId, email: user1.email, username: user1.username, role: user1.role },
+      {
+        userId: testUserId,
+        email: user1.email,
+        username: user1.username,
+        role: user1.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
 
     authToken2 = jwt.sign(
-      { userId: testUserId2, email: user2.email, username: user2.username, role: user2.role },
+      {
+        userId: testUserId2,
+        email: user2.email,
+        username: user2.username,
+        role: user2.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
@@ -77,6 +108,7 @@ describe('Collection Routes - Issue #19', () => {
         description: 'A test collection for testing',
         isPublic: true,
         userId: testUserId,
+        gameSystemId: testGameSystemId,
         tags: ['Test', 'Collection'],
       },
     });
@@ -84,9 +116,11 @@ describe('Collection Routes - Issue #19', () => {
   });
 
   afterEach(async () => {
-    // Clean up after each test
+    // Clean up after each test in correct order to handle foreign key constraints
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
+    await prisma.faction.deleteMany();
+    await prisma.gameSystem.deleteMany();
     await prisma.tag.deleteMany();
     await prisma.user.deleteMany();
   });
@@ -97,6 +131,7 @@ describe('Collection Routes - Issue #19', () => {
         name: 'Space Marines Collection',
         description: 'My awesome Space Marines',
         isPublic: true,
+        gameSystemId: testGameSystemId,
         tags: ['Warhammer 40k', 'Space Marines'],
       };
 
@@ -117,6 +152,7 @@ describe('Collection Routes - Issue #19', () => {
     it('should create collection with minimal data', async () => {
       const collectionData = {
         name: 'Minimal Collection',
+        gameSystemId: testGameSystemId,
       };
 
       const response = await request(app)
@@ -133,6 +169,7 @@ describe('Collection Routes - Issue #19', () => {
     it('should require authentication', async () => {
       const collectionData = {
         name: 'Unauthorized Collection',
+        gameSystemId: testGameSystemId,
       };
 
       await request(app)
@@ -144,6 +181,7 @@ describe('Collection Routes - Issue #19', () => {
     it('should validate collection name', async () => {
       const collectionData = {
         name: '', // Invalid empty name
+        gameSystemId: testGameSystemId,
       };
 
       await request(app)
@@ -156,6 +194,7 @@ describe('Collection Routes - Issue #19', () => {
     it('should validate tags array', async () => {
       const collectionData = {
         name: 'Test Collection',
+        gameSystemId: testGameSystemId,
         tags: 'not-an-array', // Invalid tags format
       };
 
@@ -169,6 +208,7 @@ describe('Collection Routes - Issue #19', () => {
     it('should limit number of tags', async () => {
       const collectionData = {
         name: 'Collection with Many Tags',
+        gameSystemId: testGameSystemId,
         tags: Array.from({ length: 25 }, (_, i) => `Tag${i + 1}`), // Too many tags
       };
 
@@ -190,6 +230,7 @@ describe('Collection Routes - Issue #19', () => {
             description: 'First public collection',
             isPublic: true,
             userId: testUserId,
+            gameSystemId: testGameSystemId,
             tags: ['Public', 'Test'],
           },
           {
@@ -197,6 +238,7 @@ describe('Collection Routes - Issue #19', () => {
             description: 'Private collection',
             isPublic: false,
             userId: testUserId,
+            gameSystemId: testGameSystemId,
             tags: ['Private', 'Secret'],
           },
           {
@@ -204,6 +246,7 @@ describe('Collection Routes - Issue #19', () => {
             description: 'Another public collection',
             isPublic: true,
             userId: testUserId2,
+            gameSystemId: testGameSystemId,
             tags: ['Public', 'User2'],
           },
         ],
@@ -216,9 +259,9 @@ describe('Collection Routes - Issue #19', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.collections).toHaveLength(3); // 2 public collections + testCollection
-      expect(response.body.data.collections.every((c: any) => c.isPublic)).toBe(true);
-      expect(response.body.data.total).toBe(3);
+      expect(response.body.data).toHaveLength(3); // 2 public collections + testCollection
+      expect(response.body.data.every((c: any) => c.isPublic)).toBe(true);
+      expect(response.body.pagination.total).toBe(3);
     });
 
     it('should paginate collections correctly', async () => {
@@ -227,10 +270,10 @@ describe('Collection Routes - Issue #19', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.collections).toHaveLength(2);
-      expect(response.body.data.page).toBe(1);
-      expect(response.body.data.limit).toBe(2);
-      expect(response.body.data.totalPages).toBe(2);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.pagination.page).toBe(1);
+      expect(response.body.pagination.limit).toBe(2);
+      expect(response.body.pagination.totalPages).toBe(2);
     });
 
     it('should filter by search term', async () => {
@@ -239,8 +282,8 @@ describe('Collection Routes - Issue #19', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.collections).toHaveLength(1);
-      expect(response.body.data.collections[0].name).toBe('Public Collection A');
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].name).toBe('Public Collection A');
     });
 
     it('should filter by user ID', async () => {
@@ -249,8 +292,8 @@ describe('Collection Routes - Issue #19', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.collections).toHaveLength(1);
-      expect(response.body.data.collections[0].userId).toBe(testUserId2);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].userId).toBe(testUserId2);
     });
 
     it('should sort collections correctly', async () => {
@@ -259,7 +302,7 @@ describe('Collection Routes - Issue #19', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      const names = response.body.data.collections.map((c: any) => c.name);
+      const names = response.body.data.map((c: any) => c.name);
       expect(names).toEqual([...names].sort());
     });
   });
@@ -272,6 +315,7 @@ describe('Collection Routes - Issue #19', () => {
           description: 'Blue Space Marines from Ultramar',
           isPublic: true,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
           tags: ['Space Marines', 'Ultramarines', 'Blue'],
         },
       });
@@ -307,9 +351,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should require search query', async () => {
-      await request(app)
-        .get('/api/v1/collections/search')
-        .expect(400);
+      await request(app).get('/api/v1/collections/search').expect(400);
     });
   });
 
@@ -321,6 +363,7 @@ describe('Collection Routes - Issue #19', () => {
           description: 'A private collection',
           isPublic: false,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
         },
       });
     });
@@ -337,9 +380,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/v1/collections/my')
-        .expect(401);
+      await request(app).get('/api/v1/collections/my').expect(401);
     });
   });
 
@@ -361,6 +402,7 @@ describe('Collection Routes - Issue #19', () => {
           name: 'Private Collection',
           isPublic: false,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
         },
       });
 
@@ -380,6 +422,7 @@ describe('Collection Routes - Issue #19', () => {
           name: 'Private Collection',
           isPublic: false,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
         },
       });
 
@@ -390,9 +433,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should return 404 for non-existent collection', async () => {
-      await request(app)
-        .get('/api/v1/collections/non-existent-id')
-        .expect(404);
+      await request(app).get('/api/v1/collections/non-existent-id').expect(404);
     });
   });
 
@@ -431,7 +472,9 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.name).toBe(updateData.name);
-      expect(response.body.data.description).toBe('A test collection for testing'); // Should remain unchanged
+      expect(response.body.data.description).toBe(
+        'A test collection for testing'
+      ); // Should remain unchanged
     });
 
     it('should require authentication', async () => {
@@ -521,13 +564,9 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should validate pagination parameters', async () => {
-      await request(app)
-        .get('/api/v1/collections?page=-1')
-        .expect(400);
+      await request(app).get('/api/v1/collections?page=-1').expect(400);
 
-      await request(app)
-        .get('/api/v1/collections?limit=200')
-        .expect(400);
+      await request(app).get('/api/v1/collections?limit=200').expect(400);
     });
 
     it('should handle very long collection names', async () => {
@@ -553,6 +592,7 @@ describe('Collection Routes - Issue #19', () => {
       const collectionData = {
         name: 'Concurrent Collection',
         description: 'Testing concurrent creation',
+        gameSystemId: testGameSystemId,
       };
 
       const promises = Array.from({ length: 3 }, () =>

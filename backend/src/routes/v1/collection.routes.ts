@@ -8,7 +8,10 @@ import { Router, Response, NextFunction } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 
 import { prisma } from '../../lib/database';
-import { authenticateToken, optionalAuth } from '../../middleware/auth.middleware';
+import {
+  authenticateToken,
+  optionalAuth,
+} from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
 import { CollectionService } from '../../services/collection.service';
 import { AuthenticatedRequest } from '../../types/auth';
@@ -29,6 +32,11 @@ const validateCreateCollection = [
     .trim()
     .isLength({ max: 1000 })
     .withMessage('Description must be max 1000 characters'),
+  body('gameSystemId')
+    .notEmpty()
+    .withMessage('Game system ID is required')
+    .isString()
+    .withMessage('Game system ID must be a string'),
   body('isPublic')
     .optional()
     .isBoolean()
@@ -37,11 +45,14 @@ const validateCreateCollection = [
     .optional()
     .isArray()
     .withMessage('Tags must be an array')
-    .custom((tags) => {
+    .custom(tags => {
       if (tags && tags.length > 20) {
         throw new Error('Maximum 20 tags allowed');
       }
-      if (tags && tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)) {
+      if (
+        tags &&
+        tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)
+      ) {
         throw new Error('Each tag must be a string with max 50 characters');
       }
       return true;
@@ -71,11 +82,14 @@ const validateUpdateCollection = [
     .optional()
     .isArray()
     .withMessage('Tags must be an array')
-    .custom((tags) => {
+    .custom(tags => {
       if (tags && tags.length > 20) {
         throw new Error('Maximum 20 tags allowed');
       }
-      if (tags && tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)) {
+      if (
+        tags &&
+        tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)
+      ) {
         throw new Error('Each tag must be a string with max 50 characters');
       }
       return true;
@@ -106,9 +120,7 @@ const validatePagination = [
 ];
 
 const validateCollectionId = [
-  param('id')
-    .isLength({ min: 1 })
-    .withMessage('Collection ID is required'),
+  param('id').isLength({ min: 1 }).withMessage('Collection ID is required'),
 ];
 
 /**
@@ -145,8 +157,11 @@ router.post(
       if (!userId) {
         throw new AppError('User not authenticated', 401);
       }
-      
-      const collection = await collectionService.createCollection(userId, req.body);
+
+      const collection = await collectionService.createCollection(
+        userId,
+        req.body
+      );
 
       res.status(201).json({
         success: true,
@@ -171,22 +186,39 @@ router.get(
       const filters = {
         search: req.query.search as string,
         isPublic: req.query.isPublic ? req.query.isPublic === 'true' : true, // Default to public only
-        tags: req.query.tags ? (Array.isArray(req.query.tags) ? req.query.tags as string[] : [req.query.tags as string]) : undefined,
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
         userId: req.query.userId as string,
+        gameSystem: req.query.gameSystem as string,
       };
 
       const pagination = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
         sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt',
         sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
-      const result = await collectionService.getCollections(filters, pagination);
+      const result = await collectionService.getCollections(
+        filters,
+        pagination
+      );
 
+      // Return paginated response format expected by frontend
       res.json({
         success: true,
-        data: result,
+        data: result.collections,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       next(error);
@@ -211,21 +243,33 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const query = req.query.q as string;
-      
+
       const filters = {
-        isPublic: req.query.isPublic ? req.query.isPublic === 'true' : undefined,
-        tags: req.query.tags ? (Array.isArray(req.query.tags) ? req.query.tags as string[] : [req.query.tags as string]) : undefined,
+        isPublic: req.query.isPublic
+          ? req.query.isPublic === 'true'
+          : undefined,
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
         userId: req.query.userId as string,
       };
 
       const pagination = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
         sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt',
         sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
-      const result = await collectionService.searchCollections(query, filters, pagination);
+      const result = await collectionService.searchCollections(
+        query,
+        filters,
+        pagination
+      );
 
       res.json({
         success: true,
@@ -243,11 +287,7 @@ router.get(
  */
 router.get(
   '/user/:userId',
-  [
-    param('userId')
-      .isLength({ min: 1 })
-      .withMessage('User ID is required'),
-  ],
+  [param('userId').isLength({ min: 1 }).withMessage('User ID is required')],
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -255,7 +295,10 @@ router.get(
       const currentUserId = req.user?.id;
       const includePrivate = currentUserId === userId;
 
-      const collections = await collectionService.getUserCollections(userId, includePrivate);
+      const collections = await collectionService.getUserCollections(
+        userId,
+        includePrivate
+      );
 
       res.json({
         success: true,
@@ -269,23 +312,58 @@ router.get(
 
 /**
  * GET /api/v1/collections/my
- * Get current user's collections
+ * Get current user's collections with pagination and filtering
  */
 router.get(
   '/my',
   authenticateToken,
+  validatePagination,
+  handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
         throw new AppError('User not authenticated', 401);
       }
-      
-      const collections = await collectionService.getUserCollections(userId, true);
 
+      const filters = {
+        search: req.query.search as string,
+        isPublic: req.query.isPublic
+          ? req.query.isPublic === 'true'
+          : undefined, // Allow both public and private for user's own collections
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
+        userId: userId, // Force userId to current user
+        gameSystem: req.query.gameSystem as string,
+      };
+
+      const pagination = {
+        page: req.query.page ? parseInt(req.query.page as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
+        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc',
+      };
+
+      const result = await collectionService.getCollections(
+        filters,
+        pagination
+      );
+
+      // Return paginated response format expected by frontend
       res.json({
         success: true,
-        data: collections,
+        data: result.collections,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       next(error);
@@ -307,7 +385,10 @@ router.get(
       const collectionId = req.params.id;
       const userId = req.user?.id;
 
-      const collection = await collectionService.getCollectionById(collectionId, userId);
+      const collection = await collectionService.getCollectionById(
+        collectionId,
+        userId
+      );
 
       if (!collection) {
         throw new AppError('Collection not found', 404);
@@ -341,7 +422,11 @@ router.put(
         throw new AppError('User not authenticated', 401);
       }
 
-      const collection = await collectionService.updateCollection(collectionId, userId, req.body);
+      const collection = await collectionService.updateCollection(
+        collectionId,
+        userId,
+        req.body
+      );
 
       res.json({
         success: true,

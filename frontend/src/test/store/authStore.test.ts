@@ -98,7 +98,7 @@ describe('Auth Store', () => {
     useAuthStore.getState().setTokens('access', 'refresh');
 
     // Clear auth using logout
-    useAuthStore.getState().logout();
+    await useAuthStore.getState().logout();
 
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();

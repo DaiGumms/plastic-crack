@@ -167,8 +167,8 @@ class PerformanceMonitor {
     // In a real application, you would send this to your analytics service
     // For example: Google Analytics, Mixpanel, or custom analytics
     if (typeof window !== 'undefined' && 'gtag' in window) {
-      // @ts-expect-error - gtag is a global function
-      window.gtag('event', 'web_vitals', {
+      const gtag = (window as unknown as { gtag: (...args: unknown[]) => void }).gtag;
+      gtag('event', 'web_vitals', {
         metric_name: metric,
         metric_value: Math.round(value),
         metric_threshold: threshold,
