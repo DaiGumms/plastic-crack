@@ -62,7 +62,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 );
 
 export const CollectionsPage: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // State
@@ -314,15 +314,6 @@ export const CollectionsPage: React.FC = () => {
               <Chip
                 label={`Game: ${filters.gameSystem}`}
                 onDelete={() => handleFilterChange({ gameSystem: undefined })}
-                size='small'
-              />
-            )}
-            {filters.paintingStatus && (
-              <Chip
-                label={`Status: ${filters.paintingStatus}`}
-                onDelete={() =>
-                  handleFilterChange({ paintingStatus: undefined })
-                }
                 size='small'
               />
             )}

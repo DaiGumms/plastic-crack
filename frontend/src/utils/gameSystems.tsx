@@ -101,27 +101,27 @@ export const getGameSystemIconFromCollection = (
   );
 };
 
-// Temporary hardcoded game system IDs from database
-// TODO: Replace with dynamic API call
-const GAME_SYSTEM_DB_IDS: Record<string, string> = {
-  'warhammer-40k': '', // Will be populated dynamically
-  'age-of-sigmar': '', // Will be populated dynamically
-};
-
 // Convert frontend game system ID to database ID
 export const getGameSystemDbId = async (
   frontendId: string
 ): Promise<string> => {
   // For now, we'll use a simple API call to get the game systems
   // and find the matching one by shortName
-  const response = await fetch('/api/v1/game-systems');
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+  const response = await fetch(`${baseUrl}/game-systems`);
   if (!response.ok) {
     throw new Error('Failed to fetch game systems');
   }
 
-  const gameSystems = await response.json();
+  const gameSystems: Array<{
+    id: string;
+    name: string;
+    shortName: string;
+    description?: string;
+    publisher?: string;
+  }> = await response.json();
   const shortName = FRONTEND_TO_DB_GAME_SYSTEM_MAP[frontendId];
-  const gameSystem = gameSystems.find((gs: any) => gs.shortName === shortName);
+  const gameSystem = gameSystems.find(gs => gs.shortName === shortName);
 
   if (!gameSystem) {
     throw new Error(`Game system not found for frontend ID: ${frontendId}`);

@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Collection } from '../../types';
 import { formatDistanceToNow } from 'date-fns';
-import { getGameSystemIcon } from '../../utils/gameSystems';
+import { getGameSystemIconFromCollection } from '../../utils/gameSystems';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -129,7 +129,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           {viewMode === 'grid' ? (
             <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
           ) : (
-            getGameSystemIcon(collection.gameSystem, { sx: { fontSize: 48 } })
+            getGameSystemIconFromCollection(collection, { sx: { fontSize: 48 } })
           )}
         </Box>
       )}
@@ -165,7 +165,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
             }}
           >
             {viewMode === 'grid' &&
-              getGameSystemIcon(collection.gameSystem, {
+              getGameSystemIconFromCollection(collection, {
                 sx: { fontSize: 20, flexShrink: 0 },
               })}
             <Typography
