@@ -59,27 +59,86 @@ export interface RegisterData {
 }
 
 // Model/Collection types
+export interface ModelLike {
+  id: string;
+  userId: string;
+  modelId: string;
+  createdAt: string;
+}
+
 export interface UserModel {
   id: string;
   userId: string;
   name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus: 'unpainted' | 'in_progress' | 'completed';
+  description?: string;
+  gameSystemId: string;
+  factionId?: string;
+  collectionId: string;
+  
+  // Model Details
+  paintingStatus: 'UNPAINTED' | 'IN_PROGRESS' | 'COMPLETED';
+  pointsCost?: number;
   notes?: string;
-  imageUrls?: string[];
+  tags: string[];
+  
+  // Purchase Information
+  purchasePrice?: number;
+  purchaseDate?: string;
+  
+  // Visibility and Status
+  isPublic: boolean;
+  
+  // Timestamps
   createdAt: string;
   updatedAt: string;
+  
+  // Relations
+  gameSystem?: {
+    id: string;
+    name: string;
+    shortName: string;
+  };
+  faction?: {
+    id: string;
+    name: string;
+  };
+  collection?: {
+    id: string;
+    name: string;
+    user?: {
+      id: string;
+      username: string;
+      displayName?: string;
+      profileImageUrl?: string;
+    };
+  };
+  photos?: {
+    id: string;
+    fileName: string;
+    originalUrl: string;
+    thumbnailUrl?: string;
+    description?: string;
+    isPrimary: boolean;
+  }[];
+  likes?: ModelLike[];
+  _count?: {
+    likes: number;
+  };
 }
 
 export interface CreateModelData {
   name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus?: 'unpainted' | 'in_progress' | 'completed';
+  description?: string;
+  gameSystemId: string;
+  factionId?: string;
+  collectionId: string;
+  paintingStatus?: 'UNPAINTED' | 'IN_PROGRESS' | 'COMPLETED';
+  pointsCost?: number;
   notes?: string;
+  tags?: string[];
+  purchasePrice?: number;
+  purchaseDate?: string;
+  isPublic?: boolean;
 }
 
 export interface Collection {
