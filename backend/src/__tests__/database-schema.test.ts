@@ -56,6 +56,7 @@ describe('Database Schema - Issue #18 Implementation', () => {
         name: 'Test Collection',
         description: 'Test collection for schema testing',
         userId: testUserId,
+        gameSystemId: testGameSystemId,
         tags: ['test', 'collection'],
       },
     });

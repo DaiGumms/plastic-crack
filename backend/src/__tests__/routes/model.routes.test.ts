@@ -38,9 +38,10 @@ describe('Model Routes - Issue #20', () => {
   });
 
   beforeEach(async () => {
-    // Clean up database
+    // Clean up database in correct order (respecting foreign key constraints)
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
+    await prisma.faction.deleteMany(); // Delete factions before gameSystem
     await prisma.gameSystem.deleteMany();
     await prisma.user.deleteMany();
 
@@ -108,6 +109,7 @@ describe('Model Routes - Issue #20', () => {
         description: 'A collection for testing models',
         isPublic: true,
         userId: testUserId,
+        gameSystemId: testGameSystemId,
         tags: ['Test', 'Models'],
       },
     });
@@ -419,6 +421,7 @@ describe('Model Routes - Issue #20', () => {
           name: 'Private Collection',
           isPublic: false,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
         },
       });
 

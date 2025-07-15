@@ -14,6 +14,7 @@ interface CollectionGridProps {
   currentUserId?: string;
   emptyMessage?: string;
   emptySubMessage?: string;
+  viewMode?: 'grid' | 'list';
 }
 
 export const CollectionGrid: React.FC<CollectionGridProps> = ({
@@ -27,6 +28,7 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
   currentUserId,
   emptyMessage = 'No collections found',
   emptySubMessage = 'Create your first collection to get started',
+  viewMode = 'grid',
 }) => {
   if (error) {
     return (
@@ -73,7 +75,7 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
     );
   }
 
-  if (!collections || collections.length === 0) {
+  if (!Array.isArray(collections) || collections.length === 0) {
     return (
       <Box
         sx={{
@@ -99,17 +101,18 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
     <Box
       sx={{
         mt: 2,
-        display: 'grid',
-        gridTemplateColumns: {
+        display: viewMode === 'grid' ? 'grid' : 'flex',
+        flexDirection: viewMode === 'list' ? 'column' : undefined,
+        gridTemplateColumns: viewMode === 'grid' ? {
           xs: '1fr',
           sm: 'repeat(2, 1fr)',
           md: 'repeat(3, 1fr)',
           lg: 'repeat(4, 1fr)',
-        },
-        gap: 3,
+        } : undefined,
+        gap: viewMode === 'grid' ? 3 : 2,
       }}
     >
-      {collections.map(collection => (
+      {Array.isArray(collections) && collections.map(collection => (
         <CollectionCard
           key={collection.id}
           collection={collection}
@@ -118,6 +121,7 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
           onDelete={onDelete}
           onView={onView}
           currentUserId={currentUserId}
+          viewMode={viewMode}
         />
       ))}
     </Box>

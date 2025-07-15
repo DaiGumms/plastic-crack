@@ -1,9 +1,19 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 // Extend Vitest's expect with jest-dom matchers
 import * as matchers from '@testing-library/jest-dom/matchers';
 expect.extend(matchers);
+
+// Clean up after each test
+afterEach(() => {
+  cleanup();
+  // Clear all mocks
+  vi.clearAllMocks();
+  // Reset all timers
+  vi.clearAllTimers();
+});
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

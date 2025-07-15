@@ -32,6 +32,11 @@ const validateCreateCollection = [
     .trim()
     .isLength({ max: 1000 })
     .withMessage('Description must be max 1000 characters'),
+  body('gameSystemId')
+    .notEmpty()
+    .withMessage('Game system ID is required')
+    .isString()
+    .withMessage('Game system ID must be a string'),
   body('isPublic')
     .optional()
     .isBoolean()
@@ -187,6 +192,7 @@ router.get(
             : [req.query.tags as string]
           : undefined,
         userId: req.query.userId as string,
+        gameSystem: req.query.gameSystem as string,
       };
 
       const pagination = {
@@ -203,9 +209,16 @@ router.get(
         pagination
       );
 
+      // Return paginated response format expected by frontend
       res.json({
         success: true,
-        data: result,
+        data: result.collections,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       next(error);
@@ -299,11 +312,13 @@ router.get(
 
 /**
  * GET /api/v1/collections/my
- * Get current user's collections
+ * Get current user's collections with pagination and filtering
  */
 router.get(
   '/my',
   authenticateToken,
+  validatePagination,
+  handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id;
@@ -311,14 +326,42 @@ router.get(
         throw new AppError('User not authenticated', 401);
       }
 
-      const collections = await collectionService.getUserCollections(
-        userId,
-        true
+      const filters = {
+        search: req.query.search as string,
+        isPublic: req.query.isPublic ? req.query.isPublic === 'true' : undefined, // Allow both public and private for user's own collections
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
+        userId: userId, // Force userId to current user
+        gameSystem: req.query.gameSystem as string,
+      };
+
+      const pagination = {
+        page: req.query.page ? parseInt(req.query.page as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
+        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc',
+      };
+
+      const result = await collectionService.getCollections(
+        filters,
+        pagination
       );
 
+      // Return paginated response format expected by frontend
       res.json({
         success: true,
-        data: collections,
+        data: result.collections,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       next(error);

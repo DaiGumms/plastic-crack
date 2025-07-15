@@ -31,18 +31,6 @@ async function main() {
     },
   });
 
-  const killTeam = await prisma.gameSystem.upsert({
-    where: { shortName: 'KT' },
-    update: {},
-    create: {
-      name: 'Kill Team',
-      shortName: 'KT',
-      description: 'Small-scale squad-based combat in the 41st Millennium',
-      publisher: 'Games Workshop',
-      sortOrder: 3,
-    },
-  });
-
   // Seed Warhammer 40K Factions
   const w40kFactions = [
     { name: 'Space Marines', description: "The Emperor's finest warriors" },
@@ -305,7 +293,7 @@ async function main() {
 
   console.log('✅ Database seeding completed successfully!');
   console.log(
-    `📊 Created game systems: ${[warhammer40k, ageOfSigmar, killTeam].length}`
+    `📊 Created game systems: ${[warhammer40k, ageOfSigmar].length}`
   );
   console.log(
     `🏛️ Created factions: ${w40kFactions.length + aosFactions.length}`

@@ -19,6 +19,8 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { PublicProfilePage } from './pages/PublicProfilePage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+import { CollectionsPage } from './pages/CollectionsPage';
+import { CollectionDetailPage } from './pages/CollectionDetailPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -110,6 +112,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/collections'
+                  element={
+                    <ProtectedRoute>
+                      <CollectionsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/collections/:id'
+                  element={
+                    <ProtectedRoute>
+                      <CollectionDetailPage />
                     </ProtectedRoute>
                   }
                 />

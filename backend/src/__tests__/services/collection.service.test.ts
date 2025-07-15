@@ -20,6 +20,7 @@ describe('CollectionService', () => {
   let collectionService: CollectionService;
   let testUserId: string;
   let testUserId2: string;
+  let testGameSystemId: string;
 
   beforeAll(async () => {
     prisma = new PrismaClient();
@@ -32,9 +33,10 @@ describe('CollectionService', () => {
   });
 
   beforeEach(async () => {
-    // Clean up database
+    // Clean up database in correct order (respecting foreign key constraints)
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
+    await prisma.faction.deleteMany(); // Delete factions before gameSystem
     await prisma.gameSystem.deleteMany();
     await prisma.user.deleteMany();
 
@@ -62,8 +64,7 @@ describe('CollectionService', () => {
     testUserId2 = user2.id;
 
     // Create test game system
-    // Create test game system (needed for models)
-    await prisma.gameSystem.create({
+    const gameSystem = await prisma.gameSystem.create({
       data: {
         name: 'Warhammer 40,000',
         shortName: 'WH40K',
@@ -71,6 +72,7 @@ describe('CollectionService', () => {
         isActive: true,
       },
     });
+    testGameSystemId = gameSystem.id;
   });
 
   describe('createCollection', () => {
@@ -79,6 +81,7 @@ describe('CollectionService', () => {
         name: 'New Collection',
         description: 'A brand new collection',
         isPublic: true,
+        gameSystemId: testGameSystemId,
         tags: ['New', 'Test'],
       };
 
@@ -98,6 +101,7 @@ describe('CollectionService', () => {
     it('should create collection with minimal data', async () => {
       const collectionData = {
         name: 'Minimal Collection',
+        gameSystemId: testGameSystemId,
       };
 
       const collection = await collectionService.createCollection(
@@ -114,6 +118,7 @@ describe('CollectionService', () => {
     it('should throw error for invalid user ID', async () => {
       const collectionData = {
         name: 'Invalid User Collection',
+        gameSystemId: testGameSystemId,
       };
 
       await expect(
@@ -132,6 +137,7 @@ describe('CollectionService', () => {
             description: 'Public description 1',
             isPublic: true,
             userId: testUserId,
+            gameSystemId: testGameSystemId,
             tags: ['Public', 'Test1'],
           },
           {
@@ -139,6 +145,7 @@ describe('CollectionService', () => {
             description: 'Public description 2',
             isPublic: true,
             userId: testUserId2,
+            gameSystemId: testGameSystemId,
             tags: ['Public', 'Test2'],
           },
           {
@@ -146,6 +153,7 @@ describe('CollectionService', () => {
             description: 'Private description',
             isPublic: false,
             userId: testUserId,
+            gameSystemId: testGameSystemId,
             tags: ['Private', 'Test'],
           },
         ],
@@ -180,6 +188,7 @@ describe('CollectionService', () => {
           description: 'Original description',
           isPublic: true,
           userId: testUserId,
+          gameSystemId: testGameSystemId,
           tags: ['Original', 'Tags'],
         },
       });
@@ -228,6 +237,7 @@ describe('CollectionService', () => {
           name: 'Test Collection for Delete',
           description: 'A collection to be deleted',
           userId: testUserId,
+          gameSystemId: testGameSystemId,
           tags: ['ToDelete'],
         },
       });

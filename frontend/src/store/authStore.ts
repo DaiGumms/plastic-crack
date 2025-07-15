@@ -49,7 +49,7 @@ interface AuthState {
   setTokens: (accessToken: string, refreshToken: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
 
   // Auth flow helpers
@@ -106,17 +106,26 @@ export const useAuthStore = create<AuthState>()(
         set({ error: null });
       },
 
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          accessToken: null,
-          refreshToken: null,
-          error: null,
-        });
-        // Also clear from localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+      logout: async () => {
+        try {
+          // Try to logout from server
+          await authApiService.logout();
+        } catch (error) {
+          console.warn('Server logout failed:', error);
+        } finally {
+          // Always clear local state
+          set({
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+            refreshToken: null,
+            error: null,
+          });
+          // Also clear from localStorage
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('auth-storage');
+        }
       },
 
       // Auth flow methods
@@ -172,10 +181,20 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refreshAccessToken: async (): Promise<boolean> => {
-        const { refreshToken, logout, setTokens } = get();
+        const { refreshToken, setTokens } = get();
 
         if (!refreshToken) {
-          logout();
+          // Silent cleanup without server call
+          set({
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+            refreshToken: null,
+            error: null,
+          });
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('auth-storage');
           return false;
         }
 
@@ -192,21 +211,41 @@ export const useAuthStore = create<AuthState>()(
           return true;
         } catch (error) {
           console.error('Token refresh failed:', error);
-          logout();
+          // Silent cleanup without server call
+          set({
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+            refreshToken: null,
+            error: null,
+          });
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('auth-storage');
           return false;
         }
       },
 
       checkAuthStatus: async () => {
-        const { accessToken, logout, setUser } = get();
+        const { accessToken, setUser } = get();
 
+        // If no token, just logout silently without server call
         if (!accessToken) {
-          logout();
+          set({
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+            refreshToken: null,
+            error: null,
+          });
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('auth-storage');
           return;
         }
 
         try {
-          const data = await authApiService.getCurrentUser(accessToken);
+          const data = await authApiService.getCurrentUser();
           setUser(data.user);
           set({ isAuthenticated: true });
         } catch (error) {
@@ -214,20 +253,37 @@ export const useAuthStore = create<AuthState>()(
           // Try to refresh the token
           const refreshed = await get().refreshAccessToken();
           if (!refreshed) {
-            logout();
+            // Silent logout without server call since tokens are invalid
+            set({
+              user: null,
+              isAuthenticated: false,
+              accessToken: null,
+              refreshToken: null,
+              error: null,
+            });
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('auth-storage');
             return;
           }
 
           // Retry getting user data with new token
           try {
-            const newToken = get().accessToken;
-            if (newToken) {
-              const retryData = await authApiService.getCurrentUser(newToken);
-              setUser(retryData.user);
-              set({ isAuthenticated: true });
-            }
+            const retryData = await authApiService.getCurrentUser();
+            setUser(retryData.user);
+            set({ isAuthenticated: true });
           } catch {
-            logout();
+            // Silent logout without server call
+            set({
+              user: null,
+              isAuthenticated: false,
+              accessToken: null,
+              refreshToken: null,
+              error: null,
+            });
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('auth-storage');
           }
         }
       },

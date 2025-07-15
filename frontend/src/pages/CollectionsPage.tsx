@@ -18,6 +18,11 @@ import {
   InputLabel,
   Select,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -38,6 +43,7 @@ import type {
   CollectionFilter,
 } from '../types';
 import { useAuth } from '../hooks/useAuth';
+import { getPersistedViewMode, setPersistedViewMode, type ViewMode } from '../utils/viewMode';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,12 +58,12 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 );
 
 export const CollectionsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   // State
   const [activeTab, setActiveTab] = useState(0);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>(getPersistedViewMode());
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<CollectionFilter>({});
@@ -68,6 +74,8 @@ export const CollectionsPage: React.FC = () => {
   const [filterMenuAnchor, setFilterMenuAnchor] = useState<null | HTMLElement>(
     null
   );
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<Collection | null>(null);
 
   const limit = 12;
 
@@ -100,12 +108,28 @@ export const CollectionsPage: React.FC = () => {
     },
   });
 
+  // Ensure we always have valid data
+  const safeCollectionsData = collectionsData?.data || [];
+  const safePaginationData = collectionsData?.pagination || {
+    page: 1,
+    limit: 12,
+    total: 0,
+    totalPages: 0,
+  };
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: CollectionService.createCollection,
-    onSuccess: () => {
+    onSuccess: (newCollection) => {
+      console.log('✅ Collection created successfully:', newCollection);
+      // Invalidate all collections queries
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      // Refetch the current collections data
+      refetch();
       setFormOpen(false);
+    },
+    onError: (error) => {
+      console.error('❌ Failed to create collection:', error);
     },
   });
 
@@ -122,7 +146,13 @@ export const CollectionsPage: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: CollectionService.deleteCollection,
     onSuccess: () => {
+      console.log('✅ Collection deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      setDeleteConfirmOpen(false);
+      setCollectionToDelete(null);
+    },
+    onError: (error) => {
+      console.error('❌ Failed to delete collection:', error);
     },
   });
 
@@ -161,12 +191,20 @@ export const CollectionsPage: React.FC = () => {
     setFormOpen(true);
   };
 
-  const handleDeleteCollection = async (collection: Collection) => {
-    if (
-      window.confirm(`Are you sure you want to delete "${collection.name}"?`)
-    ) {
-      await deleteMutation.mutateAsync(collection.id);
+  const handleDeleteCollection = (collection: Collection) => {
+    setCollectionToDelete(collection);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (collectionToDelete) {
+      await deleteMutation.mutateAsync(collectionToDelete.id);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setCollectionToDelete(null);
   };
 
   const handleFilterChange = (newFilters: Partial<CollectionFilter>) => {
@@ -204,7 +242,11 @@ export const CollectionsPage: React.FC = () => {
 
         <Box sx={{ display: 'flex', gap: 1 }}>
           <IconButton
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+            onClick={() => {
+              const newViewMode = viewMode === 'grid' ? 'list' : 'grid';
+              setViewMode(newViewMode);
+              setPersistedViewMode(newViewMode);
+            }}
             color='primary'
           >
             {viewMode === 'grid' ? <ListViewIcon /> : <GridViewIcon />}
@@ -318,7 +360,7 @@ export const CollectionsPage: React.FC = () => {
       {/* Tab Panels */}
       <TabPanel value={activeTab} index={0}>
         <CollectionGrid
-          collections={collectionsData?.data || []}
+          collections={safeCollectionsData}
           loading={isLoading}
           showOwner={false}
           onEdit={handleEditCollection}
@@ -326,25 +368,27 @@ export const CollectionsPage: React.FC = () => {
           currentUserId={user?.id}
           emptyMessage="You haven't created any collections yet"
           emptySubMessage='Create your first collection to organize your Warhammer models'
+          viewMode={viewMode}
         />
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>
         <CollectionGrid
-          collections={collectionsData?.data || []}
+          collections={safeCollectionsData}
           loading={isLoading}
           showOwner={true}
           currentUserId={user?.id}
           emptyMessage='No public collections found'
           emptySubMessage='Try adjusting your search or filters'
+          viewMode={viewMode}
         />
       </TabPanel>
 
       {/* Pagination */}
-      {collectionsData && collectionsData.pagination.totalPages > 1 && (
+      {safePaginationData.totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
-            count={collectionsData.pagination.totalPages}
+            count={safePaginationData.totalPages}
             page={page}
             onChange={(_, newPage) => setPage(newPage)}
             color='primary'
@@ -376,28 +420,8 @@ export const CollectionsPage: React.FC = () => {
               label='Game System'
             >
               <MenuItem value=''>All Systems</MenuItem>
-              <MenuItem value='Warhammer 40K'>Warhammer 40K</MenuItem>
-              <MenuItem value='Age of Sigmar'>Age of Sigmar</MenuItem>
-              <MenuItem value='Kill Team'>Kill Team</MenuItem>
-              <MenuItem value='Necromunda'>Necromunda</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Painting Status</InputLabel>
-            <Select
-              value={filters.paintingStatus || ''}
-              onChange={e =>
-                handleFilterChange({
-                  paintingStatus: e.target.value || undefined,
-                })
-              }
-              label='Painting Status'
-            >
-              <MenuItem value=''>All Statuses</MenuItem>
-              <MenuItem value='unpainted'>Unpainted</MenuItem>
-              <MenuItem value='in_progress'>In Progress</MenuItem>
-              <MenuItem value='completed'>Completed</MenuItem>
+              <MenuItem value='W40K'>Warhammer 40,000</MenuItem>
+              <MenuItem value='AOS'>Age of Sigmar</MenuItem>
             </Select>
           </FormControl>
 
@@ -426,6 +450,36 @@ export const CollectionsPage: React.FC = () => {
           createMutation.error?.message || updateMutation.error?.message || null
         }
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Delete Collection
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete "{collectionToDelete?.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            variant="contained"
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

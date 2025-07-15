@@ -3,6 +3,7 @@ import { Router } from 'express';
 import authRoutes from '../auth.routes';
 
 import { collectionRoutes } from './collection.routes';
+import gameSystemRoutes from './gameSystem.routes';
 import { healthRoutes } from './health';
 import { modelRoutes } from './model.routes';
 import { redisRoutes } from './redis';
@@ -26,6 +27,9 @@ router.use('/users', userRoutes);
 
 // Collection management routes
 router.use('/collections', collectionRoutes);
+
+// Game system routes
+router.use('/game-systems', gameSystemRoutes);
 
 // Model management routes
 router.use('/models', modelRoutes);

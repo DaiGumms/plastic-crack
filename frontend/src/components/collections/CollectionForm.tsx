@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -13,6 +13,10 @@ import {
   IconButton,
   Typography,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
@@ -23,6 +27,7 @@ import type {
   CreateCollectionData,
   UpdateCollectionData,
 } from '../../types';
+import { GAME_SYSTEMS, getGameSystemIcon, getGameSystemDbId, DB_TO_FRONTEND_GAME_SYSTEM_MAP } from '../../utils/gameSystems';
 
 const collectionSchema = z.object({
   name: z
@@ -34,6 +39,7 @@ const collectionSchema = z.object({
     .max(1000, 'Description must be less than 1000 characters')
     .optional()
     .or(z.literal('')),
+  gameSystem: z.string().min(1, 'Game system is required'),
   isPublic: z.boolean(),
   imageUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
@@ -63,6 +69,12 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   const [tags, setTags] = useState<string[]>(collection?.tags || []);
   const [newTag, setNewTag] = useState('');
 
+  // Convert database game system to frontend ID for editing
+  const getDefaultGameSystem = useCallback(() => {
+    if (!collection?.gameSystem?.shortName) return '';
+    return DB_TO_FRONTEND_GAME_SYSTEM_MAP[collection.gameSystem.shortName] || '';
+  }, [collection?.gameSystem?.shortName]);
+
   const {
     control,
     handleSubmit,
@@ -71,13 +83,27 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   } = useForm<CollectionFormData>({
     resolver: zodResolver(collectionSchema),
     defaultValues: {
-      name: collection?.name || '',
-      description: collection?.description || '',
-      isPublic: collection?.isPublic ?? true,
-      imageUrl: collection?.imageUrl || '',
+      name: '',
+      description: '',
+      gameSystem: '',
+      isPublic: true,
+      imageUrl: '',
     },
     mode: 'onChange',
   });
+
+  // Update form values when collection changes
+  useEffect(() => {
+    reset({
+      name: collection?.name || '',
+      description: collection?.description || '',
+      gameSystem: getDefaultGameSystem(),
+      isPublic: collection?.isPublic ?? true,
+      imageUrl: collection?.imageUrl || '',
+    });
+    
+    setTags(collection?.tags || []);
+  }, [collection, reset, getDefaultGameSystem]);
 
   const handleClose = () => {
     reset();
@@ -88,13 +114,33 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
   const handleFormSubmit = async (data: CollectionFormData) => {
     try {
-      const submitData = {
-        ...data,
-        tags,
-        // Remove empty strings
-        description: data.description?.trim() || undefined,
-        imageUrl: data.imageUrl?.trim() || undefined,
-      };
+      // Destructure to remove gameSystem field
+      const { gameSystem, ...restData } = data;
+      let submitData: CreateCollectionData | UpdateCollectionData;
+      
+      if (isEditing && collection) {
+        // For editing, keep the existing gameSystemId
+        submitData = {
+          ...restData,
+          gameSystemId: collection.gameSystemId,
+          tags,
+          // Remove empty strings
+          description: restData.description?.trim() || undefined,
+          imageUrl: restData.imageUrl?.trim() || undefined,
+        };
+      } else {
+        // For creating, convert frontend gameSystem ID to database gameSystemId
+        const gameSystemId = await getGameSystemDbId(gameSystem);
+        submitData = {
+          ...restData,
+          gameSystemId,
+          tags,
+          // Remove empty strings
+          description: restData.description?.trim() || undefined,
+          imageUrl: restData.imageUrl?.trim() || undefined,
+        };
+      }
+      
       await onSubmit(submitData);
       handleClose();
     } catch (err) {
@@ -161,6 +207,66 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                 />
               )}
             />
+
+            {/* Game System */}
+            {isEditing && collection?.gameSystem ? (
+              // Read-only display for editing
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Game System
+                </Typography>
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    p: 2,
+                    border: 1,
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    bgcolor: 'grey.50'
+                  }}
+                >
+                  {getGameSystemIcon(getDefaultGameSystem(), { fontSize: 'small' })}
+                  <Typography variant="body1">
+                    {collection.gameSystem.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    (Cannot be changed)
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
+              // Editable select for creation
+              <Controller
+                name='gameSystem'
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth required error={!!errors.gameSystem}>
+                    <InputLabel>Game System</InputLabel>
+                    <Select
+                      {...field}
+                      label='Game System'
+                      disabled={loading}
+                    >
+                      {GAME_SYSTEMS.map((system) => (
+                        <MenuItem key={system.id} value={system.id}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {getGameSystemIcon(system.id, { fontSize: 'small' })}
+                            {system.name}
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.gameSystem && (
+                      <Typography variant='caption' color='error' sx={{ mt: 0.5, ml: 1.5 }}>
+                        {errors.gameSystem.message}
+                      </Typography>
+                    )}
+                  </FormControl>
+                )}
+              />
+            )}
 
             {/* Description */}
             <Controller

@@ -38,11 +38,14 @@ describe('UserService', () => {
 
       const mockResponse = {
         data: {
-          id: '1',
-          ...profileData,
-          avatarUrl: null,
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-02',
+          success: true,
+          data: {
+            id: '1',
+            ...profileData,
+            avatarUrl: null,
+            createdAt: '2024-01-01',
+            updatedAt: '2024-01-02',
+          },
         },
       };
 
@@ -51,7 +54,7 @@ describe('UserService', () => {
       const result = await userService.updateProfile(profileData);
 
       expect(mockPut).toHaveBeenCalledWith('/users/profile', profileData);
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(mockResponse.data.data);
     });
 
     it('should handle API error with message', async () => {

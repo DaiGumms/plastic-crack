@@ -23,6 +23,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Collection } from '../../types';
 import { formatDistanceToNow } from 'date-fns';
+import { getGameSystemIcon } from '../../utils/gameSystems';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -31,6 +32,7 @@ interface CollectionCardProps {
   onDelete?: (collection: Collection) => void;
   onView?: (collection: Collection) => void;
   currentUserId?: string;
+  viewMode?: 'grid' | 'list';
 }
 
 export const CollectionCard: React.FC<CollectionCardProps> = ({
@@ -40,6 +42,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   onDelete,
   onView,
   currentUserId,
+  viewMode = 'grid',
 }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -82,15 +85,18 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   return (
     <Card
       sx={{
-        height: '100%',
+        height: viewMode === 'grid' ? '100%' : 'auto',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: viewMode === 'grid' ? 'column' : 'row',
         cursor: 'pointer',
         transition: 'all 0.2s ease-in-out',
         '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: 4,
         },
+        ...(viewMode === 'list' && {
+          mb: 2,
+        }),
       }}
       onClick={handleCardClick}
     >
@@ -98,29 +104,46 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
       {collection.imageUrl ? (
         <CardMedia
           component='img'
-          height='200'
+          height={viewMode === 'grid' ? '200' : '120'}
           image={collection.imageUrl}
           alt={collection.name}
           sx={{
             objectFit: 'cover',
+            width: viewMode === 'list' ? 200 : '100%',
+            flexShrink: 0,
           }}
         />
       ) : (
         <Box
           sx={{
-            height: 200,
+            height: viewMode === 'grid' ? 200 : 120,
+            width: viewMode === 'list' ? 200 : '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: 'grey.100',
             position: 'relative',
+            flexShrink: 0,
           }}
         >
-          <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+          {viewMode === 'grid' ? (
+            <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+          ) : (
+            getGameSystemIcon(collection.gameSystem, { sx: { fontSize: 48 } })
+          )}
         </Box>
       )}
 
-      <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
+      <CardContent sx={{ 
+        flexGrow: 1, 
+        position: 'relative',
+        ...(viewMode === 'list' && {
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          py: 2,
+        }),
+      }}>
         {/* Header with title and menu */}
         <Box
           sx={{
@@ -130,23 +153,26 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
             mb: 1,
           }}
         >
-          <Typography
-            variant='h6'
-            component='h3'
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.2,
-              flexGrow: 1,
-              mr: 1,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
-            {collection.name}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, mr: 1 }}>
+            {viewMode === 'grid' && getGameSystemIcon(collection.gameSystem, { 
+              sx: { fontSize: 20, flexShrink: 0 } 
+            })}
+            <Typography
+              variant='h6'
+              component='h3'
+              sx={{
+                fontWeight: 600,
+                lineHeight: 1.2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {collection.name}
+            </Typography>
+          </Box>
 
           {/* Privacy indicator and menu */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

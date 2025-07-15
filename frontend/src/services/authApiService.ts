@@ -8,6 +8,12 @@ interface AuthResponse {
   refreshToken: string;
 }
 
+interface BackendAuthResponse {
+  user: User;
+  token: string;
+  refreshToken: string;
+}
+
 interface UserResponse {
   user: User;
 }
@@ -15,13 +21,34 @@ interface UserResponse {
 class AuthApiService {
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    requireAuth = false
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
 
-    const defaultHeaders = {
+    const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
     };
+
+    // Add auth header if required and token is available
+    if (requireAuth) {
+      // Try to get token from localStorage first
+      let token = localStorage.getItem('access_token');
+      
+      // If not in localStorage, try to get from Zustand store
+      if (!token) {
+        try {
+          const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+          token = authState?.state?.accessToken;
+        } catch {
+          // If parsing fails, token remains null
+        }
+      }
+
+      if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+      }
+    }
 
     const response = await fetch(url, {
       ...options,
@@ -42,7 +69,7 @@ class AuthApiService {
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    return this.makeRequest<AuthResponse>('/auth/login', {
+    const response = await this.makeRequest<BackendAuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
         emailOrUsername: credentials.emailOrUsername,
@@ -50,10 +77,17 @@ class AuthApiService {
         rememberMe: credentials.rememberMe,
       }),
     });
+    
+    // Map backend response to frontend format
+    return {
+      user: response.user,
+      accessToken: response.token,
+      refreshToken: response.refreshToken,
+    };
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {
-    return this.makeRequest<AuthResponse>('/auth/register', {
+    const response = await this.makeRequest<BackendAuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         username: userData.username,
@@ -62,33 +96,54 @@ class AuthApiService {
         displayName: userData.displayName,
       }),
     });
+    
+    // Map backend response to frontend format
+    return {
+      user: response.user,
+      accessToken: response.token,
+      refreshToken: response.refreshToken,
+    };
   }
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    return this.makeRequest<AuthResponse>('/auth/refresh', {
+    const response = await this.makeRequest<BackendAuthResponse>('/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({
         refreshToken,
       }),
     });
+    
+    // Map backend response to frontend format
+    return {
+      user: response.user,
+      accessToken: response.token,
+      refreshToken: response.refreshToken,
+    };
   }
 
-  async getCurrentUser(accessToken: string): Promise<UserResponse> {
+  async getCurrentUser(accessToken?: string): Promise<UserResponse> {
     return this.makeRequest<UserResponse>('/auth/me', {
-      headers: {
+      headers: accessToken ? {
         Authorization: `Bearer ${accessToken}`,
-      },
-    });
+      } : {},
+    }, !accessToken); // Use built-in auth if no token provided
   }
 
-  async logout(accessToken: string): Promise<void> {
+  async logout(accessToken?: string): Promise<void> {
     try {
-      await this.makeRequest('/auth/logout', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      // Only attempt server logout if we have a token
+      const hasToken = accessToken || 
+        localStorage.getItem('access_token') || 
+        JSON.parse(localStorage.getItem('auth-storage') || '{}').state?.accessToken;
+      
+      if (hasToken) {
+        await this.makeRequest('/auth/logout', {
+          method: 'POST',
+          headers: accessToken ? {
+            Authorization: `Bearer ${accessToken}`,
+          } : {},
+        }, !accessToken); // Use built-in auth if no token provided
+      }
     } catch (error) {
       // If logout fails, we still want to clear local state
       console.warn('Server logout failed:', error);
@@ -112,18 +167,18 @@ class AuthApiService {
   async changePassword(
     oldPassword: string,
     newPassword: string,
-    accessToken: string
+    accessToken?: string
   ): Promise<void> {
     return this.makeRequest('/auth/change-password', {
       method: 'POST',
-      headers: {
+      headers: accessToken ? {
         Authorization: `Bearer ${accessToken}`,
-      },
+      } : {},
       body: JSON.stringify({
         oldPassword,
         newPassword,
       }),
-    });
+    }, !accessToken); // Use built-in auth if no token provided
   }
 }
 

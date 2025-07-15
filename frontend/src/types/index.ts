@@ -88,6 +88,14 @@ export interface Collection {
   description?: string;
   isPublic: boolean;
   userId: string;
+  gameSystemId: string;
+  gameSystem?: {
+    id: string;
+    name: string;
+    shortName: string;
+    description?: string;
+    publisher?: string;
+  };
   tags: string[];
   imageUrl?: string;
   createdAt: string;
@@ -108,6 +116,7 @@ export interface CreateCollectionData {
   name: string;
   description?: string;
   isPublic?: boolean;
+  gameSystemId: string;
   tags?: string[];
   imageUrl?: string;
 }
@@ -116,6 +125,7 @@ export interface UpdateCollectionData {
   name?: string;
   description?: string;
   isPublic?: boolean;
+  gameSystemId?: string;
   tags?: string[];
   imageUrl?: string;
 }
@@ -126,7 +136,6 @@ export interface CollectionFilter {
   tags?: string[];
   userId?: string;
   gameSystem?: string;
-  paintingStatus?: string;
 }
 
 export interface CollectionStats {
