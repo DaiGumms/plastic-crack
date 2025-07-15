@@ -6,7 +6,6 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -16,10 +15,8 @@ import {
   InputAdornment,
   Alert,
   Autocomplete,
+  Box,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import type { Model, CreateModelData, UpdateModelData, PaintingStatus } from '../../types';
 
 interface ModelFormProps {
@@ -66,7 +63,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
     notes: '',
     tags: [] as string[],
     purchasePrice: '',
-    purchaseDate: null as Date | null,
+    purchaseDate: '',
     isPublic: true,
   });
 
@@ -82,7 +79,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
         notes: model.notes || '',
         tags: model.tags || [],
         purchasePrice: model.purchasePrice ? model.purchasePrice.toString() : '',
-        purchaseDate: model.purchaseDate ? new Date(model.purchaseDate) : null,
+        purchaseDate: model.purchaseDate ? model.purchaseDate.split('T')[0] : '',
         isPublic: model.isPublic ?? true,
       });
     } else {
@@ -94,7 +91,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
         notes: '',
         tags: [],
         purchasePrice: '',
-        purchaseDate: null,
+        purchaseDate: '',
         isPublic: true,
       });
     }
@@ -111,7 +108,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
       notes: formData.notes.trim() || undefined,
       tags: formData.tags,
       purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : undefined,
-      purchaseDate: formData.purchaseDate ? formData.purchaseDate.toISOString() : undefined,
+      purchaseDate: formData.purchaseDate ? formData.purchaseDate : undefined,
       isPublic: formData.isPublic,
     };
 
@@ -123,7 +120,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
     await onSubmit(submitData);
   };
 
-  const handleTagsChange = (event: React.SyntheticEvent, newValue: string[]) => {
+  const handleTagsChange = (_event: React.SyntheticEvent, newValue: string[]) => {
     setFormData(prev => ({ ...prev, tags: newValue }));
   };
 
@@ -133,42 +130,34 @@ export const ModelForm: React.FC<ModelFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: event.target.value }));
   };
 
-  const handleSelectChange = (field: string) => (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: event.target.value }));
-  };
-
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog 
-        open={open} 
-        onClose={onClose} 
-        maxWidth="md" 
-        fullWidth
-        PaperProps={{ sx: { minHeight: '70vh' } }}
-      >
-        <DialogTitle>
-          {isEditing ? 'Edit Model' : 'Add New Model'}
-        </DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{ sx: { minHeight: '70vh' } }}
+    >
+      <DialogTitle>
+        {isEditing ? 'Edit Model' : 'Add New Model'}
+      </DialogTitle>
 
-        <form onSubmit={handleSubmit}>
-          <DialogContent dividers sx={{ py: 3 }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
+      <form onSubmit={handleSubmit}>
+        <DialogContent dividers sx={{ py: 3 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-            <Grid container spacing={3}>
-              {/* Basic Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Basic Information
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Basic Information */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Basic Information
+              </Typography>
+              
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 2 }}>
                 <TextField
                   fullWidth
                   label="Model Name"
@@ -177,14 +166,12 @@ export const ModelForm: React.FC<ModelFormProps> = ({
                   required
                   disabled={loading}
                 />
-              </Grid>
 
-              <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
                   <InputLabel>Painting Status</InputLabel>
                   <Select
                     value={formData.paintingStatus}
-                    onChange={handleSelectChange('paintingStatus')}
+                    onChange={(e) => setFormData(prev => ({ ...prev, paintingStatus: e.target.value as PaintingStatus }))}
                     label="Painting Status"
                     disabled={loading}
                   >
@@ -195,78 +182,74 @@ export const ModelForm: React.FC<ModelFormProps> = ({
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
+              </Box>
 
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  value={formData.description}
-                  onChange={handleInputChange('description')}
-                  multiline
-                  rows={3}
-                  disabled={loading}
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                label="Description"
+                value={formData.description}
+                onChange={handleInputChange('description')}
+                multiline
+                rows={3}
+                disabled={loading}
+                sx={{ mb: 2 }}
+              />
+            </Box>
 
-              {/* Game Details */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  Game Details
-                </Typography>
-              </Grid>
+            {/* Game Details */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Game Details
+              </Typography>
+              
+              <TextField
+                fullWidth
+                label="Points Cost"
+                value={formData.pointsCost}
+                onChange={handleInputChange('pointsCost')}
+                type="number"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">pts</InputAdornment>,
+                }}
+                disabled={loading}
+                sx={{ mb: 2 }}
+              />
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Points Cost"
-                  value={formData.pointsCost}
-                  onChange={handleInputChange('pointsCost')}
-                  type="number"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">pts</InputAdornment>,
-                  }}
-                  disabled={loading}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Autocomplete
-                  multiple
-                  freeSolo
-                  options={commonTags}
-                  value={formData.tags}
-                  onChange={handleTagsChange}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                      <Chip
-                        variant="outlined"
-                        label={option}
-                        {...getTagProps({ index })}
-                        key={option}
-                      />
-                    ))
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Tags"
-                      placeholder="Add tags..."
-                      disabled={loading}
+              <Autocomplete
+                multiple
+                freeSolo
+                options={commonTags}
+                value={formData.tags}
+                onChange={handleTagsChange}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      key={option}
                     />
-                  )}
-                  disabled={loading}
-                />
-              </Grid>
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Tags"
+                    placeholder="Add tags..."
+                    disabled={loading}
+                  />
+                )}
+                disabled={loading}
+              />
+            </Box>
 
-              {/* Purchase Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  Purchase Information
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
+            {/* Purchase Information */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Purchase Information
+              </Typography>
+              
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 2 }}>
                 <TextField
                   fullWidth
                   label="Purchase Price"
@@ -278,60 +261,54 @@ export const ModelForm: React.FC<ModelFormProps> = ({
                   }}
                   disabled={loading}
                 />
-              </Grid>
 
-              <Grid item xs={12} md={6}>
-                <DatePicker
-                  label="Purchase Date"
-                  value={formData.purchaseDate}
-                  onChange={(newValue) => 
-                    setFormData(prev => ({ ...prev, purchaseDate: newValue }))
-                  }
-                  disabled={loading}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                    },
-                  }}
-                />
-              </Grid>
-
-              {/* Notes */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  Additional Notes
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Notes"
-                  value={formData.notes}
-                  onChange={handleInputChange('notes')}
-                  multiline
-                  rows={4}
-                  placeholder="Add any additional notes about this model..."
+                  label="Purchase Date"
+                  value={formData.purchaseDate}
+                  onChange={handleInputChange('purchaseDate')}
+                  type="date"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
                   disabled={loading}
                 />
-              </Grid>
-            </Grid>
-          </DialogContent>
+              </Box>
+            </Box>
 
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={onClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading || !formData.name.trim()}
-            >
-              {loading ? 'Saving...' : isEditing ? 'Update Model' : 'Add Model'}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </LocalizationProvider>
+            {/* Notes */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Additional Notes
+              </Typography>
+              
+              <TextField
+                fullWidth
+                label="Notes"
+                value={formData.notes}
+                onChange={handleInputChange('notes')}
+                multiline
+                rows={4}
+                placeholder="Add any additional notes about this model..."
+                disabled={loading}
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading || !formData.name.trim()}
+          >
+            {loading ? 'Saving...' : isEditing ? 'Update Model' : 'Add Model'}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 };

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Grid,
   Box,
   Typography,
   CircularProgress,
@@ -98,18 +97,28 @@ export const ModelGrid: React.FC<ModelGridProps> = ({
   }
 
   return (
-    <Grid container spacing={3}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+          lg: 'repeat(4, 1fr)',
+        },
+        gap: 3,
+      }}
+    >
       {models.map((model) => (
-        <Grid item xs={12} sm={6} md={4} lg={3} key={model.id}>
-          <ModelCard
-            model={model}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            currentUserId={currentUserId}
-            showOwner={showOwner}
-          />
-        </Grid>
+        <ModelCard
+          key={model.id}
+          model={model}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          currentUserId={currentUserId}
+          showOwner={showOwner}
+        />
       ))}
-    </Grid>
+    </Box>
   );
 };

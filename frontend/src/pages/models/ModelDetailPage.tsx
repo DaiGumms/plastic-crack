@@ -12,7 +12,6 @@ import {
   Avatar,
   Skeleton,
   Alert,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -161,11 +160,11 @@ export const ModelDetailPage: React.FC = () => {
         <Box sx={{ mb: 3 }}>
           <Skeleton variant="rectangular" width={100} height={36} />
         </Box>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={8}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          <Box sx={{ flex: 2 }}>
             <Skeleton variant="rectangular" height={400} />
-          </Grid>
-          <Grid item xs={12} md={4}>
+          </Box>
+          <Box sx={{ flex: 1 }}>
             <Card>
               <CardContent>
                 <Skeleton variant="text" sx={{ fontSize: '2rem', mb: 2 }} />
@@ -177,8 +176,8 @@ export const ModelDetailPage: React.FC = () => {
                 <Skeleton variant="rectangular" height={200} />
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     );
   }
@@ -247,9 +246,9 @@ export const ModelDetailPage: React.FC = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={4}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
         {/* Image Gallery */}
-        <Grid item xs={12} md={8}>
+        <Box sx={{ flex: 2 }}>
           <Card>
             <CardContent sx={{ p: 0 }}>
               {primaryPhoto ? (
@@ -305,6 +304,7 @@ export const ModelDetailPage: React.FC = () => {
                     justifyContent: 'center',
                     bgcolor: 'grey.100',
                     color: 'text.secondary',
+                    flexDirection: 'column',
                   }}
                 >
                   <PhotoCameraIcon sx={{ fontSize: 64, mb: 2 }} />
@@ -351,10 +351,10 @@ export const ModelDetailPage: React.FC = () => {
               <AddIcon />
             </Fab>
           )}
-        </Grid>
+        </Box>
 
         {/* Model Details */}
-        <Grid item xs={12} md={4}>
+        <Box sx={{ flex: 1 }}>
           <Card>
             <CardContent>
               <Typography variant="h4" component="h1" gutterBottom>
@@ -460,8 +460,8 @@ export const ModelDetailPage: React.FC = () => {
               )}
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Image Viewer Dialog */}
       <Dialog
@@ -522,7 +522,6 @@ export const ModelDetailPage: React.FC = () => {
       <ModelImageGallery
         open={imageGalleryOpen}
         onClose={() => setImageGalleryOpen(false)}
-        modelId={model.id}
         photos={model.photos || []}
         onUpload={handleUploadPhotos}
         loading={addPhotosMutation.isPending}

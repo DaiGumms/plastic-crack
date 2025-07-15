@@ -7,7 +7,6 @@ import {
   Button,
   Box,
   Typography,
-  Grid,
   Card,
   CardMedia,
   CardActions,
@@ -28,7 +27,6 @@ import type { ModelPhoto, ModelPhotoData } from '../../types';
 interface ModelImageGalleryProps {
   open: boolean;
   onClose: () => void;
-  modelId: string;
   photos: ModelPhoto[];
   onUpload: (photos: ModelPhotoData[]) => Promise<void>;
   loading?: boolean;
@@ -38,7 +36,6 @@ interface ModelImageGalleryProps {
 export const ModelImageGallery: React.FC<ModelImageGalleryProps> = ({
   open,
   onClose,
-  modelId,
   photos,
   onUpload,
   loading = false,
@@ -159,75 +156,77 @@ export const ModelImageGallery: React.FC<ModelImageGalleryProps> = ({
               <Typography variant="subtitle2" gutterBottom>
                 Selected Photos ({selectedFiles.length})
               </Typography>
-              <Grid container spacing={2}>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+                gap: 2 
+              }}>
                 {selectedFiles.map((file, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card>
-                      <Box sx={{ position: 'relative' }}>
-                        <CardMedia
-                          component="img"
-                          height="150"
-                          image={URL.createObjectURL(file)}
-                          alt={file.name}
-                          sx={{ objectFit: 'cover' }}
-                        />
-                        <IconButton
-                          sx={{
-                            position: 'absolute',
-                            top: 4,
-                            right: 4,
-                            bgcolor: 'rgba(255, 255, 255, 0.8)',
-                          }}
-                          size="small"
-                          onClick={() => removeFile(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                        <IconButton
-                          sx={{
-                            position: 'absolute',
-                            top: 4,
-                            left: 4,
-                            bgcolor: 'rgba(255, 255, 255, 0.8)',
-                          }}
-                          size="small"
-                          onClick={() => setPrimaryIndex(index)}
-                        >
-                          {primaryIndex === index ? (
-                            <StarIcon color="primary" />
-                          ) : (
-                            <StarBorderIcon />
-                          )}
-                        </IconButton>
-                        {primaryIndex === index && (
-                          <Chip
-                            label="Primary"
-                            size="small"
-                            color="primary"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 4,
-                              left: 4,
-                            }}
-                          />
+                  <Card key={index}>
+                    <Box sx={{ position: 'relative' }}>
+                      <CardMedia
+                        component="img"
+                        height="150"
+                        image={URL.createObjectURL(file)}
+                        alt={file.name}
+                        sx={{ objectFit: 'cover' }}
+                      />
+                      <IconButton
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        }}
+                        size="small"
+                        onClick={() => removeFile(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          left: 4,
+                          bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        }}
+                        size="small"
+                        onClick={() => setPrimaryIndex(index)}
+                      >
+                        {primaryIndex === index ? (
+                          <StarIcon color="primary" />
+                        ) : (
+                          <StarBorderIcon />
                         )}
-                      </Box>
-                      <CardActions sx={{ flexDirection: 'column', p: 1 }}>
-                        <TextField
+                      </IconButton>
+                      {primaryIndex === index && (
+                        <Chip
+                          label="Primary"
                           size="small"
-                          placeholder="Photo description (optional)"
-                          value={uploadDescriptions[index] || ''}
-                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                          fullWidth
+                          color="primary"
+                          sx={{
+                            position: 'absolute',
+                            bottom: 4,
+                            left: 4,
+                          }}
                         />
-                        <Typography variant="caption" color="text.secondary">
-                          {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
-                        </Typography>
-                      </CardActions>
-                    </Card>
-                  </Grid>
+                      )}
+                    </Box>
+                    <CardActions sx={{ flexDirection: 'column', p: 1 }}>
+                      <TextField
+                        size="small"
+                        placeholder="Photo description (optional)"
+                        value={uploadDescriptions[index] || ''}
+                        onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                        fullWidth
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                      </Typography>
+                    </CardActions>
+                  </Card>
                 ))}
-              </Grid>
+              </Box>
             </Box>
           )}
         </Box>
@@ -238,42 +237,44 @@ export const ModelImageGallery: React.FC<ModelImageGalleryProps> = ({
             <Typography variant="h6" gutterBottom>
               Current Photos ({photos.length})
             </Typography>
-            <Grid container spacing={2}>
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+              gap: 2 
+            }}>
               {photos.map((photo) => (
-                <Grid item xs={12} sm={6} md={4} key={photo.id}>
-                  <Card>
-                    <Box sx={{ position: 'relative' }}>
-                      <CardMedia
-                        component="img"
-                        height="150"
-                        image={photo.thumbnailUrl || photo.originalUrl}
-                        alt={photo.description || 'Model photo'}
-                        sx={{ objectFit: 'cover' }}
+                <Card key={photo.id}>
+                  <Box sx={{ position: 'relative' }}>
+                    <CardMedia
+                      component="img"
+                      height="150"
+                      image={photo.thumbnailUrl || photo.originalUrl}
+                      alt={photo.description || 'Model photo'}
+                      sx={{ objectFit: 'cover' }}
+                    />
+                    {photo.isPrimary && (
+                      <Chip
+                        label="Primary"
+                        size="small"
+                        color="primary"
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          left: 4,
+                        }}
                       />
-                      {photo.isPrimary && (
-                        <Chip
-                          label="Primary"
-                          size="small"
-                          color="primary"
-                          sx={{
-                            position: 'absolute',
-                            top: 4,
-                            left: 4,
-                          }}
-                        />
-                      )}
-                    </Box>
-                    {photo.description && (
-                      <CardActions>
-                        <Typography variant="body2" color="text.secondary">
-                          {photo.description}
-                        </Typography>
-                      </CardActions>
                     )}
-                  </Card>
-                </Grid>
+                  </Box>
+                  {photo.description && (
+                    <CardActions>
+                      <Typography variant="body2" color="text.secondary">
+                        {photo.description}
+                      </Typography>
+                    </CardActions>
+                  )}
+                </Card>
               ))}
-            </Grid>
+            </Box>
           </Box>
         )}
 

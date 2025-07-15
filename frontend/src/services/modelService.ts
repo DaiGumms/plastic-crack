@@ -12,7 +12,7 @@ import type {
   BulkUpdateData,
   PaginatedResponse,
 } from '../types';
-import { apiClient } from './api';
+import api from './api';
 
 export interface PaginationOptions {
   page?: number;
@@ -28,7 +28,7 @@ class ModelService {
    * Create a new model
    */
   async createModel(data: CreateModelData): Promise<Model> {
-    const response = await apiClient.post<{ data: Model }>(this.baseUrl, data);
+    const response = await api.post<{ data: Model }>(this.baseUrl, data);
     return response.data.data;
   }
 
@@ -56,7 +56,7 @@ class ModelService {
     }
 
     const url = `${this.baseUrl}/collection/${collectionId}?${params.toString()}`;
-    const response = await apiClient.get<{ data: PaginatedResponse<Model> }>(url);
+    const response = await api.get<{ data: PaginatedResponse<Model> }>(url);
     return response.data.data;
   }
 
@@ -83,7 +83,7 @@ class ModelService {
     if (filters?.collectionId) params.append('collectionId', filters.collectionId);
 
     const url = `${this.baseUrl}/search?${params.toString()}`;
-    const response = await apiClient.get<{ data: PaginatedResponse<Model> }>(url);
+    const response = await api.get<{ data: PaginatedResponse<Model> }>(url);
     return response.data.data;
   }
 
@@ -91,7 +91,7 @@ class ModelService {
    * Get model by ID
    */
   async getModel(id: string): Promise<Model> {
-    const response = await apiClient.get<{ data: Model }>(`${this.baseUrl}/${id}`);
+    const response = await api.get<{ data: Model }>(`${this.baseUrl}/${id}`);
     return response.data.data;
   }
 
@@ -99,7 +99,7 @@ class ModelService {
    * Update model
    */
   async updateModel(id: string, data: UpdateModelData): Promise<Model> {
-    const response = await apiClient.put<{ data: Model }>(`${this.baseUrl}/${id}`, data);
+    const response = await api.put<{ data: Model }>(`${this.baseUrl}/${id}`, data);
     return response.data.data;
   }
 
@@ -107,14 +107,14 @@ class ModelService {
    * Delete model
    */
   async deleteModel(id: string): Promise<void> {
-    await apiClient.delete(`${this.baseUrl}/${id}`);
+    await api.delete(`${this.baseUrl}/${id}`);
   }
 
   /**
    * Bulk update models
    */
   async bulkUpdateModels(data: BulkUpdateData): Promise<{ updatedCount: number }> {
-    const response = await apiClient.put<{ data: { updatedCount: number } }>(
+    const response = await api.put<{ data: { updatedCount: number } }>(
       `${this.baseUrl}/bulk-update`,
       data
     );
@@ -125,7 +125,7 @@ class ModelService {
    * Add photos to a model
    */
   async addModelPhotos(modelId: string, photos: ModelPhotoData[]): Promise<Model> {
-    const response = await apiClient.post<{ data: Model }>(
+    const response = await api.post<{ data: Model }>(
       `${this.baseUrl}/${modelId}/photos`,
       { photos }
     );
