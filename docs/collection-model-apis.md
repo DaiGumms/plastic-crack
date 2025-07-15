@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document provides comprehensive documentation for the Collection and Model CRUD APIs implementation, addressing Issues #19 and #20. The implementation includes full REST API endpoints, business logic services, comprehensive validation, authentication, and extensive testing.
+This document provides comprehensive documentation for the Collection and Model CRUD APIs
+implementation, addressing Issues #19 and #20. The implementation includes full REST API endpoints,
+business logic services, comprehensive validation, authentication, and extensive testing.
 
 ## Table of Contents
 
@@ -65,20 +67,21 @@ backend/src/
 
 ## Collection API (Issue #19)
 
-The Collection API provides comprehensive CRUD operations for managing user collections of miniatures.
+The Collection API provides comprehensive CRUD operations for managing user collections of
+miniatures.
 
 ### Endpoints Overview
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/v1/collections` | Create new collection | ✅ |
-| GET | `/api/v1/collections` | List public collections | ❌ |
-| GET | `/api/v1/collections/search` | Search collections | ❌ |
-| GET | `/api/v1/collections/my` | Get user's collections | ✅ |
-| GET | `/api/v1/collections/user/:userId` | Get user's public collections | ❌ |
-| GET | `/api/v1/collections/:id` | Get specific collection | ❌ |
-| PUT | `/api/v1/collections/:id` | Update collection | ✅ |
-| DELETE | `/api/v1/collections/:id` | Delete collection | ✅ |
+| Method | Endpoint                           | Description                   | Auth Required |
+| ------ | ---------------------------------- | ----------------------------- | ------------- |
+| POST   | `/api/v1/collections`              | Create new collection         | ✅            |
+| GET    | `/api/v1/collections`              | List public collections       | ❌            |
+| GET    | `/api/v1/collections/search`       | Search collections            | ❌            |
+| GET    | `/api/v1/collections/my`           | Get user's collections        | ✅            |
+| GET    | `/api/v1/collections/user/:userId` | Get user's public collections | ❌            |
+| GET    | `/api/v1/collections/:id`          | Get specific collection       | ❌            |
+| PUT    | `/api/v1/collections/:id`          | Update collection             | ✅            |
+| DELETE | `/api/v1/collections/:id`          | Delete collection             | ✅            |
 
 ### Collection Data Model
 
@@ -93,7 +96,7 @@ interface Collection {
   imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Relations
   user: User;
   models: Model[];
@@ -105,36 +108,43 @@ interface Collection {
 #### Key Methods
 
 ##### `createCollection(userId: string, data: CreateCollectionData)`
+
 - Creates a new collection for the specified user
 - Validates input data and enforces business rules
 - Returns the created collection with user relationship
 
 ##### `getCollections(filters?, pagination?)`
+
 - Retrieves public collections with optional filtering
 - Supports search by name/description, tag filtering, and pagination
 - Returns paginated results with metadata
 
 ##### `searchCollections(query: string, filters?, pagination?)`
+
 - Full-text search across collection names and descriptions
 - Supports additional filtering by tags, user, and privacy
 - Returns ranked search results
 
 ##### `getUserCollections(userId: string, includePrivate: boolean)`
+
 - Retrieves collections for a specific user
 - Controls privacy based on requester (owner sees private collections)
 - Supports pagination and filtering
 
 ##### `getCollectionById(id: string, userId?: string)`
+
 - Retrieves a specific collection by ID
 - Enforces privacy rules based on requester
 - Returns null if not found or access denied
 
 ##### `updateCollection(id: string, userId: string, data: UpdateCollectionData)`
+
 - Updates collection with ownership validation
 - Supports partial updates
 - Returns updated collection
 
 ##### `deleteCollection(id: string, userId: string)`
+
 - Deletes collection with ownership validation
 - Cascades to delete associated models
 - Returns void on success
@@ -142,6 +152,7 @@ interface Collection {
 ### Validation Rules
 
 #### Create/Update Collection
+
 ```typescript
 {
   name: {
@@ -171,6 +182,7 @@ interface Collection {
 ```
 
 #### Query Parameters
+
 ```typescript
 {
   page: { type: 'integer', min: 1 },
@@ -189,16 +201,16 @@ The Model API manages individual miniature models within collections.
 
 ### Endpoints Overview
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/v1/models` | Create new model | ✅ |
-| GET | `/api/v1/models/collection/:collectionId` | Get models in collection | ❌ |
-| GET | `/api/v1/models/search` | Search models | ✅ |
-| GET | `/api/v1/models/:id` | Get specific model | ❌ |
-| PUT | `/api/v1/models/:id` | Update model | ✅ |
-| DELETE | `/api/v1/models/:id` | Delete model | ✅ |
-| POST | `/api/v1/models/:id/photos` | Add photos to model | ✅ |
-| PUT | `/api/v1/models/bulk-update` | Bulk update models | ✅ |
+| Method | Endpoint                                  | Description              | Auth Required |
+| ------ | ----------------------------------------- | ------------------------ | ------------- |
+| POST   | `/api/v1/models`                          | Create new model         | ✅            |
+| GET    | `/api/v1/models/collection/:collectionId` | Get models in collection | ❌            |
+| GET    | `/api/v1/models/search`                   | Search models            | ✅            |
+| GET    | `/api/v1/models/:id`                      | Get specific model       | ❌            |
+| PUT    | `/api/v1/models/:id`                      | Update model             | ✅            |
+| DELETE | `/api/v1/models/:id`                      | Delete model             | ✅            |
+| POST   | `/api/v1/models/:id/photos`               | Add photos to model      | ✅            |
+| PUT    | `/api/v1/models/bulk-update`              | Bulk update models       | ✅            |
 
 ### Model Data Model
 
@@ -219,7 +231,7 @@ interface Model {
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Relations
   user: User;
   collection: Collection;
@@ -233,7 +245,7 @@ enum PaintingStatus {
   BASE_COATED = 'BASE_COATED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
-  SHOWCASE = 'SHOWCASE'
+  SHOWCASE = 'SHOWCASE',
 }
 
 interface ModelPhoto {
@@ -250,41 +262,49 @@ interface ModelPhoto {
 #### Key Methods
 
 ##### `addModel(userId: string, data: CreateModelData)`
+
 - Creates a new model with ownership validation
 - Validates collection ownership and game system existence
 - Returns created model with relationships
 
 ##### `updateModel(id: string, userId: string, data: UpdateModelData)`
+
 - Updates model with ownership validation
 - Supports partial updates including painting status changes
 - Returns updated model
 
 ##### `getModelsByCollection(collectionId: string, filters?, pagination?)`
+
 - Retrieves models within a specific collection
 - Supports filtering by painting status, search terms, and tags
 - Respects collection privacy settings
 
 ##### `searchModels(userId: string, query: string, filters?, pagination?)`
+
 - Full-text search across user's models
 - Supports filtering by collection, painting status, and tags
 - Returns search results with relevance ranking
 
 ##### `getModelById(id: string, userId?: string)`
+
 - Retrieves specific model by ID
 - Enforces privacy rules based on collection and model settings
 - Returns null if not found or access denied
 
 ##### `deleteModel(id: string, userId: string)`
+
 - Deletes model with ownership validation
 - Removes associated photos and relationships
 - Returns void on success
 
 ##### `addPhotos(modelId: string, userId: string, photos: PhotoData[])`
+
 - Adds photos to a model with ownership validation
 - Supports multiple photo types and captions
 - Returns updated model with new photos
 
 ##### `bulkUpdateModels(userId: string, modelIds: string[], updates: BulkUpdateData)`
+
 - Updates multiple models in a single operation
 - Validates ownership for all models
 - Returns summary of successful and failed updates
@@ -292,6 +312,7 @@ interface ModelPhoto {
 ### Validation Rules
 
 #### Create/Update Model
+
 ```typescript
 {
   name: {
@@ -334,6 +355,7 @@ interface ModelPhoto {
 ### Core Tables
 
 #### Collections Table
+
 ```sql
 CREATE TABLE collections (
   id VARCHAR PRIMARY KEY DEFAULT cuid(),
@@ -349,6 +371,7 @@ CREATE TABLE collections (
 ```
 
 #### Models Table
+
 ```sql
 CREATE TABLE models (
   id VARCHAR PRIMARY KEY DEFAULT cuid(),
@@ -412,25 +435,27 @@ Authorization: Bearer <jwt_token>
 
 ```typescript
 interface JWTPayload {
-  id: string;          // User ID
-  email: string;       // User email
-  username: string;    // Username
-  role: UserRole;      // User role
-  iat: number;         // Issued at
-  exp: number;         // Expires at
-  jti: string;         // JWT ID for revocation
+  id: string; // User ID
+  email: string; // User email
+  username: string; // Username
+  role: UserRole; // User role
+  iat: number; // Issued at
+  exp: number; // Expires at
+  jti: string; // JWT ID for revocation
 }
 ```
 
 ### Authorization Rules
 
 #### Collections
+
 - **Create**: Authenticated users only
 - **Read**: Public collections accessible to all, private collections only to owners
 - **Update**: Collection owners only
 - **Delete**: Collection owners only
 
 #### Models
+
 - **Create**: Authenticated users, must own the target collection
 - **Read**: Public models accessible to all, private models only to owners
 - **Update**: Model owners only
@@ -453,16 +478,19 @@ interface JWTPayload {
 The implementation includes comprehensive testing across multiple layers:
 
 #### Unit Tests
+
 - **Service Layer**: Business logic validation
 - **Utility Functions**: Helper function testing
 - **Validation**: Input validation rule testing
 
 #### Integration Tests
+
 - **API Endpoints**: Full request/response cycle testing
 - **Database Operations**: Prisma ORM integration testing
 - **Authentication**: JWT middleware testing
 
 #### End-to-End Tests
+
 - **User Workflows**: Complete user journey testing
 - **Error Scenarios**: Comprehensive error handling validation
 - **Edge Cases**: Boundary condition testing
@@ -477,13 +505,13 @@ describe('CollectionService', () => {
     it('should enforce business rules');
     it('should handle duplicate names');
   });
-  
+
   describe('getCollections', () => {
     it('should return paginated results');
     it('should filter by privacy settings');
     it('should support search functionality');
   });
-  
+
   // ... more test suites
 });
 ```
@@ -491,6 +519,7 @@ describe('CollectionService', () => {
 ### Test Database
 
 Tests use a dedicated test database with:
+
 - **Isolation**: Each test runs in a clean environment
 - **Fixtures**: Consistent test data setup
 - **Cleanup**: Automatic cleanup after each test
@@ -524,6 +553,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -548,6 +578,7 @@ GET /api/v1/collections/search?q=space%20marine&tags=Warhammer%2040k&page=1&limi
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -596,6 +627,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -608,7 +640,7 @@ Response:
     "userId": "user123",
     "paintingStatus": "IN_PROGRESS",
     "tags": ["Primaris", "Intercessor", "Sergeant"],
-    "purchasePrice": 35.00,
+    "purchasePrice": 35.0,
     "notes": "Kitbashed with Death Company bits",
     "isPublic": true,
     "createdAt": "2025-01-15T10:30:00Z",
@@ -634,6 +666,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -661,14 +694,14 @@ All errors follow a consistent format:
 
 ### Common Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `VALIDATION_ERROR` | 400 | Input validation failed |
-| `UNAUTHORIZED` | 401 | Authentication required |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `CONFLICT` | 409 | Resource conflict (duplicate) |
-| `INTERNAL_ERROR` | 500 | Server error |
+| Code               | HTTP Status | Description                   |
+| ------------------ | ----------- | ----------------------------- |
+| `VALIDATION_ERROR` | 400         | Input validation failed       |
+| `UNAUTHORIZED`     | 401         | Authentication required       |
+| `FORBIDDEN`        | 403         | Insufficient permissions      |
+| `NOT_FOUND`        | 404         | Resource not found            |
+| `CONFLICT`         | 409         | Resource conflict (duplicate) |
+| `INTERNAL_ERROR`   | 500         | Server error                  |
 
 ### Validation Error Details
 
@@ -812,6 +845,9 @@ All errors follow a consistent format:
 
 ## Conclusion
 
-This implementation provides a robust, scalable, and well-tested foundation for the Collection and Model CRUD APIs. The architecture supports future enhancements while maintaining high performance and security standards.
+This implementation provides a robust, scalable, and well-tested foundation for the Collection and
+Model CRUD APIs. The architecture supports future enhancements while maintaining high performance
+and security standards.
 
-For additional information or implementation details, please refer to the source code and test files in the repository.
+For additional information or implementation details, please refer to the source code and test files
+in the repository.

@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import CollectionService from '../../../services/collectionService';
-import type { CreateCollectionData, UpdateCollectionData, CollectionFilter } from '../../../types';
+import type {
+  CreateCollectionData,
+  UpdateCollectionData,
+  CollectionFilter,
+} from '../../../types';
 
 // Mock the API
 vi.mock('../../../services/api', () => ({
@@ -69,7 +73,10 @@ describe('CollectionService', () => {
 
       const result = await CollectionService.createCollection(collectionData);
 
-      expect(mockApi.default.post).toHaveBeenCalledWith('/collections', collectionData);
+      expect(mockApi.default.post).toHaveBeenCalledWith(
+        '/collections',
+        collectionData
+      );
       expect(result.name).toBe('Test Collection');
     });
 
@@ -88,7 +95,9 @@ describe('CollectionService', () => {
         name: 'Test Collection',
       };
 
-      await expect(CollectionService.createCollection(collectionData)).rejects.toThrow('Creation failed');
+      await expect(
+        CollectionService.createCollection(collectionData)
+      ).rejects.toThrow('Creation failed');
     });
   });
 
@@ -117,9 +126,15 @@ describe('CollectionService', () => {
         isPublic: false,
       };
 
-      const result = await CollectionService.updateCollection('collection-1', updateData);
+      const result = await CollectionService.updateCollection(
+        'collection-1',
+        updateData
+      );
 
-      expect(mockApi.default.put).toHaveBeenCalledWith('/collections/collection-1', updateData);
+      expect(mockApi.default.put).toHaveBeenCalledWith(
+        '/collections/collection-1',
+        updateData
+      );
       expect(result.name).toBe('Updated Collection');
     });
   });
@@ -137,7 +152,9 @@ describe('CollectionService', () => {
 
       await CollectionService.deleteCollection('collection-1');
 
-      expect(mockApi.default.delete).toHaveBeenCalledWith('/collections/collection-1');
+      expect(mockApi.default.delete).toHaveBeenCalledWith(
+        '/collections/collection-1'
+      );
     });
 
     it('should throw error when deletion fails', async () => {
@@ -151,7 +168,9 @@ describe('CollectionService', () => {
       const mockApi = await import('../../../services/api');
       vi.mocked(mockApi.default.delete).mockResolvedValue(mockResponse);
 
-      await expect(CollectionService.deleteCollection('collection-1')).rejects.toThrow('Deletion failed');
+      await expect(
+        CollectionService.deleteCollection('collection-1')
+      ).rejects.toThrow('Deletion failed');
     });
   });
 
@@ -167,7 +186,9 @@ describe('CollectionService', () => {
       const mockApi = await import('../../../services/api');
       vi.mocked(mockApi.default.get).mockResolvedValue(mockResponse);
 
-      await CollectionService.searchCollections('test query', 1, 10, { isPublic: true });
+      await CollectionService.searchCollections('test query', 1, 10, {
+        isPublic: true,
+      });
 
       expect(mockApi.default.get).toHaveBeenCalledWith(
         expect.stringContaining('search=test+query')
@@ -185,8 +206,8 @@ describe('CollectionService', () => {
             unpainterModels: 3,
             inProgressModels: 4,
             completedModels: 3,
-            totalValue: 250.00,
-            averageValue: 25.00,
+            totalValue: 250.0,
+            averageValue: 25.0,
           },
         },
       };
@@ -196,7 +217,9 @@ describe('CollectionService', () => {
 
       const result = await CollectionService.getCollectionStats('collection-1');
 
-      expect(mockApi.default.get).toHaveBeenCalledWith('/collections/collection-1/stats');
+      expect(mockApi.default.get).toHaveBeenCalledWith(
+        '/collections/collection-1/stats'
+      );
       expect(result.totalModels).toBe(10);
     });
   });
@@ -209,12 +232,18 @@ describe('CollectionService', () => {
       const mockApi = await import('../../../services/api');
       vi.mocked(mockApi.default.get).mockResolvedValue(mockResponse);
 
-      const result = await CollectionService.exportCollection('collection-1', 'json');
+      const result = await CollectionService.exportCollection(
+        'collection-1',
+        'json'
+      );
 
-      expect(mockApi.default.get).toHaveBeenCalledWith('/collections/collection-1/export', {
-        params: { format: 'json' },
-        responseType: 'blob',
-      });
+      expect(mockApi.default.get).toHaveBeenCalledWith(
+        '/collections/collection-1/export',
+        {
+          params: { format: 'json' },
+          responseType: 'blob',
+        }
+      );
       expect(result).toBeInstanceOf(Blob);
     });
   });

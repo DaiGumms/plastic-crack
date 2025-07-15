@@ -4,7 +4,15 @@
  * Tests Issue #20 implementation - Model CRUD Routes
  */
 
-import { beforeAll, beforeEach, afterAll, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  afterEach,
+  describe,
+  it,
+  expect,
+} from '@jest/globals';
 import request from 'supertest';
 import { PrismaClient } from '../../generated/prisma';
 import { app } from '../../app';
@@ -61,13 +69,23 @@ describe('Model Routes - Issue #20', () => {
 
     // Create auth tokens
     authToken = jwt.sign(
-      { userId: testUserId, email: user1.email, username: user1.username, role: user1.role },
+      {
+        userId: testUserId,
+        email: user1.email,
+        username: user1.username,
+        role: user1.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
 
     authToken2 = jwt.sign(
-      { userId: testUserId2, email: user2.email, username: user2.username, role: user2.role },
+      {
+        userId: testUserId2,
+        email: user2.email,
+        username: user2.username,
+        role: user2.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
@@ -172,10 +190,7 @@ describe('Model Routes - Issue #20', () => {
         collectionId: testCollectionId,
       };
 
-      await request(app)
-        .post('/api/v1/models')
-        .send(modelData)
-        .expect(401);
+      await request(app).post('/api/v1/models').send(modelData).expect(401);
     });
 
     it('should validate required fields', async () => {
@@ -210,7 +225,7 @@ describe('Model Routes - Issue #20', () => {
         name: 'Negative Price Model',
         gameSystemId: testGameSystemId,
         collectionId: testCollectionId,
-        purchasePrice: -10.50,
+        purchasePrice: -10.5,
       };
 
       await request(app)
@@ -284,7 +299,9 @@ describe('Model Routes - Issue #20', () => {
 
     it('should filter by painting status', async () => {
       const response = await request(app)
-        .get(`/api/v1/models/collection/${testCollectionId}?paintingStatus=COMPLETED`)
+        .get(
+          `/api/v1/models/collection/${testCollectionId}?paintingStatus=COMPLETED`
+        )
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -304,7 +321,9 @@ describe('Model Routes - Issue #20', () => {
 
     it('should sort models correctly', async () => {
       const response = await request(app)
-        .get(`/api/v1/models/collection/${testCollectionId}?sortBy=name&sortOrder=asc`)
+        .get(
+          `/api/v1/models/collection/${testCollectionId}?sortBy=name&sortOrder=asc`
+        )
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -367,9 +386,7 @@ describe('Model Routes - Issue #20', () => {
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/v1/models/search?q=test')
-        .expect(401);
+      await request(app).get('/api/v1/models/search?q=test').expect(401);
     });
 
     it('should require search query', async () => {
@@ -392,9 +409,7 @@ describe('Model Routes - Issue #20', () => {
     });
 
     it('should return 404 for non-existent model', async () => {
-      await request(app)
-        .get('/api/v1/models/non-existent-id')
-        .expect(404);
+      await request(app).get('/api/v1/models/non-existent-id').expect(404);
     });
 
     it('should respect privacy settings', async () => {
@@ -520,9 +535,7 @@ describe('Model Routes - Issue #20', () => {
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .delete(`/api/v1/models/${testModelId}`)
-        .expect(401);
+      await request(app).delete(`/api/v1/models/${testModelId}`).expect(401);
     });
 
     it('should require ownership', async () => {
@@ -571,7 +584,12 @@ describe('Model Routes - Issue #20', () => {
 
     it('should require authentication', async () => {
       const photoData = {
-        photos: [{ fileName: 'photo.jpg', originalUrl: 'https://example.com/photo.jpg' }],
+        photos: [
+          {
+            fileName: 'photo.jpg',
+            originalUrl: 'https://example.com/photo.jpg',
+          },
+        ],
       };
 
       await request(app)
@@ -582,7 +600,12 @@ describe('Model Routes - Issue #20', () => {
 
     it('should require ownership', async () => {
       const photoData = {
-        photos: [{ fileName: 'photo.jpg', originalUrl: 'https://example.com/photo.jpg' }],
+        photos: [
+          {
+            fileName: 'photo.jpg',
+            originalUrl: 'https://example.com/photo.jpg',
+          },
+        ],
       };
 
       await request(app)
@@ -676,7 +699,9 @@ describe('Model Routes - Issue #20', () => {
       const updatedModels = await prisma.model.findMany({
         where: { id: { in: bulkData.modelIds } },
       });
-      expect(updatedModels.every(m => m.paintingStatus === 'IN_PROGRESS')).toBe(true);
+      expect(updatedModels.every(m => m.paintingStatus === 'IN_PROGRESS')).toBe(
+        true
+      );
     });
 
     it('should require authentication', async () => {
@@ -734,9 +759,7 @@ describe('Model Routes - Issue #20', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle invalid model ID format', async () => {
-      await request(app)
-        .get('/api/v1/models/invalid-id-format')
-        .expect(404);
+      await request(app).get('/api/v1/models/invalid-id-format').expect(404);
     });
 
     it('should handle malformed JSON in request body', async () => {

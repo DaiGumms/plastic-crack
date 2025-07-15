@@ -18,7 +18,11 @@ import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { Collection, CreateCollectionData, UpdateCollectionData } from '../../types';
+import type {
+  Collection,
+  CreateCollectionData,
+  UpdateCollectionData,
+} from '../../types';
 
 const collectionSchema = z.object({
   name: z
@@ -39,7 +43,9 @@ type CollectionFormData = z.infer<typeof collectionSchema>;
 interface CollectionFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateCollectionData | UpdateCollectionData) => Promise<void>;
+  onSubmit: (
+    data: CreateCollectionData | UpdateCollectionData
+  ) => Promise<void>;
   collection?: Collection;
   loading?: boolean;
   error?: string | null;
@@ -117,13 +123,13 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth='sm'
       fullWidth
       PaperProps={{
-        sx: { minHeight: '400px' }
+        sx: { minHeight: '400px' },
       }}
     >
       <DialogTitle>
@@ -133,7 +139,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <DialogContent dividers>
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity='error' sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
@@ -141,12 +147,12 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Name */}
             <Controller
-              name="name"
+              name='name'
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Collection Name"
+                  label='Collection Name'
                   fullWidth
                   required
                   error={!!errors.name}
@@ -158,17 +164,20 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
             {/* Description */}
             <Controller
-              name="description"
+              name='description'
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Description"
+                  label='Description'
                   fullWidth
                   multiline
                   rows={3}
                   error={!!errors.description}
-                  helperText={errors.description?.message || 'Optional description for your collection'}
+                  helperText={
+                    errors.description?.message ||
+                    'Optional description for your collection'
+                  }
                   disabled={loading}
                 />
               )}
@@ -176,15 +185,18 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
             {/* Image URL */}
             <Controller
-              name="imageUrl"
+              name='imageUrl'
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Cover Image URL"
+                  label='Cover Image URL'
                   fullWidth
                   error={!!errors.imageUrl}
-                  helperText={errors.imageUrl?.message || 'Optional URL for collection cover image'}
+                  helperText={
+                    errors.imageUrl?.message ||
+                    'Optional URL for collection cover image'
+                  }
                   disabled={loading}
                 />
               )}
@@ -192,25 +204,30 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
             {/* Tags */}
             <Box>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant='subtitle2' gutterBottom>
                 Tags
               </Typography>
-              
+
               {/* Tag Input */}
               <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
-                  size="small"
-                  placeholder="Add a tag"
+                  size='small'
+                  placeholder='Add a tag'
                   value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
+                  onChange={e => setNewTag(e.target.value)}
                   onKeyPress={handleTagKeyPress}
                   disabled={loading || tags.length >= 20}
                   sx={{ flexGrow: 1 }}
                 />
                 <IconButton
                   onClick={handleAddTag}
-                  disabled={!newTag.trim() || tags.includes(newTag.trim()) || tags.length >= 20 || loading}
-                  color="primary"
+                  disabled={
+                    !newTag.trim() ||
+                    tags.includes(newTag.trim()) ||
+                    tags.length >= 20 ||
+                    loading
+                  }
+                  color='primary'
                 >
                   <AddIcon />
                 </IconButton>
@@ -218,26 +235,26 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
               {/* Tag Display */}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {tags.map((tag) => (
+                {tags.map(tag => (
                   <Chip
                     key={tag}
                     label={tag}
                     onDelete={() => handleRemoveTag(tag)}
                     deleteIcon={<CloseIcon />}
-                    size="small"
+                    size='small'
                     disabled={loading}
                   />
                 ))}
               </Box>
-              
-              <Typography variant="caption" color="text.secondary">
+
+              <Typography variant='caption' color='text.secondary'>
                 {tags.length}/20 tags
               </Typography>
             </Box>
 
             {/* Public/Private Toggle */}
             <Controller
-              name="isPublic"
+              name='isPublic'
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -250,14 +267,19 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                   }
                   label={
                     <Box>
-                      <Typography component="span">
-                        {field.value ? 'Public Collection' : 'Private Collection'}
+                      <Typography component='span'>
+                        {field.value
+                          ? 'Public Collection'
+                          : 'Private Collection'}
                       </Typography>
-                      <Typography variant="caption" display="block" color="text.secondary">
-                        {field.value 
-                          ? 'Anyone can view this collection' 
-                          : 'Only you can view this collection'
-                        }
+                      <Typography
+                        variant='caption'
+                        display='block'
+                        color='text.secondary'
+                      >
+                        {field.value
+                          ? 'Anyone can view this collection'
+                          : 'Only you can view this collection'}
                       </Typography>
                     </Box>
                   }
@@ -272,11 +294,15 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
             Cancel
           </Button>
           <Button
-            type="submit"
-            variant="contained"
+            type='submit'
+            variant='contained'
             disabled={!isValid || loading}
           >
-            {loading ? 'Saving...' : isEditing ? 'Update Collection' : 'Create Collection'}
+            {loading
+              ? 'Saving...'
+              : isEditing
+                ? 'Update Collection'
+                : 'Create Collection'}
           </Button>
         </DialogActions>
       </form>

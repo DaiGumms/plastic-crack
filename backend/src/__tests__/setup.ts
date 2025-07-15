@@ -36,7 +36,7 @@ async function cleanupDatabaseBetweenTests() {
     await prisma.collection.deleteMany({});
     await prisma.userRelationship.deleteMany({});
     await prisma.tag.deleteMany({});
-    
+
     // Only clean up specific temporary test users, not main test users
     await prisma.user.deleteMany({
       where: {

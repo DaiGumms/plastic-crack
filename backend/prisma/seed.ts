@@ -115,49 +115,179 @@ async function main() {
 
   // Seed Default Tags
   console.log('🏷️ Seeding default tags...');
-  
+
   const defaultTags = [
     // General tags
-    { name: 'Infantry', category: 'UNIT_TYPE', color: '#3B82F6', description: 'Foot soldiers and basic troops' },
-    { name: 'Vehicle', category: 'UNIT_TYPE', color: '#8B5CF6', description: 'Tanks, transports, and vehicles' },
-    { name: 'Character', category: 'UNIT_TYPE', color: '#F59E0B', description: 'Heroes, leaders, and special characters' },
-    { name: 'Monster', category: 'UNIT_TYPE', color: '#EF4444', description: 'Large creatures and beasts' },
-    
+    {
+      name: 'Infantry',
+      category: 'UNIT_TYPE',
+      color: '#3B82F6',
+      description: 'Foot soldiers and basic troops',
+    },
+    {
+      name: 'Vehicle',
+      category: 'UNIT_TYPE',
+      color: '#8B5CF6',
+      description: 'Tanks, transports, and vehicles',
+    },
+    {
+      name: 'Character',
+      category: 'UNIT_TYPE',
+      color: '#F59E0B',
+      description: 'Heroes, leaders, and special characters',
+    },
+    {
+      name: 'Monster',
+      category: 'UNIT_TYPE',
+      color: '#EF4444',
+      description: 'Large creatures and beasts',
+    },
+
     // Painting status tags
-    { name: 'Unpainted', category: 'STATUS', color: '#6B7280', description: 'Not yet started painting' },
-    { name: 'Work in Progress', category: 'STATUS', color: '#F59E0B', description: 'Currently being painted' },
-    { name: 'Completed', category: 'STATUS', color: '#10B981', description: 'Finished painting' },
-    { name: 'Showcase', category: 'STATUS', color: '#8B5CF6', description: 'Display quality miniatures' },
-    
+    {
+      name: 'Unpainted',
+      category: 'STATUS',
+      color: '#6B7280',
+      description: 'Not yet started painting',
+    },
+    {
+      name: 'Work in Progress',
+      category: 'STATUS',
+      color: '#F59E0B',
+      description: 'Currently being painted',
+    },
+    {
+      name: 'Completed',
+      category: 'STATUS',
+      color: '#10B981',
+      description: 'Finished painting',
+    },
+    {
+      name: 'Showcase',
+      category: 'STATUS',
+      color: '#8B5CF6',
+      description: 'Display quality miniatures',
+    },
+
     // Painting techniques
-    { name: 'Drybrushing', category: 'TECHNIQUE', color: '#F97316', description: 'Dry brush highlighting technique' },
-    { name: 'Washing', category: 'TECHNIQUE', color: '#0EA5E9', description: 'Wash and shade technique' },
-    { name: 'Edge Highlighting', category: 'TECHNIQUE', color: '#F59E0B', description: 'Fine edge highlight technique' },
-    { name: 'OSL', category: 'TECHNIQUE', color: '#8B5CF6', description: 'Object Source Lighting effects' },
-    { name: 'NMM', category: 'TECHNIQUE', color: '#6B7280', description: 'Non-Metallic Metal technique' },
-    { name: 'Weathering', category: 'TECHNIQUE', color: '#92400E', description: 'Battle damage and aging effects' },
-    
+    {
+      name: 'Drybrushing',
+      category: 'TECHNIQUE',
+      color: '#F97316',
+      description: 'Dry brush highlighting technique',
+    },
+    {
+      name: 'Washing',
+      category: 'TECHNIQUE',
+      color: '#0EA5E9',
+      description: 'Wash and shade technique',
+    },
+    {
+      name: 'Edge Highlighting',
+      category: 'TECHNIQUE',
+      color: '#F59E0B',
+      description: 'Fine edge highlight technique',
+    },
+    {
+      name: 'OSL',
+      category: 'TECHNIQUE',
+      color: '#8B5CF6',
+      description: 'Object Source Lighting effects',
+    },
+    {
+      name: 'NMM',
+      category: 'TECHNIQUE',
+      color: '#6B7280',
+      description: 'Non-Metallic Metal technique',
+    },
+    {
+      name: 'Weathering',
+      category: 'TECHNIQUE',
+      color: '#92400E',
+      description: 'Battle damage and aging effects',
+    },
+
     // Game systems
-    { name: 'Warhammer 40K', category: 'GAME_SYSTEM', color: '#DC2626', description: 'Warhammer 40,000 models' },
-    { name: 'Age of Sigmar', category: 'GAME_SYSTEM', color: '#1D4ED8', description: 'Age of Sigmar models' },
-    { name: 'Kill Team', category: 'GAME_SYSTEM', color: '#059669', description: 'Kill Team models' },
-    
+    {
+      name: 'Warhammer 40K',
+      category: 'GAME_SYSTEM',
+      color: '#DC2626',
+      description: 'Warhammer 40,000 models',
+    },
+    {
+      name: 'Age of Sigmar',
+      category: 'GAME_SYSTEM',
+      color: '#1D4ED8',
+      description: 'Age of Sigmar models',
+    },
+    {
+      name: 'Kill Team',
+      category: 'GAME_SYSTEM',
+      color: '#059669',
+      description: 'Kill Team models',
+    },
+
     // Common categories
-    { name: 'Troops', category: 'UNIT_TYPE', color: '#16A34A', description: 'Basic battlefield units' },
-    { name: 'Elite', category: 'UNIT_TYPE', color: '#DC2626', description: 'Elite specialized units' },
-    { name: 'Heavy Support', category: 'UNIT_TYPE', color: '#7C2D12', description: 'Heavy weapons and support' },
-    { name: 'Fast Attack', category: 'UNIT_TYPE', color: '#0284C7', description: 'Fast moving units' },
-    { name: 'HQ', category: 'UNIT_TYPE', color: '#7C3AED', description: 'Headquarters and commanders' },
-    
+    {
+      name: 'Troops',
+      category: 'UNIT_TYPE',
+      color: '#16A34A',
+      description: 'Basic battlefield units',
+    },
+    {
+      name: 'Elite',
+      category: 'UNIT_TYPE',
+      color: '#DC2626',
+      description: 'Elite specialized units',
+    },
+    {
+      name: 'Heavy Support',
+      category: 'UNIT_TYPE',
+      color: '#7C2D12',
+      description: 'Heavy weapons and support',
+    },
+    {
+      name: 'Fast Attack',
+      category: 'UNIT_TYPE',
+      color: '#0284C7',
+      description: 'Fast moving units',
+    },
+    {
+      name: 'HQ',
+      category: 'UNIT_TYPE',
+      color: '#7C3AED',
+      description: 'Headquarters and commanders',
+    },
+
     // Quality/condition
-    { name: 'Kitbashed', category: 'GENERAL', color: '#059669', description: 'Custom converted models' },
-    { name: 'Magnetized', category: 'GENERAL', color: '#6B7280', description: 'Models with magnetic weapon options' },
-    { name: 'Vintage', category: 'GENERAL', color: '#92400E', description: 'Older or classic models' },
-    { name: 'Competition', category: 'GENERAL', color: '#7C2D12', description: 'Competition painted models' },
+    {
+      name: 'Kitbashed',
+      category: 'GENERAL',
+      color: '#059669',
+      description: 'Custom converted models',
+    },
+    {
+      name: 'Magnetized',
+      category: 'GENERAL',
+      color: '#6B7280',
+      description: 'Models with magnetic weapon options',
+    },
+    {
+      name: 'Vintage',
+      category: 'GENERAL',
+      color: '#92400E',
+      description: 'Older or classic models',
+    },
+    {
+      name: 'Competition',
+      category: 'GENERAL',
+      color: '#7C2D12',
+      description: 'Competition painted models',
+    },
   ] as const;
 
   const createdTags: any[] = [];
-  
+
   for (const tag of defaultTags) {
     const createdTag = await prisma.tag.upsert({
       where: { name: tag.name },

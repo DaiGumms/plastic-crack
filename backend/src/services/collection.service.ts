@@ -175,7 +175,7 @@ export class CollectionService {
 
     // Calculate total value for each collection
     const collectionsWithStats: CollectionWithStats[] = collections.map(
-      (collection) => {
+      collection => {
         const totalValue = collection.models.reduce((sum, model) => {
           return sum + (model.purchasePrice?.toNumber() || 0);
         }, 0);
@@ -430,7 +430,7 @@ export class CollectionService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return collections.map((collection) => {
+    return collections.map(collection => {
       const totalValue = collection.models.reduce((sum, model) => {
         return sum + (model.purchasePrice?.toNumber() || 0);
       }, 0);

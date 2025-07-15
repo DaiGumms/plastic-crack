@@ -20,6 +20,16 @@ coverage/
 # nyc test coverage
 .nyc_output
 
+# Playwright test results
+test-results/
+playwright-report/
+
+# Testing and debugging
+*.test.js.snap
+*.test.ts.snap
+*.test.tsx.snap
+storybook-static/
+
 # Grunt intermediate storage
 .grunt
 
@@ -48,6 +58,9 @@ typings/
 # Optional eslint cache
 .eslintcache
 
+# Prettier cache
+.prettierignore.cache
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
@@ -71,9 +84,17 @@ typings/
 .env.test.local
 .env.production.local
 
+# Debug files and screenshots
+debug-*.png
+debug-*.jpg
+debug-*.jpeg
+
 # parcel-bundler cache
 .cache
 .parcel-cache
+
+# Vite cache
+.vite/
 
 # Next.js build output
 .next
@@ -113,7 +134,17 @@ public
 
 # Database
 *.sqlite
+*.sqlite3
 *.db
+*.db3
+
+# Security and secrets
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
 
 # Logs
 logs
@@ -155,6 +186,13 @@ build/Release
 ehthumbs.db
 Thumbs.db
 
+# Backup files
+*.bak
+*.backup
+*.orig
+*.tmp
+*~
+
 # Docker
 .docker/
 
@@ -166,6 +204,11 @@ temp/
 build/
 dist/
 out/
+
+# File uploads
+uploads/
+upload/
+temp-uploads/
 
 # React Native
 # Buck build

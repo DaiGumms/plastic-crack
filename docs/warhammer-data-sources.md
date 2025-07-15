@@ -2,13 +2,16 @@
 
 ## Overview
 
-This document outlines the strategy for gathering comprehensive Warhammer data for the Plastic Crack application. The approach combines multiple data sources to create a robust, accurate, and up-to-date product database.
+This document outlines the strategy for gathering comprehensive Warhammer data for the Plastic Crack
+application. The approach combines multiple data sources to create a robust, accurate, and
+up-to-date product database.
 
 ## Data Sources
 
 ### 1. Official Sources
 
 #### Games Workshop APIs/Data
+
 - **Warhammer Community API**: Limited but official product data
 - **Games Workshop Product Catalog**: Web scraping from their online store
 - **Purpose**: Official product names, images, descriptions, and current availability
@@ -17,6 +20,7 @@ This document outlines the strategy for gathering comprehensive Warhammer data f
 - **Implementation**: Web scraping with rate limiting and respectful practices
 
 #### Wahapedia
+
 - **Website**: https://wahapedia.ru/
 - **Purpose**: Comprehensive rules and unit data
 - **Coverage**: All current game systems (40K, AoS, Kill Team, Necromunda, etc.)
@@ -27,6 +31,7 @@ This document outlines the strategy for gathering comprehensive Warhammer data f
 ### 2. Community Databases
 
 #### BattleScribe Data Repository
+
 - **GitHub Repository**: https://github.com/BSData/
 - **Format**: XML files with structured data
 - **Coverage**: Comprehensive unit data, points costs, army compositions
@@ -36,6 +41,7 @@ This document outlines the strategy for gathering comprehensive Warhammer data f
 - **Implementation**: Direct XML parsing from GitHub repository
 
 **Key BSData Repositories:**
+
 ```
 - wh40k (Warhammer 40,000)
 - age-of-sigmar (Age of Sigmar)
@@ -48,6 +54,7 @@ This document outlines the strategy for gathering comprehensive Warhammer data f
 ### 3. Retailer APIs and Data
 
 #### Major Warhammer Retailers
+
 - **Element Games**: Product catalog and competitive pricing
 - **Dicehead Games**: API available for partners
 - **Warhammer Official Store**: Product information and MSRP
@@ -56,6 +63,7 @@ This document outlines the strategy for gathering comprehensive Warhammer data f
 - **Implementation**: API integration where available, web scraping for others
 
 #### Pricing Data Sources
+
 ```
 Primary Retailers:
 - Games Workshop Official Store (MSRP)
@@ -74,17 +82,18 @@ Secondary Sources:
 ### Phase 1: Core Data Import (Priority 1)
 
 #### 1.1 BattleScribe Data Integration
+
 ```typescript
 export class BattleScribeImportService {
   private readonly githubBaseUrl = 'https://raw.githubusercontent.com/BSData';
-  
+
   async importGameSystem(system: string): Promise<void> {
     // Download catalog XML files
     // Parse unit data, costs, and rules
     // Transform to database schema
     // Handle incremental updates
   }
-  
+
   async parseUnitData(xmlData: string): Promise<Unit[]> {
     // Extract unit stats, costs, and abilities
     // Map to standardized format
@@ -93,6 +102,7 @@ export class BattleScribeImportService {
 ```
 
 #### 1.2 Games Workshop Product Catalog
+
 ```typescript
 export class GWProductImportService {
   async importProductCatalog(): Promise<void> {
@@ -100,7 +110,7 @@ export class GWProductImportService {
     // Extract product details, images, descriptions
     // Map to existing unit data from BattleScribe
   }
-  
+
   async validateProductData(): Promise<void> {
     // Cross-reference with BattleScribe data
     // Flag discrepancies for manual review
@@ -111,6 +121,7 @@ export class GWProductImportService {
 ### Phase 2: Pricing Integration (Priority 2)
 
 #### 2.1 Multi-Retailer Pricing Service
+
 ```typescript
 export class PricingService {
   async updatePricing(): Promise<void> {
@@ -118,7 +129,7 @@ export class PricingService {
     // Calculate price trends and history
     // Update product availability status
   }
-  
+
   async trackPriceHistory(): Promise<void> {
     // Store historical pricing data
     // Calculate average prices and trends
@@ -130,6 +141,7 @@ export class PricingService {
 ### Phase 3: Data Validation and Enhancement (Priority 3)
 
 #### 3.1 Community Contributions
+
 ```typescript
 export class CommunityDataService {
   async submitProductCorrection(correction: ProductCorrection): Promise<void> {
@@ -137,7 +149,7 @@ export class CommunityDataService {
     // Implement moderation workflow
     // Track contributor reputation
   }
-  
+
   async validateCommunityData(): Promise<void> {
     // Cross-reference user submissions
     // Auto-approve high-confidence changes
@@ -148,6 +160,7 @@ export class CommunityDataService {
 ## Database Schema Considerations
 
 ### Core Product Model
+
 ```typescript
 model Product {
   id              String            @id @default(cuid())
@@ -162,18 +175,18 @@ model Product {
   description     String?
   imageUrl        String?
   officialUrl     String?           // Link to GW store page
-  
+
   // BattleScribe Integration
   battlescribeId  String?           @unique
   lastBSUpdate    DateTime?
-  
+
   // Pricing Data
   priceHistory    PriceHistory[]
   availability    ProductAvailability[]
-  
+
   // Community Data
   userCorrections ProductCorrection[]
-  
+
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -223,12 +236,14 @@ enum ProductType {
 ## Data Update Schedule
 
 ### Automated Updates
+
 - **BattleScribe Data**: Daily check for repository updates
 - **Pricing Data**: Every 6 hours for major retailers
 - **Availability**: Every 12 hours
 - **GW Product Catalog**: Weekly full scan
 
 ### Manual Processes
+
 - **New Product Validation**: Weekly review of new additions
 - **Community Corrections**: Daily moderation
 - **Data Quality Audits**: Monthly comprehensive review
@@ -236,6 +251,7 @@ enum ProductType {
 ## Implementation Services
 
 ### 1. Data Import Service
+
 ```typescript
 export class WarhammerDataImportService {
   constructor(
@@ -258,6 +274,7 @@ export class WarhammerDataImportService {
 ```
 
 ### 2. Data Validation Service
+
 ```typescript
 export class DataValidationService {
   async validateProductConsistency(): Promise<ValidationReport> {
@@ -277,6 +294,7 @@ export class DataValidationService {
 ## Rate Limiting and Ethical Considerations
 
 ### Scraping Guidelines
+
 - **Respect robots.txt** files
 - **Implement delays** between requests (minimum 1 second)
 - **Use User-Agent** headers identifying the application
@@ -284,6 +302,7 @@ export class DataValidationService {
 - **Cache data** to minimize repeated requests
 
 ### API Usage
+
 - **Respect rate limits** imposed by data providers
 - **Implement exponential backoff** for failed requests
 - **Store API keys securely** in environment variables
@@ -292,12 +311,14 @@ export class DataValidationService {
 ## Monitoring and Maintenance
 
 ### Data Quality Metrics
+
 - **Completeness**: Percentage of products with full data
 - **Accuracy**: User-reported error rates
 - **Freshness**: Age of last update per data source
 - **Coverage**: Percentage of GW catalog represented
 
 ### Error Handling
+
 ```typescript
 export class DataImportErrorHandler {
   async handleImportError(error: ImportError): Promise<void> {
@@ -312,12 +333,14 @@ export class DataImportErrorHandler {
 ## Future Enhancements
 
 ### Machine Learning Integration
+
 - **Price prediction** based on historical data
 - **Product recommendation** based on user collections
 - **Automated data validation** using ML models
 - **Image recognition** for product identification
 
 ### Advanced Features
+
 - **Real-time price alerts** for users
 - **Stock availability notifications**
 - **Price comparison tools**
@@ -326,12 +349,14 @@ export class DataImportErrorHandler {
 ## Security Considerations
 
 ### Data Protection
+
 - **Sanitize all imported data** to prevent injection attacks
 - **Validate data types and ranges** before database insertion
 - **Encrypt sensitive configuration** (API keys, credentials)
 - **Implement audit logging** for all data changes
 
 ### Access Control
+
 - **Separate read/write permissions** for different services
 - **Use service accounts** with minimal required permissions
 - **Regularly rotate API keys** and credentials
@@ -348,4 +373,5 @@ For immediate implementation, prioritize:
 3. **Basic pricing from 2-3 major retailers**
 4. **Simple data validation and deduplication**
 
-This foundational approach will provide comprehensive product data while establishing the infrastructure for more advanced features.
+This foundational approach will provide comprehensive product data while establishing the
+infrastructure for more advanced features.

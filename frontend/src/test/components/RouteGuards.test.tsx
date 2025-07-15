@@ -15,7 +15,7 @@ import { ProtectedRoute, PublicRoute } from '../../components/auth/RouteGuards';
 const TestComponent = () => <div>Test Content</div>;
 const LoginComponent = () => <div>Login Page</div>;
 
-const renderWithRouter = (component: React.ReactElement, initialPath = '/') => {
+const renderWithRouter = (component: React.ReactElement) => {
   return render(
     <BrowserRouter>
       <Routes>

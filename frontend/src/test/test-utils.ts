@@ -32,7 +32,6 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 export const renderWithProviders = (
   ui: React.ReactElement,
   {
-    initialEntries = ['/'],
     queryClient = createTestQueryClient(),
     ...renderOptions
   }: CustomRenderOptions = {}

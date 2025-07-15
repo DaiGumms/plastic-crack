@@ -9,7 +9,10 @@ import { body, param, query, validationResult } from 'express-validator';
 
 import { PaintingStatus } from '../../generated/prisma';
 import { prisma } from '../../lib/database';
-import { authenticateToken, optionalAuth } from '../../middleware/auth.middleware';
+import {
+  authenticateToken,
+  optionalAuth,
+} from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
 import { ModelService } from '../../services/model.service';
 import { AuthenticatedRequest } from '../../types/auth';
@@ -52,11 +55,14 @@ const validateCreateModel = [
     .optional()
     .isArray()
     .withMessage('Tags must be an array')
-    .custom((tags) => {
+    .custom(tags => {
       if (tags && tags.length > 20) {
         throw new Error('Maximum 20 tags allowed');
       }
-      if (tags && tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)) {
+      if (
+        tags &&
+        tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)
+      ) {
         throw new Error('Each tag must be a string with max 50 characters');
       }
       return true;
@@ -75,8 +81,17 @@ const validateCreateModel = [
     .withMessage('Purchase date must be a valid ISO8601 date'),
   body('paintingStatus')
     .optional()
-    .isIn(['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'])
-    .withMessage('Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'),
+    .isIn([
+      'UNPAINTED',
+      'PRIMED',
+      'BASE_COATED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'SHOWCASE',
+    ])
+    .withMessage(
+      'Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'
+    ),
   body('notes')
     .optional()
     .trim()
@@ -114,11 +129,14 @@ const validateUpdateModel = [
     .optional()
     .isArray()
     .withMessage('Tags must be an array')
-    .custom((tags) => {
+    .custom(tags => {
       if (tags && tags.length > 20) {
         throw new Error('Maximum 20 tags allowed');
       }
-      if (tags && tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)) {
+      if (
+        tags &&
+        tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 50)
+      ) {
         throw new Error('Each tag must be a string with max 50 characters');
       }
       return true;
@@ -137,8 +155,17 @@ const validateUpdateModel = [
     .withMessage('Purchase date must be a valid ISO8601 date'),
   body('paintingStatus')
     .optional()
-    .isIn(['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'])
-    .withMessage('Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'),
+    .isIn([
+      'UNPAINTED',
+      'PRIMED',
+      'BASE_COATED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'SHOWCASE',
+    ])
+    .withMessage(
+      'Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'
+    ),
   body('notes')
     .optional()
     .trim()
@@ -153,17 +180,24 @@ const validateBulkUpdate = [
   body('modelIds.*')
     .isLength({ min: 1 })
     .withMessage('Each model ID must be provided'),
-  body('updates')
-    .isObject()
-    .withMessage('Updates object is required'),
+  body('updates').isObject().withMessage('Updates object is required'),
   body('updates.tags')
     .optional()
     .isArray()
     .withMessage('Tags must be an array'),
   body('updates.paintingStatus')
     .optional()
-    .isIn(['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'])
-    .withMessage('Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'),
+    .isIn([
+      'UNPAINTED',
+      'PRIMED',
+      'BASE_COATED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'SHOWCASE',
+    ])
+    .withMessage(
+      'Painting status must be one of: UNPAINTED, PRIMED, BASE_COATED, IN_PROGRESS, COMPLETED, SHOWCASE'
+    ),
   body('updates.purchased')
     .optional()
     .isBoolean()
@@ -182,7 +216,9 @@ const validatePagination = [
   query('sortBy')
     .optional()
     .isIn(['name', 'createdAt', 'updatedAt', 'paintingStatus'])
-    .withMessage('SortBy must be one of: name, createdAt, updatedAt, paintingStatus'),
+    .withMessage(
+      'SortBy must be one of: name, createdAt, updatedAt, paintingStatus'
+    ),
   query('sortOrder')
     .optional()
     .isIn(['asc', 'desc'])
@@ -190,9 +226,7 @@ const validatePagination = [
 ];
 
 const validateModelId = [
-  param('id')
-    .isLength({ min: 1 })
-    .withMessage('Model ID is required'),
+  param('id').isLength({ min: 1 }).withMessage('Model ID is required'),
 ];
 
 const validateCollectionId = [
@@ -264,8 +298,14 @@ router.get(
 
       const pagination = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt' | 'paintingStatus',
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
+        sortBy: req.query.sortBy as
+          | 'name'
+          | 'createdAt'
+          | 'updatedAt'
+          | 'paintingStatus',
         sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
@@ -275,7 +315,11 @@ router.get(
         paintingStatus: req.query.paintingStatus as PaintingStatus,
         gameSystemId: req.query.gameSystemId as string,
         factionId: req.query.factionId as string,
-        tags: req.query.tags ? (Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags]) as string[] : undefined,
+        tags: req.query.tags
+          ? ((Array.isArray(req.query.tags)
+              ? req.query.tags
+              : [req.query.tags]) as string[])
+          : undefined,
       };
 
       // Remove undefined values
@@ -285,7 +329,12 @@ router.get(
         }
       });
 
-      const result = await modelService.getModelsByCollection(collectionId, userId, filters, pagination);
+      const result = await modelService.getModelsByCollection(
+        collectionId,
+        userId,
+        filters,
+        pagination
+      );
 
       res.json({
         success: true,
@@ -320,10 +369,14 @@ router.get(
       }
 
       const query = req.query.q as string;
-      
+
       const filters = {
         search: query,
-        tags: req.query.tags ? (Array.isArray(req.query.tags) ? req.query.tags as string[] : [req.query.tags as string]) : undefined,
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
         paintingStatus: req.query.paintingStatus as PaintingStatus,
         collectionId: req.query.collectionId as string,
         userId: userId,
@@ -331,8 +384,14 @@ router.get(
 
       const pagination = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt' | 'paintingStatus',
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
+        sortBy: req.query.sortBy as
+          | 'name'
+          | 'createdAt'
+          | 'updatedAt'
+          | 'paintingStatus',
         sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
@@ -347,7 +406,6 @@ router.get(
     }
   }
 );
-
 
 /**
  * PUT /api/v1/models/bulk-update
@@ -483,7 +541,9 @@ router.post(
     body('photos.*.fileName')
       .trim()
       .isLength({ min: 1, max: 255 })
-      .withMessage('File name is required and must be between 1-255 characters'),
+      .withMessage(
+        'File name is required and must be between 1-255 characters'
+      ),
     body('photos.*.originalUrl')
       .isURL()
       .withMessage('Original URL must be valid'),

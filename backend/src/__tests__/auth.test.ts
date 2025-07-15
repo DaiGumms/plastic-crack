@@ -16,7 +16,7 @@ const createTestUser = async (overrides: Partial<any> = {}) => {
     password: 'TestPassword123!',
     displayName: 'Auth Test User',
   };
-  
+
   // Apply overrides completely, not just spreading over defaults
   const userData = { ...defaultData, ...overrides };
 
@@ -135,9 +135,12 @@ describe('Authentication System', () => {
       const uniqueId = Math.floor(Math.random() * 10000);
       const originalEmail = `dupemail${uniqueId}@example.com`;
       const originalUsername = `dupemail${uniqueId}`;
-      
+
       // First create a user with our test email
-      await createTestUser({ email: originalEmail, username: originalUsername });
+      await createTestUser({
+        email: originalEmail,
+        username: originalUsername,
+      });
 
       // Try to register again with same email but different username
       const duplicateUser = {
@@ -160,9 +163,12 @@ describe('Authentication System', () => {
       const uniqueId = Date.now() + Math.random();
       const originalEmail = `duplicate-username-test-${uniqueId}@example.com`;
       const originalUsername = `user${Math.floor(uniqueId).toString().slice(-8)}`;
-      
+
       // First create a user with our test username
-      await createTestUser({ email: originalEmail, username: originalUsername });
+      await createTestUser({
+        email: originalEmail,
+        username: originalUsername,
+      });
 
       // Try to register again with same username but different email
       const duplicateUser = {

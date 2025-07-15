@@ -3,7 +3,14 @@
  * Tests Issue #19 implementation - Collection CRUD Service
  */
 
-import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  describe,
+  it,
+  expect,
+} from '@jest/globals';
 import { PrismaClient } from '../../generated/prisma';
 import { CollectionService } from '../../services/collection.service';
 import { AppError } from '../../middleware/errorHandler';
@@ -13,7 +20,6 @@ describe('CollectionService', () => {
   let collectionService: CollectionService;
   let testUserId: string;
   let testUserId2: string;
-  let testGameSystemId: string;
 
   beforeAll(async () => {
     prisma = new PrismaClient();
@@ -56,7 +62,8 @@ describe('CollectionService', () => {
     testUserId2 = user2.id;
 
     // Create test game system
-    const gameSystem = await prisma.gameSystem.create({
+    // Create test game system (needed for models)
+    await prisma.gameSystem.create({
       data: {
         name: 'Warhammer 40,000',
         shortName: 'WH40K',
@@ -64,7 +71,6 @@ describe('CollectionService', () => {
         isActive: true,
       },
     });
-    testGameSystemId = gameSystem.id;
   });
 
   describe('createCollection', () => {
@@ -76,7 +82,10 @@ describe('CollectionService', () => {
         tags: ['New', 'Test'],
       };
 
-      const collection = await collectionService.createCollection(testUserId, collectionData);
+      const collection = await collectionService.createCollection(
+        testUserId,
+        collectionData
+      );
 
       expect(collection.id).toBeDefined();
       expect(collection.name).toBe(collectionData.name);
@@ -91,7 +100,10 @@ describe('CollectionService', () => {
         name: 'Minimal Collection',
       };
 
-      const collection = await collectionService.createCollection(testUserId, collectionData);
+      const collection = await collectionService.createCollection(
+        testUserId,
+        collectionData
+      );
 
       expect(collection.id).toBeDefined();
       expect(collection.name).toBe(collectionData.name);
@@ -198,7 +210,11 @@ describe('CollectionService', () => {
       const updateData = { name: 'Updated Name' };
 
       await expect(
-        collectionService.updateCollection(testCollectionId, testUserId2, updateData)
+        collectionService.updateCollection(
+          testCollectionId,
+          testUserId2,
+          updateData
+        )
       ).rejects.toThrow(AppError);
     });
   });

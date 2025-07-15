@@ -27,10 +27,12 @@ export class CollectionService {
 
     // Add filters to params
     if (filters.search) params.append('search', filters.search);
-    if (filters.isPublic !== undefined) params.append('isPublic', filters.isPublic.toString());
+    if (filters.isPublic !== undefined)
+      params.append('isPublic', filters.isPublic.toString());
     if (filters.userId) params.append('userId', filters.userId);
     if (filters.gameSystem) params.append('gameSystem', filters.gameSystem);
-    if (filters.paintingStatus) params.append('paintingStatus', filters.paintingStatus);
+    if (filters.paintingStatus)
+      params.append('paintingStatus', filters.paintingStatus);
     if (filters.tags && filters.tags.length > 0) {
       filters.tags.forEach(tag => params.append('tags', tag));
     }
@@ -67,7 +69,9 @@ export class CollectionService {
    * Get a specific collection by ID
    */
   static async getCollection(id: string): Promise<Collection> {
-    const response = await api.get<ApiResponse<Collection>>(`${this.BASE_PATH}/${id}`);
+    const response = await api.get<ApiResponse<Collection>>(
+      `${this.BASE_PATH}/${id}`
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch collection');
     }
@@ -77,8 +81,13 @@ export class CollectionService {
   /**
    * Create a new collection
    */
-  static async createCollection(data: CreateCollectionData): Promise<Collection> {
-    const response = await api.post<ApiResponse<Collection>>(this.BASE_PATH, data);
+  static async createCollection(
+    data: CreateCollectionData
+  ): Promise<Collection> {
+    const response = await api.post<ApiResponse<Collection>>(
+      this.BASE_PATH,
+      data
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to create collection');
     }
@@ -88,8 +97,14 @@ export class CollectionService {
   /**
    * Update an existing collection
    */
-  static async updateCollection(id: string, data: UpdateCollectionData): Promise<Collection> {
-    const response = await api.put<ApiResponse<Collection>>(`${this.BASE_PATH}/${id}`, data);
+  static async updateCollection(
+    id: string,
+    data: UpdateCollectionData
+  ): Promise<Collection> {
+    const response = await api.put<ApiResponse<Collection>>(
+      `${this.BASE_PATH}/${id}`,
+      data
+    );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to update collection');
     }
@@ -100,7 +115,9 @@ export class CollectionService {
    * Delete a collection
    */
   static async deleteCollection(id: string): Promise<void> {
-    const response = await api.delete<ApiResponse<void>>(`${this.BASE_PATH}/${id}`);
+    const response = await api.delete<ApiResponse<void>>(
+      `${this.BASE_PATH}/${id}`
+    );
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to delete collection');
     }
@@ -110,9 +127,13 @@ export class CollectionService {
    * Get collection statistics
    */
   static async getCollectionStats(id: string): Promise<CollectionStats> {
-    const response = await api.get<ApiResponse<CollectionStats>>(`${this.BASE_PATH}/${id}/stats`);
+    const response = await api.get<ApiResponse<CollectionStats>>(
+      `${this.BASE_PATH}/${id}/stats`
+    );
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to fetch collection statistics');
+      throw new Error(
+        response.data.message || 'Failed to fetch collection statistics'
+      );
     }
     return response.data.data;
   }
@@ -120,58 +141,81 @@ export class CollectionService {
   /**
    * Add a model to a collection
    */
-  static async addModelToCollection(collectionId: string, modelId: string): Promise<void> {
+  static async addModelToCollection(
+    collectionId: string,
+    modelId: string
+  ): Promise<void> {
     const response = await api.post<ApiResponse<void>>(
       `${this.BASE_PATH}/${collectionId}/models`,
       { modelId }
     );
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to add model to collection');
+      throw new Error(
+        response.data.message || 'Failed to add model to collection'
+      );
     }
   }
 
   /**
    * Remove a model from a collection
    */
-  static async removeModelFromCollection(collectionId: string, modelId: string): Promise<void> {
+  static async removeModelFromCollection(
+    collectionId: string,
+    modelId: string
+  ): Promise<void> {
     const response = await api.delete<ApiResponse<void>>(
       `${this.BASE_PATH}/${collectionId}/models/${modelId}`
     );
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to remove model from collection');
+      throw new Error(
+        response.data.message || 'Failed to remove model from collection'
+      );
     }
   }
 
   /**
    * Bulk operations - add multiple models to a collection
    */
-  static async addModelsToCollection(collectionId: string, modelIds: string[]): Promise<void> {
+  static async addModelsToCollection(
+    collectionId: string,
+    modelIds: string[]
+  ): Promise<void> {
     const response = await api.post<ApiResponse<void>>(
       `${this.BASE_PATH}/${collectionId}/models/bulk`,
       { modelIds }
     );
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to add models to collection');
+      throw new Error(
+        response.data.message || 'Failed to add models to collection'
+      );
     }
   }
 
   /**
    * Bulk operations - remove multiple models from a collection
    */
-  static async removeModelsFromCollection(collectionId: string, modelIds: string[]): Promise<void> {
+  static async removeModelsFromCollection(
+    collectionId: string,
+    modelIds: string[]
+  ): Promise<void> {
     const response = await api.delete<ApiResponse<void>>(
       `${this.BASE_PATH}/${collectionId}/models/bulk`,
       { data: { modelIds } }
     );
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to remove models from collection');
+      throw new Error(
+        response.data.message || 'Failed to remove models from collection'
+      );
     }
   }
 
   /**
    * Export collection data
    */
-  static async exportCollection(id: string, format: 'json' | 'csv' = 'json'): Promise<Blob> {
+  static async exportCollection(
+    id: string,
+    format: 'json' | 'csv' = 'json'
+  ): Promise<Blob> {
     const response = await api.get(`${this.BASE_PATH}/${id}/export`, {
       params: { format },
       responseType: 'blob',
@@ -197,9 +241,13 @@ export class CollectionService {
    * Get available tags for collections
    */
   static async getCollectionTags(): Promise<string[]> {
-    const response = await api.get<ApiResponse<string[]>>(`${this.BASE_PATH}/tags`);
+    const response = await api.get<ApiResponse<string[]>>(
+      `${this.BASE_PATH}/tags`
+    );
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to fetch collection tags');
+      throw new Error(
+        response.data.message || 'Failed to fetch collection tags'
+      );
     }
     return response.data.data;
   }

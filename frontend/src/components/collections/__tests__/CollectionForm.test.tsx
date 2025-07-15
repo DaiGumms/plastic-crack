@@ -45,8 +45,12 @@ describe('CollectionForm', () => {
 
     expect(screen.getByText('Edit Collection')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Collection')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('A test collection for unit testing')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('https://example.com/image.jpg')).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue('A test collection for unit testing')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue('https://example.com/image.jpg')
+    ).toBeInTheDocument();
   });
 
   it('displays existing tags when editing', () => {
@@ -112,7 +116,9 @@ describe('CollectionForm', () => {
       ...mockCollection,
       tags: Array.from({ length: 20 }, (_, i) => `tag-${i}`),
     };
-    render(<CollectionForm {...mockProps} collection={collectionWithMaxTags} />);
+    render(
+      <CollectionForm {...mockProps} collection={collectionWithMaxTags} />
+    );
 
     const tagInput = screen.getByPlaceholderText('Add a tag');
     const addButton = screen.getByRole('button', { name: /add/i });
@@ -127,13 +133,18 @@ describe('CollectionForm', () => {
     const user = userEvent.setup();
     render(<CollectionForm {...mockProps} />);
 
-    const submitButton = screen.getByRole('button', { name: /create collection/i });
-    
+    const submitButton = screen.getByRole('button', {
+      name: /create collection/i,
+    });
+
     // Submit button should be disabled when name is empty
     expect(submitButton).toBeDisabled();
 
     // Fill in the name
-    await user.type(screen.getByLabelText(/collection name/i), 'New Collection');
+    await user.type(
+      screen.getByLabelText(/collection name/i),
+      'New Collection'
+    );
 
     // Submit button should now be enabled
     expect(submitButton).not.toBeDisabled();
@@ -172,15 +183,20 @@ describe('CollectionForm', () => {
     render(<CollectionForm {...mockProps} onSubmit={mockOnSubmit} />);
 
     // Fill in form
-    await user.type(screen.getByLabelText(/collection name/i), 'New Collection');
+    await user.type(
+      screen.getByLabelText(/collection name/i),
+      'New Collection'
+    );
     await user.type(screen.getByLabelText(/description/i), 'Test description');
-    
+
     // Add a tag
     await user.type(screen.getByPlaceholderText('Add a tag'), 'test-tag');
     await user.click(screen.getByRole('button', { name: /add/i }));
 
     // Submit form
-    await user.click(screen.getByRole('button', { name: /create collection/i }));
+    await user.click(
+      screen.getByRole('button', { name: /create collection/i })
+    );
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -196,7 +212,13 @@ describe('CollectionForm', () => {
   it('calls onSubmit with correct data when editing', async () => {
     const user = userEvent.setup();
     const mockOnSubmit = vi.fn().mockResolvedValue(undefined);
-    render(<CollectionForm {...mockProps} collection={mockCollection} onSubmit={mockOnSubmit} />);
+    render(
+      <CollectionForm
+        {...mockProps}
+        collection={mockCollection}
+        onSubmit={mockOnSubmit}
+      />
+    );
 
     // Modify the name
     const nameInput = screen.getByDisplayValue('Test Collection');
@@ -204,7 +226,9 @@ describe('CollectionForm', () => {
     await user.type(nameInput, 'Updated Collection');
 
     // Submit form
-    await user.click(screen.getByRole('button', { name: /update collection/i }));
+    await user.click(
+      screen.getByRole('button', { name: /update collection/i })
+    );
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -234,7 +258,7 @@ describe('CollectionForm', () => {
   });
 
   it('displays error message', () => {
-    render(<CollectionForm {...mockProps} error="Something went wrong" />);
+    render(<CollectionForm {...mockProps} error='Something went wrong' />);
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });

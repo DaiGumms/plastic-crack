@@ -72,7 +72,9 @@ describe('Database Schema - Issue #18 Implementation', () => {
     await prisma.collection.deleteMany();
     await prisma.faction.deleteMany({ where: { name: 'Test Faction' } });
     await prisma.gameSystem.deleteMany({ where: { name: 'Test Game System' } });
-    await prisma.user.deleteMany({ where: { email: 'test-schema@example.com' } });
+    await prisma.user.deleteMany({
+      where: { email: 'test-schema@example.com' },
+    });
   });
 
   afterAll(async () => {
@@ -87,7 +89,10 @@ describe('Database Schema - Issue #18 Implementation', () => {
 
       expect(user).toBeTruthy();
       expect(user?.experienceLevel).toBe('INTERMEDIATE');
-      expect(user?.preferredGameSystems).toEqual(['Warhammer 40K', 'Age of Sigmar']);
+      expect(user?.preferredGameSystems).toEqual([
+        'Warhammer 40K',
+        'Age of Sigmar',
+      ]);
       expect(user?.preferredPaintBrands).toEqual(['Citadel', 'Vallejo']);
       expect(user?.role).toBe('USER');
       expect(user?.permissions).toEqual([]);
@@ -95,7 +100,7 @@ describe('Database Schema - Issue #18 Implementation', () => {
 
     it('should enforce experience level enum constraints', async () => {
       const validLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
-      
+
       for (const level of validLevels) {
         const user = await prisma.user.create({
           data: {
@@ -105,9 +110,9 @@ describe('Database Schema - Issue #18 Implementation', () => {
             experienceLevel: level as any,
           },
         });
-        
+
         expect(user.experienceLevel).toBe(level);
-        
+
         // Clean up
         await prisma.user.delete({ where: { id: user.id } });
       }
@@ -133,7 +138,9 @@ describe('Database Schema - Issue #18 Implementation', () => {
         },
       });
 
-      expect(collection.imageUrl).toBe('https://example.com/collection-cover.jpg');
+      expect(collection.imageUrl).toBe(
+        'https://example.com/collection-cover.jpg'
+      );
     });
   });
 
@@ -151,7 +158,7 @@ describe('Database Schema - Issue #18 Implementation', () => {
           paintingStatus: 'IN_PROGRESS',
           pointsCost: 100,
           tags: ['infantry', 'troop'],
-          purchasePrice: 35.00,
+          purchasePrice: 35.0,
           purchaseDate: new Date('2024-01-15'),
           isPublic: true,
         },
@@ -172,14 +179,21 @@ describe('Database Schema - Issue #18 Implementation', () => {
     });
 
     it('should support painting status tracking', async () => {
-      const validStatuses = ['UNPAINTED', 'PRIMED', 'BASE_COATED', 'IN_PROGRESS', 'COMPLETED', 'SHOWCASE'];
-      
+      const validStatuses = [
+        'UNPAINTED',
+        'PRIMED',
+        'BASE_COATED',
+        'IN_PROGRESS',
+        'COMPLETED',
+        'SHOWCASE',
+      ];
+
       for (const status of validStatuses) {
         const model = await prisma.model.update({
           where: { id: testModelId },
           data: { paintingStatus: status as any },
         });
-        
+
         expect(model.paintingStatus).toBe(status);
       }
     });
@@ -228,8 +242,14 @@ describe('Database Schema - Issue #18 Implementation', () => {
 
     it('should support all tag categories', async () => {
       const categories = [
-        'GENERAL', 'PAINTING', 'GAME_SYSTEM', 'FACTION', 
-        'UNIT_TYPE', 'TECHNIQUE', 'STATUS', 'CUSTOM'
+        'GENERAL',
+        'PAINTING',
+        'GAME_SYSTEM',
+        'FACTION',
+        'UNIT_TYPE',
+        'TECHNIQUE',
+        'STATUS',
+        'CUSTOM',
       ];
 
       for (const category of categories) {
@@ -239,9 +259,9 @@ describe('Database Schema - Issue #18 Implementation', () => {
             category: category as any,
           },
         });
-        
+
         expect(tag.category).toBe(category);
-        
+
         // Clean up
         await prisma.tag.delete({ where: { id: tag.id } });
       }

@@ -4,7 +4,12 @@
  * Implements Issue #20 acceptance criteria
  */
 
-import { PrismaClient, Model, Prisma, PaintingStatus } from '../generated/prisma';
+import {
+  PrismaClient,
+  Model,
+  Prisma,
+  PaintingStatus,
+} from '../generated/prisma';
 import { AppError } from '../middleware/errorHandler';
 
 export interface CreateModelData {
@@ -116,7 +121,10 @@ export class ModelService {
       }
 
       if (faction.gameSystemId !== data.gameSystemId) {
-        throw new AppError('Faction does not belong to the specified game system', 400);
+        throw new AppError(
+          'Faction does not belong to the specified game system',
+          400
+        );
       }
     }
 
@@ -126,7 +134,9 @@ export class ModelService {
           ...data,
           userId,
           tags: data.tags || [],
-          purchasePrice: data.purchasePrice ? new Prisma.Decimal(data.purchasePrice) : null,
+          purchasePrice: data.purchasePrice
+            ? new Prisma.Decimal(data.purchasePrice)
+            : null,
         },
         include: {
           gameSystem: true,
@@ -151,7 +161,10 @@ export class ModelService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new AppError('Model name must be unique within collection', 400);
+          throw new AppError(
+            'Model name must be unique within collection',
+            400
+          );
         }
       }
       throw new AppError('Failed to create model', 500);
@@ -207,7 +220,10 @@ export class ModelService {
     }
 
     // Check privacy - if model or collection is private, only owner can view
-    if ((!model.isPublic || !model.collection.isPublic) && model.userId !== userId) {
+    if (
+      (!model.isPublic || !model.collection.isPublic) &&
+      model.userId !== userId
+    ) {
       throw new AppError('Model not found or access denied', 404);
     }
 
@@ -261,7 +277,10 @@ export class ModelService {
 
       const gameSystemId = data.gameSystemId || existingModel.gameSystemId;
       if (faction.gameSystemId !== gameSystemId) {
-        throw new AppError('Faction does not belong to the specified game system', 400);
+        throw new AppError(
+          'Faction does not belong to the specified game system',
+          400
+        );
       }
     }
 
@@ -270,7 +289,9 @@ export class ModelService {
         where: { id: modelId },
         data: {
           ...data,
-          purchasePrice: data.purchasePrice ? new Prisma.Decimal(data.purchasePrice) : undefined,
+          purchasePrice: data.purchasePrice
+            ? new Prisma.Decimal(data.purchasePrice)
+            : undefined,
           updatedAt: new Date(),
         },
         include: {
@@ -296,7 +317,10 @@ export class ModelService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new AppError('Model name must be unique within collection', 400);
+          throw new AppError(
+            'Model name must be unique within collection',
+            400
+          );
         }
       }
       throw new AppError('Failed to update model', 500);
@@ -434,7 +458,10 @@ export class ModelService {
     if (models.length !== bulkData.modelIds.length) {
       const foundIds = models.map(m => m.id);
       const notFound = bulkData.modelIds.filter(id => !foundIds.includes(id));
-      throw new AppError(`Models not found or access denied: ${notFound.join(', ')}`, 404);
+      throw new AppError(
+        `Models not found or access denied: ${notFound.join(', ')}`,
+        404
+      );
     }
 
     // Perform bulk update
@@ -446,8 +473,8 @@ export class ModelService {
         },
         data: {
           ...bulkData.updates,
-          purchasePrice: bulkData.updates.purchasePrice 
-            ? new Prisma.Decimal(bulkData.updates.purchasePrice) 
+          purchasePrice: bulkData.updates.purchasePrice
+            ? new Prisma.Decimal(bulkData.updates.purchasePrice)
             : undefined,
           updatedAt: new Date(),
         },
@@ -524,10 +551,7 @@ export class ModelService {
 
     // For public visibility, ensure both model and collection are public
     if (filters.isPublic === true && !filters.userId) {
-      where.AND = [
-        { isPublic: true },
-        { collection: { isPublic: true } },
-      ];
+      where.AND = [{ isPublic: true }, { collection: { isPublic: true } }];
     }
 
     // Get total count for pagination

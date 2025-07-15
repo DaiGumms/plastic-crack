@@ -44,7 +44,9 @@ describe('CollectionCard', () => {
     render(<CollectionCard {...mockProps} />);
 
     expect(screen.getByText('Test Collection')).toBeInTheDocument();
-    expect(screen.getByText('A test collection for unit testing')).toBeInTheDocument();
+    expect(
+      screen.getByText('A test collection for unit testing')
+    ).toBeInTheDocument();
     expect(screen.getByText('5 models')).toBeInTheDocument();
     expect(screen.getByText('Test User')).toBeInTheDocument();
   });
@@ -59,9 +61,13 @@ describe('CollectionCard', () => {
 
   it('displays default icon when no image provided', () => {
     const collectionWithoutImage = { ...mockCollection, imageUrl: undefined };
-    render(<CollectionCard {...mockProps} collection={collectionWithoutImage} />);
+    render(
+      <CollectionCard {...mockProps} collection={collectionWithoutImage} />
+    );
 
-    expect(screen.queryByRole('img', { name: 'Test Collection' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('img', { name: 'Test Collection' })
+    ).not.toBeInTheDocument();
   });
 
   it('shows public indicator for public collections', () => {
@@ -89,7 +95,9 @@ describe('CollectionCard', () => {
       ...mockCollection,
       tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
     };
-    render(<CollectionCard {...mockProps} collection={collectionWithManyTags} />);
+    render(
+      <CollectionCard {...mockProps} collection={collectionWithManyTags} />
+    );
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.getByText('tag2')).toBeInTheDocument();
@@ -120,7 +128,9 @@ describe('CollectionCard', () => {
     const nonOwnerProps = { ...mockProps, currentUserId: 'different-user' };
     render(<CollectionCard {...nonOwnerProps} />);
 
-    expect(screen.queryByRole('button', { name: /more/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /more/i })
+    ).not.toBeInTheDocument();
   });
 
   it('calls onEdit when edit menu item is clicked', async () => {
@@ -155,7 +165,13 @@ describe('CollectionCard', () => {
 
   it('handles missing user information gracefully', () => {
     const collectionWithoutUser = { ...mockCollection, user: undefined };
-    render(<CollectionCard {...mockProps} collection={collectionWithoutUser} showOwner={true} />);
+    render(
+      <CollectionCard
+        {...mockProps}
+        collection={collectionWithoutUser}
+        showOwner={true}
+      />
+    );
 
     expect(screen.getByText('Test Collection')).toBeInTheDocument();
     expect(screen.queryByText('Test User')).not.toBeInTheDocument();
@@ -163,7 +179,9 @@ describe('CollectionCard', () => {
 
   it('shows model count of 1 with singular form', () => {
     const collectionWithOneModel = { ...mockCollection, _count: { models: 1 } };
-    render(<CollectionCard {...mockProps} collection={collectionWithOneModel} />);
+    render(
+      <CollectionCard {...mockProps} collection={collectionWithOneModel} />
+    );
 
     expect(screen.getByText('1 model')).toBeInTheDocument();
   });

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Skeleton,
-  Alert,
-} from '@mui/material';
+import { Box, Typography, Skeleton, Alert } from '@mui/material';
 import { CollectionCard } from './CollectionCard';
 import type { Collection } from '../../types';
 
@@ -30,12 +25,12 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
   onDelete,
   onView,
   currentUserId,
-  emptyMessage = "No collections found",
-  emptySubMessage = "Create your first collection to get started",
+  emptyMessage = 'No collections found',
+  emptySubMessage = 'Create your first collection to get started',
 }) => {
   if (error) {
     return (
-      <Alert severity="error" sx={{ mt: 2 }}>
+      <Alert severity='error' sx={{ mt: 2 }}>
         {error}
       </Alert>
     );
@@ -58,14 +53,18 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
       >
         {Array.from({ length: 6 }).map((_, index) => (
           <Box key={index}>
-            <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
+            <Skeleton
+              variant='rectangular'
+              height={200}
+              sx={{ borderRadius: 1 }}
+            />
             <Box sx={{ pt: 2 }}>
-              <Skeleton variant="text" height={28} />
-              <Skeleton variant="text" height={20} width="80%" />
-              <Skeleton variant="text" height={20} width="60%" />
+              <Skeleton variant='text' height={28} />
+              <Skeleton variant='text' height={20} width='80%' />
+              <Skeleton variant='text' height={20} width='60%' />
               <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                <Skeleton variant="rounded" width={60} height={24} />
-                <Skeleton variant="rounded" width={80} height={24} />
+                <Skeleton variant='rounded' width={60} height={24} />
+                <Skeleton variant='rounded' width={80} height={24} />
               </Box>
             </Box>
           </Box>
@@ -86,10 +85,10 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
           textAlign: 'center',
         }}
       >
-        <Typography variant="h6" color="text.secondary" gutterBottom>
+        <Typography variant='h6' color='text.secondary' gutterBottom>
           {emptyMessage}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           {emptySubMessage}
         </Typography>
       </Box>
@@ -110,7 +109,7 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
         gap: 3,
       }}
     >
-      {collections.map((collection) => (
+      {collections.map(collection => (
         <CollectionCard
           key={collection.id}
           collection={collection}

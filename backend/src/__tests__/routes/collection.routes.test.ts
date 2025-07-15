@@ -4,7 +4,15 @@
  * Tests Issue #19 implementation - Collection CRUD Routes
  */
 
-import { beforeAll, beforeEach, afterAll, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  afterEach,
+  describe,
+  it,
+  expect,
+} from '@jest/globals';
 import request from 'supertest';
 import { PrismaClient } from '../../generated/prisma';
 import { app } from '../../app';
@@ -59,13 +67,23 @@ describe('Collection Routes - Issue #19', () => {
 
     // Create auth tokens
     authToken = jwt.sign(
-      { userId: testUserId, email: user1.email, username: user1.username, role: user1.role },
+      {
+        userId: testUserId,
+        email: user1.email,
+        username: user1.username,
+        role: user1.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
 
     authToken2 = jwt.sign(
-      { userId: testUserId2, email: user2.email, username: user2.username, role: user2.role },
+      {
+        userId: testUserId2,
+        email: user2.email,
+        username: user2.username,
+        role: user2.role,
+      },
       process.env.JWT_SECRET || 'test-secret',
       { expiresIn: '1h' }
     );
@@ -217,7 +235,9 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.collections).toHaveLength(3); // 2 public collections + testCollection
-      expect(response.body.data.collections.every((c: any) => c.isPublic)).toBe(true);
+      expect(response.body.data.collections.every((c: any) => c.isPublic)).toBe(
+        true
+      );
       expect(response.body.data.total).toBe(3);
     });
 
@@ -240,7 +260,9 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.collections).toHaveLength(1);
-      expect(response.body.data.collections[0].name).toBe('Public Collection A');
+      expect(response.body.data.collections[0].name).toBe(
+        'Public Collection A'
+      );
     });
 
     it('should filter by user ID', async () => {
@@ -307,9 +329,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should require search query', async () => {
-      await request(app)
-        .get('/api/v1/collections/search')
-        .expect(400);
+      await request(app).get('/api/v1/collections/search').expect(400);
     });
   });
 
@@ -337,9 +357,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/v1/collections/my')
-        .expect(401);
+      await request(app).get('/api/v1/collections/my').expect(401);
     });
   });
 
@@ -390,9 +408,7 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should return 404 for non-existent collection', async () => {
-      await request(app)
-        .get('/api/v1/collections/non-existent-id')
-        .expect(404);
+      await request(app).get('/api/v1/collections/non-existent-id').expect(404);
     });
   });
 
@@ -431,7 +447,9 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.name).toBe(updateData.name);
-      expect(response.body.data.description).toBe('A test collection for testing'); // Should remain unchanged
+      expect(response.body.data.description).toBe(
+        'A test collection for testing'
+      ); // Should remain unchanged
     });
 
     it('should require authentication', async () => {
@@ -521,13 +539,9 @@ describe('Collection Routes - Issue #19', () => {
     });
 
     it('should validate pagination parameters', async () => {
-      await request(app)
-        .get('/api/v1/collections?page=-1')
-        .expect(400);
+      await request(app).get('/api/v1/collections?page=-1').expect(400);
 
-      await request(app)
-        .get('/api/v1/collections?limit=200')
-        .expect(400);
+      await request(app).get('/api/v1/collections?limit=200').expect(400);
     });
 
     it('should handle very long collection names', async () => {

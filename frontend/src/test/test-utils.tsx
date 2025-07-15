@@ -24,7 +24,6 @@ const createTestQueryClient = () =>
   });
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  initialEntries?: string[];
   queryClient?: QueryClient;
 }
 
@@ -32,7 +31,6 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 export const renderWithProviders = (
   ui: React.ReactElement,
   {
-    initialEntries = ['/'],
     queryClient = createTestQueryClient(),
     ...renderOptions
   }: CustomRenderOptions = {}
