@@ -59,7 +59,7 @@ api.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth-storage');
-      
+
       // Only redirect if we're not already on the login page
       if (!window.location.pathname.includes('/login')) {
         console.log('401 error detected, redirecting to login');

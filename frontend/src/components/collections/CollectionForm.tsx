@@ -27,7 +27,12 @@ import type {
   CreateCollectionData,
   UpdateCollectionData,
 } from '../../types';
-import { GAME_SYSTEMS, getGameSystemIcon, getGameSystemDbId, DB_TO_FRONTEND_GAME_SYSTEM_MAP } from '../../utils/gameSystems';
+import {
+  GAME_SYSTEMS,
+  getGameSystemIcon,
+  getGameSystemDbId,
+  DB_TO_FRONTEND_GAME_SYSTEM_MAP,
+} from '../../utils/gameSystems';
 
 const collectionSchema = z.object({
   name: z
@@ -72,7 +77,9 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   // Convert database game system to frontend ID for editing
   const getDefaultGameSystem = useCallback(() => {
     if (!collection?.gameSystem?.shortName) return '';
-    return DB_TO_FRONTEND_GAME_SYSTEM_MAP[collection.gameSystem.shortName] || '';
+    return (
+      DB_TO_FRONTEND_GAME_SYSTEM_MAP[collection.gameSystem.shortName] || ''
+    );
   }, [collection?.gameSystem?.shortName]);
 
   const {
@@ -101,7 +108,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       isPublic: collection?.isPublic ?? true,
       imageUrl: collection?.imageUrl || '',
     });
-    
+
     setTags(collection?.tags || []);
   }, [collection, reset, getDefaultGameSystem]);
 
@@ -117,7 +124,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       // Destructure to remove gameSystem field
       const { gameSystem, ...restData } = data;
       let submitData: CreateCollectionData | UpdateCollectionData;
-      
+
       if (isEditing && collection) {
         // For editing, keep the existing gameSystemId
         submitData = {
@@ -140,7 +147,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
           imageUrl: restData.imageUrl?.trim() || undefined,
         };
       }
-      
+
       await onSubmit(submitData);
       handleClose();
     } catch (err) {
@@ -212,26 +219,28 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
             {isEditing && collection?.gameSystem ? (
               // Read-only display for editing
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant='body2' color='text.secondary'>
                   Game System
                 </Typography>
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 2,
                     p: 2,
                     border: 1,
                     borderColor: 'divider',
                     borderRadius: 1,
-                    bgcolor: 'grey.50'
+                    bgcolor: 'grey.50',
                   }}
                 >
-                  {getGameSystemIcon(getDefaultGameSystem(), { fontSize: 'small' })}
-                  <Typography variant="body1">
+                  {getGameSystemIcon(getDefaultGameSystem(), {
+                    fontSize: 'small',
+                  })}
+                  <Typography variant='body1'>
                     {collection.gameSystem.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant='caption' color='text.secondary'>
                     (Cannot be changed)
                   </Typography>
                 </Box>
@@ -244,22 +253,30 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                 render={({ field }) => (
                   <FormControl fullWidth required error={!!errors.gameSystem}>
                     <InputLabel>Game System</InputLabel>
-                    <Select
-                      {...field}
-                      label='Game System'
-                      disabled={loading}
-                    >
-                      {GAME_SYSTEMS.map((system) => (
+                    <Select {...field} label='Game System' disabled={loading}>
+                      {GAME_SYSTEMS.map(system => (
                         <MenuItem key={system.id} value={system.id}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            {getGameSystemIcon(system.id, { fontSize: 'small' })}
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 2,
+                            }}
+                          >
+                            {getGameSystemIcon(system.id, {
+                              fontSize: 'small',
+                            })}
                             {system.name}
                           </Box>
                         </MenuItem>
                       ))}
                     </Select>
                     {errors.gameSystem && (
-                      <Typography variant='caption' color='error' sx={{ mt: 0.5, ml: 1.5 }}>
+                      <Typography
+                        variant='caption'
+                        color='error'
+                        sx={{ mt: 0.5, ml: 1.5 }}
+                      >
                         {errors.gameSystem.message}
                       </Typography>
                     )}

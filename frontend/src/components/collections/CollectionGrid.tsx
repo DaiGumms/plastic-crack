@@ -103,27 +103,31 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
         mt: 2,
         display: viewMode === 'grid' ? 'grid' : 'flex',
         flexDirection: viewMode === 'list' ? 'column' : undefined,
-        gridTemplateColumns: viewMode === 'grid' ? {
-          xs: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
-          lg: 'repeat(4, 1fr)',
-        } : undefined,
+        gridTemplateColumns:
+          viewMode === 'grid'
+            ? {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              }
+            : undefined,
         gap: viewMode === 'grid' ? 3 : 2,
       }}
     >
-      {Array.isArray(collections) && collections.map(collection => (
-        <CollectionCard
-          key={collection.id}
-          collection={collection}
-          showOwner={showOwner}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onView={onView}
-          currentUserId={currentUserId}
-          viewMode={viewMode}
-        />
-      ))}
+      {Array.isArray(collections) &&
+        collections.map(collection => (
+          <CollectionCard
+            key={collection.id}
+            collection={collection}
+            showOwner={showOwner}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onView={onView}
+            currentUserId={currentUserId}
+            viewMode={viewMode}
+          />
+        ))}
     </Box>
   );
 };

@@ -134,16 +134,18 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         </Box>
       )}
 
-      <CardContent sx={{ 
-        flexGrow: 1, 
-        position: 'relative',
-        ...(viewMode === 'list' && {
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          py: 2,
-        }),
-      }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          position: 'relative',
+          ...(viewMode === 'list' && {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            py: 2,
+          }),
+        }}
+      >
         {/* Header with title and menu */}
         <Box
           sx={{
@@ -153,10 +155,19 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
             mb: 1,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, mr: 1 }}>
-            {viewMode === 'grid' && getGameSystemIcon(collection.gameSystem, { 
-              sx: { fontSize: 20, flexShrink: 0 } 
-            })}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexGrow: 1,
+              mr: 1,
+            }}
+          >
+            {viewMode === 'grid' &&
+              getGameSystemIcon(collection.gameSystem, {
+                sx: { fontSize: 20, flexShrink: 0 },
+              })}
             <Typography
               variant='h6'
               component='h3'

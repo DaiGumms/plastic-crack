@@ -13,7 +13,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
     await prisma.user.deleteMany();
-    
+
     // Create test game systems
     const warhammer40k = await prisma.gameSystem.upsert({
       where: { shortName: 'W40K' },
@@ -21,7 +21,8 @@ describe('Collection Search and Filtering - Issue #23', () => {
       create: {
         name: 'Warhammer 40,000',
         shortName: 'W40K',
-        description: 'The grim darkness of the far future where there is only war',
+        description:
+          'The grim darkness of the far future where there is only war',
         publisher: 'Games Workshop',
         sortOrder: 1,
       },
@@ -41,16 +42,14 @@ describe('Collection Search and Filtering - Issue #23', () => {
 
     gameSystem1Id = warhammer40k.id;
     gameSystem2Id = ageOfSigmar.id;
-    
+
     // Create test user
-    const userResponse = await request(app)
-      .post('/api/v1/auth/register')
-      .send({
-        email: 'search-test@example.com',
-        password: 'Test123!@#',
-        username: 'searchuser',
-        displayName: 'Search Test User',
-      });
+    const userResponse = await request(app).post('/api/v1/auth/register').send({
+      email: 'search-test@example.com',
+      password: 'Test123!@#',
+      username: 'searchuser',
+      displayName: 'Search Test User',
+    });
 
     expect(userResponse.status).toBe(201);
     userToken = userResponse.body.token;
@@ -64,7 +63,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
         description: 'Space Marine collection focused on Ultramarines chapter',
         gameSystemId: gameSystem1Id,
         isPublic: true,
-        tags: ['space-marines', 'ultramarines']
+        tags: ['space-marines', 'ultramarines'],
       });
 
     await request(app)
@@ -75,7 +74,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
         description: 'Age of Sigmar golden warriors collection',
         gameSystemId: gameSystem2Id,
         isPublic: true,
-        tags: ['stormcast', 'order']
+        tags: ['stormcast', 'order'],
       });
 
     await request(app)
@@ -86,7 +85,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
         description: 'Traitor legions and chaos warbands',
         gameSystemId: gameSystem1Id,
         isPublic: false,
-        tags: ['chaos', 'space-marines']
+        tags: ['chaos', 'space-marines'],
       });
   });
 
@@ -95,7 +94,9 @@ describe('Collection Search and Filtering - Issue #23', () => {
     await prisma.model.deleteMany();
     await prisma.collection.deleteMany();
     await prisma.faction.deleteMany();
-    await prisma.gameSystem.deleteMany({ where: { shortName: { in: ['W40K', 'AOS'] } } });
+    await prisma.gameSystem.deleteMany({
+      where: { shortName: { in: ['W40K', 'AOS'] } },
+    });
     await prisma.user.deleteMany();
   });
 
@@ -263,8 +264,9 @@ describe('Collection Search and Filtering - Issue #23', () => {
 
   describe('GET /api/v1/collections - Public Collections Search and Filter', () => {
     it('should search public collections only', async () => {
-      const response = await request(app)
-        .get('/api/v1/collections?search=Space&isPublic=true');
+      const response = await request(app).get(
+        '/api/v1/collections?search=Space&isPublic=true'
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(1);
@@ -273,8 +275,9 @@ describe('Collection Search and Filtering - Issue #23', () => {
     });
 
     it('should filter public collections by game system', async () => {
-      const response = await request(app)
-        .get('/api/v1/collections?gameSystem=W40K&isPublic=true');
+      const response = await request(app).get(
+        '/api/v1/collections?gameSystem=W40K&isPublic=true'
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(1);
@@ -282,8 +285,9 @@ describe('Collection Search and Filtering - Issue #23', () => {
     });
 
     it('should not include private collections in public search', async () => {
-      const response = await request(app)
-        .get('/api/v1/collections?search=Chaos&isPublic=true');
+      const response = await request(app).get(
+        '/api/v1/collections?search=Chaos&isPublic=true'
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(0);
@@ -292,8 +296,9 @@ describe('Collection Search and Filtering - Issue #23', () => {
 
   describe('Error Handling', () => {
     it('should require authentication for /my endpoint', async () => {
-      const response = await request(app)
-        .get('/api/v1/collections/my?search=test');
+      const response = await request(app).get(
+        '/api/v1/collections/my?search=test'
+      );
 
       expect(response.status).toBe(401);
     });
@@ -333,7 +338,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
       expect(response.body.pagination).toHaveProperty('limit');
       expect(response.body.pagination).toHaveProperty('total');
       expect(response.body.pagination).toHaveProperty('totalPages');
-      
+
       if (response.body.data.length > 0) {
         const collection = response.body.data[0];
         expect(collection).toHaveProperty('id');
@@ -352,7 +357,7 @@ describe('Collection Search and Filtering - Issue #23', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data.length).toBeGreaterThan(0);
-      
+
       const collection = response.body.data[0];
       expect(collection.gameSystem).toHaveProperty('shortName', 'W40K');
       expect(collection.gameSystem).toHaveProperty('name');

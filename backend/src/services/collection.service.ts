@@ -156,7 +156,7 @@ export class CollectionService {
 
     if (filters.gameSystem) {
       where.gameSystem = {
-        shortName: { equals: filters.gameSystem, mode: 'insensitive' }
+        shortName: { equals: filters.gameSystem, mode: 'insensitive' },
       };
     }
 

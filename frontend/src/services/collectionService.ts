@@ -231,10 +231,13 @@ export class CollectionService {
     id: string,
     format: 'json' | 'csv' = 'json'
   ): Promise<Blob> {
-    const response = await api.get(`${CollectionService.BASE_PATH}/${id}/export`, {
-      params: { format },
-      responseType: 'blob',
-    });
+    const response = await api.get(
+      `${CollectionService.BASE_PATH}/${id}/export`,
+      {
+        params: { format },
+        responseType: 'blob',
+      }
+    );
     return new Blob([response.data], {
       type: format === 'json' ? 'application/json' : 'text/csv',
     });

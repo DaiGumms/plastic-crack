@@ -65,7 +65,7 @@ describe('Collection Routes - Issue #19', () => {
         firstName: 'Collection',
         lastName: 'User2',
       },
-    }    );
+    });
     testUserId2 = user2.id;
 
     // Create test game system
@@ -260,9 +260,7 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(3); // 2 public collections + testCollection
-      expect(response.body.data.every((c: any) => c.isPublic)).toBe(
-        true
-      );
+      expect(response.body.data.every((c: any) => c.isPublic)).toBe(true);
       expect(response.body.pagination.total).toBe(3);
     });
 
@@ -285,9 +283,7 @@ describe('Collection Routes - Issue #19', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].name).toBe(
-        'Public Collection A'
-      );
+      expect(response.body.data[0].name).toBe('Public Collection A');
     });
 
     it('should filter by user ID', async () => {

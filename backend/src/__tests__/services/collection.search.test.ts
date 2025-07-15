@@ -40,8 +40,8 @@ describe('CollectionService Search and Filter Functions', () => {
       create: {
         name: 'Warhammer 40,000',
         shortName: 'W40K',
-        description: 'Grimdark sci-fi tabletop game'
-      }
+        description: 'Grimdark sci-fi tabletop game',
+      },
     });
 
     const gameSystem2 = await prisma.gameSystem.upsert({
@@ -50,8 +50,8 @@ describe('CollectionService Search and Filter Functions', () => {
       create: {
         name: 'Age of Sigmar',
         shortName: 'AOS',
-        description: 'Fantasy tabletop game'
-      }
+        description: 'Fantasy tabletop game',
+      },
     });
 
     gameSystemId1 = gameSystem1.id;
@@ -62,7 +62,8 @@ describe('CollectionService Search and Filter Functions', () => {
       data: [
         {
           name: 'Ultramarines Army',
-          description: 'Space Marine collection focused on Ultramarines chapter',
+          description:
+            'Space Marine collection focused on Ultramarines chapter',
           gameSystemId: gameSystemId1,
           userId: userId,
           isPublic: true,
@@ -258,15 +259,21 @@ describe('CollectionService Search and Filter Functions', () => {
         },
       });
 
-      const publicResult = await collectionService.getUserCollections(userId, false);
+      const publicResult = await collectionService.getUserCollections(
+        userId,
+        false
+      );
       expect(publicResult).toHaveLength(3); // Only public collections
 
-      const allResult = await collectionService.getUserCollections(userId, true);
+      const allResult = await collectionService.getUserCollections(
+        userId,
+        true
+      );
       expect(allResult).toHaveLength(4); // Include private collection
 
       // Clean up
       await prisma.collection.deleteMany({
-        where: { name: 'Private Collection' }
+        where: { name: 'Private Collection' },
       });
     });
   });

@@ -8,7 +8,6 @@ describe('Collection Search Integration Tests', () => {
   let authToken: string;
   let userId: number;
 
-
   beforeAll(async () => {
     // Register and login a test user
     const registerResponse = await request(app)
@@ -17,7 +16,7 @@ describe('Collection Search Integration Tests', () => {
         username: 'searchuser',
         email: 'search@test.com',
         password: 'TestPassword123!',
-        displayName: 'Search User'
+        displayName: 'Search User',
       });
 
     expect(registerResponse.status).toBe(201);
@@ -32,7 +31,7 @@ describe('Collection Search Integration Tests', () => {
         name: 'Warhammer 40K Space Marines',
         description: 'My collection of Space Marine miniatures',
         gameSystem: 'Warhammer 40,000',
-        isPublic: true
+        isPublic: true,
       });
 
     await request(app)
@@ -42,7 +41,7 @@ describe('Collection Search Integration Tests', () => {
         name: 'Age of Sigmar Stormcast',
         description: 'Golden warriors of Sigmar',
         gameSystem: 'Age of Sigmar',
-        isPublic: true
+        isPublic: true,
       });
 
     await request(app)
@@ -52,19 +51,17 @@ describe('Collection Search Integration Tests', () => {
         name: 'Blood Angels Army',
         description: 'Red angels of death and destruction',
         gameSystem: 'Warhammer 40,000',
-        isPublic: false
+        isPublic: false,
       });
-
-
   });
 
   afterAll(async () => {
     // Clean up test data
     await prisma.collection.deleteMany({
-      where: { userId: userId.toString() }
+      where: { userId: userId.toString() },
     });
     await prisma.user.delete({
-      where: { id: userId.toString() }
+      where: { id: userId.toString() },
     });
     await prisma.$disconnect();
   });
@@ -104,7 +101,7 @@ describe('Collection Search Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data).toBeDefined();
-      
+
       // All collections should be Warhammer 40K
       if (response.body.data.length > 0) {
         response.body.data.forEach((collection: any) => {
@@ -116,8 +113,8 @@ describe('Collection Search Integration Tests', () => {
     it('should combine search using search endpoint', async () => {
       const response = await request(app)
         .get('/api/v1/collections/search')
-        .query({ 
-          q: 'angels'
+        .query({
+          q: 'angels',
         })
         .set('Authorization', `Bearer ${authToken}`);
 
@@ -130,10 +127,10 @@ describe('Collection Search Integration Tests', () => {
     it('should respect pagination', async () => {
       const response = await request(app)
         .get('/api/v1/collections/search')
-        .query({ 
+        .query({
           q: 'collection',
           page: 1,
-          limit: 2
+          limit: 2,
         })
         .set('Authorization', `Bearer ${authToken}`);
 
@@ -181,10 +178,10 @@ describe('Collection Search Integration Tests', () => {
     it('should handle invalid pagination parameters', async () => {
       const response = await request(app)
         .get('/api/v1/collections/search')
-        .query({ 
+        .query({
           q: 'test',
           page: -1,
-          limit: 0
+          limit: 0,
         })
         .set('Authorization', `Bearer ${authToken}`);
 
@@ -201,7 +198,7 @@ describe('Collection Search Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data).toBeDefined();
-      
+
       if (response.body.data.length > 0) {
         response.body.data.forEach((collection: any) => {
           expect(collection.gameSystem).toBe('Age of Sigmar');

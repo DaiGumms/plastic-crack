@@ -292,9 +292,7 @@ async function main() {
   }
 
   console.log('✅ Database seeding completed successfully!');
-  console.log(
-    `📊 Created game systems: ${[warhammer40k, ageOfSigmar].length}`
-  );
+  console.log(`📊 Created game systems: ${[warhammer40k, ageOfSigmar].length}`);
   console.log(
     `🏛️ Created factions: ${w40kFactions.length + aosFactions.length}`
   );

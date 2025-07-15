@@ -328,7 +328,9 @@ router.get(
 
       const filters = {
         search: req.query.search as string,
-        isPublic: req.query.isPublic ? req.query.isPublic === 'true' : undefined, // Allow both public and private for user's own collections
+        isPublic: req.query.isPublic
+          ? req.query.isPublic === 'true'
+          : undefined, // Allow both public and private for user's own collections
         tags: req.query.tags
           ? Array.isArray(req.query.tags)
             ? (req.query.tags as string[])

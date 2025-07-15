@@ -43,7 +43,11 @@ import type {
   CollectionFilter,
 } from '../types';
 import { useAuth } from '../hooks/useAuth';
-import { getPersistedViewMode, setPersistedViewMode, type ViewMode } from '../utils/viewMode';
+import {
+  getPersistedViewMode,
+  setPersistedViewMode,
+  type ViewMode,
+} from '../utils/viewMode';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -75,7 +79,8 @@ export const CollectionsPage: React.FC = () => {
     null
   );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [collectionToDelete, setCollectionToDelete] = useState<Collection | null>(null);
+  const [collectionToDelete, setCollectionToDelete] =
+    useState<Collection | null>(null);
 
   const limit = 12;
 
@@ -120,7 +125,7 @@ export const CollectionsPage: React.FC = () => {
   // Mutations
   const createMutation = useMutation({
     mutationFn: CollectionService.createCollection,
-    onSuccess: (newCollection) => {
+    onSuccess: newCollection => {
       console.log('✅ Collection created successfully:', newCollection);
       // Invalidate all collections queries
       queryClient.invalidateQueries({ queryKey: ['collections'] });
@@ -128,7 +133,7 @@ export const CollectionsPage: React.FC = () => {
       refetch();
       setFormOpen(false);
     },
-    onError: (error) => {
+    onError: error => {
       console.error('❌ Failed to create collection:', error);
     },
   });
@@ -151,7 +156,7 @@ export const CollectionsPage: React.FC = () => {
       setDeleteConfirmOpen(false);
       setCollectionToDelete(null);
     },
-    onError: (error) => {
+    onError: error => {
       console.error('❌ Failed to delete collection:', error);
     },
   });
@@ -455,25 +460,24 @@ export const CollectionsPage: React.FC = () => {
       <Dialog
         open={deleteConfirmOpen}
         onClose={handleCancelDelete}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
+        aria-labelledby='delete-dialog-title'
+        aria-describedby='delete-dialog-description'
       >
-        <DialogTitle id="delete-dialog-title">
-          Delete Collection
-        </DialogTitle>
+        <DialogTitle id='delete-dialog-title'>Delete Collection</DialogTitle>
         <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete "{collectionToDelete?.name}"? This action cannot be undone.
+          <DialogContentText id='delete-dialog-description'>
+            Are you sure you want to delete "{collectionToDelete?.name}"? This
+            action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
+          <Button onClick={handleCancelDelete} color='primary'>
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirmDelete} 
-            color="error" 
-            variant="contained"
+          <Button
+            onClick={handleConfirmDelete}
+            color='error'
+            variant='contained'
             disabled={deleteMutation.isPending}
           >
             {deleteMutation.isPending ? 'Deleting...' : 'Delete'}

@@ -6,7 +6,7 @@ export type ViewMode = 'grid' | 'list';
 export const getPersistedViewMode = (): ViewMode => {
   try {
     const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-    return (stored === 'list' || stored === 'grid') ? stored : 'grid';
+    return stored === 'list' || stored === 'grid' ? stored : 'grid';
   } catch {
     return 'grid';
   }
