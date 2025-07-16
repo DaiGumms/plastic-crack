@@ -38,6 +38,10 @@ interface Config {
       clientEmail: string;
     };
     storageBucket: string;
+    emulator: {
+      enabled: boolean;
+      host: string;
+    };
   };
   upload: {
     maxFileSize: number;
@@ -91,6 +95,10 @@ const config: Config = {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
     },
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+    emulator: {
+      enabled: process.env.USE_FIREBASE_EMULATOR === 'true' || process.env.NODE_ENV === 'development',
+      host: process.env.FIREBASE_EMULATOR_HOST || 'localhost:9199',
+    },
   },
   upload: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB default

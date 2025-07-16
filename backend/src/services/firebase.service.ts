@@ -9,16 +9,55 @@ import { getStorage } from 'firebase-admin/storage';
 import { config } from '../config/config';
 
 class FirebaseService {
-  private app: App;
+  private app: App | null = null;
   private initialized = false;
 
   constructor() {
-    this.app = this.initializeFirebase();
+    // Don't initialize immediately - use lazy initialization
   }
 
-  private initializeFirebase(): App {
-    if (this.initialized || getApps().length > 0) {
-      return getApps()[0];
+  private initializeFirebase(): App | null {
+    if (this.initialized) {
+      return this.app;
+    }
+
+    if (getApps().length > 0) {
+      this.app = getApps()[0];
+      this.initialized = true;
+      return this.app;
+    }
+
+    // Skip Firebase initialization in test environment (but allow emulator)
+    if (process.env.NODE_ENV === 'test' && !process.env.FIREBASE_EMULATOR_HOST) {
+      // eslint-disable-next-line no-console
+      console.log('Skipping Firebase initialization in test environment');
+      this.initialized = true;
+      return null;
+    }
+
+    // Check if running with Firebase emulator
+    const isEmulator = config.firebase.emulator.enabled;
+    
+    // eslint-disable-next-line no-console
+    console.log('🔍 Firebase emulator check:', {
+      isEmulator,
+      enabled: config.firebase.emulator.enabled,
+      host: config.firebase.emulator.host,
+      useFirebaseEmulator: process.env.USE_FIREBASE_EMULATOR,
+      nodeEnv: process.env.NODE_ENV
+    });
+    
+    if (isEmulator) {
+      // Initialize with minimal config for emulator
+      this.app = initializeApp({
+        projectId: config.firebase.serviceAccount.projectId || 'demo-project', // Use config or fallback
+        storageBucket: `${config.firebase.serviceAccount.projectId || 'demo-project'}.appspot.com`,
+      });
+      
+      // eslint-disable-next-line no-console
+      console.log(`🔥 Firebase initialized for emulator mode at ${config.firebase.emulator.host}`);
+      this.initialized = true;
+      return this.app;
     }
 
     if (!config.firebase.serviceAccount.projectId ||
@@ -46,7 +85,31 @@ class FirebaseService {
    * Get Firebase Storage bucket
    */
   getStorageBucket() {
-    return getStorage(this.app).bucket();
+    if (!this.app) {
+      this.app = this.initializeFirebase();
+    }
+    
+    if (!this.app) {
+      throw new Error('Firebase not initialized');
+    }
+    
+    const storage = getStorage(this.app);
+    
+    // Configure for emulator if running locally
+    if (config.firebase.emulator.enabled) {
+      // Set emulator host for storage
+      const emulatorHost = config.firebase.emulator.host;
+      
+      // For Firebase Storage emulator, we need to set the host via environment variable
+      if (!process.env.FIREBASE_STORAGE_EMULATOR_HOST) {
+        process.env.FIREBASE_STORAGE_EMULATOR_HOST = emulatorHost;
+      }
+      
+      // eslint-disable-next-line no-console
+      console.log(`🔥 Using Firebase Storage emulator at ${emulatorHost}`);
+    }
+    
+    return storage.bucket();
   }
 
   /**
@@ -78,12 +141,20 @@ class FirebaseService {
 
         stream.on('finish', async () => {
           try {
-            // Make the file publicly readable
-            await file.makePublic();
-            
-            // Get the public URL
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-            resolve(publicUrl);
+            // For emulator, use emulator URL format
+            if (config.firebase.emulator.enabled) {
+              const emulatorHost = config.firebase.emulator.host;
+              const projectId = config.firebase.serviceAccount.projectId || 'demo-project';
+              const publicUrl = `http://${emulatorHost}/v0/b/${projectId}.appspot.com/o/${encodeURIComponent(filePath)}?alt=media`;
+              resolve(publicUrl);
+            } else {
+              // Make the file publicly readable in production
+              await file.makePublic();
+              
+              // Get the public URL for production
+              const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+              resolve(publicUrl);
+            }
           } catch (error) {
             reject(error);
           }

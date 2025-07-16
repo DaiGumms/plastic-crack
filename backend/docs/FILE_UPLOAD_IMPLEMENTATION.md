@@ -220,11 +220,58 @@ curl -X POST http://localhost:3001/api/v1/upload/image \
 
 The implementation includes comprehensive error handling and validation. To test:
 
+### Option 1: Production Firebase Setup
 1. Set up Firebase project and configure environment variables
 2. Start the backend server
 3. Use the provided curl examples or integrate with frontend
 4. Verify files appear in Firebase Storage console
 5. Test file deletion and access controls
+
+### Option 2: Firebase Emulator (Recommended for Development)
+1. **Firebase CLI Setup**: Ensure Firebase CLI is installed (`npm install -g firebase-tools`)
+2. **Environment Configuration**: Set emulator environment variables in `.env`:
+   ```bash
+   USE_FIREBASE_EMULATOR=true
+   FIREBASE_EMULATOR_HOST=localhost:9199
+   ```
+3. **Start Firebase Emulator**: From the backend directory:
+   ```bash
+   npm run firebase:emulator
+   ```
+   This starts the Firebase Storage emulator at `localhost:9199` with UI at `localhost:4000`
+
+4. **Start Backend Server**: In another terminal:
+   ```bash
+   npm run dev
+   ```
+
+5. **Test Configuration**: Run configuration test:
+   ```bash
+   npx tsx scripts/test-firebase-config.js
+   npx tsx scripts/test-firebase-service.js
+   ```
+
+6. **Test File Upload**: Use curl or frontend to test uploads:
+   ```bash
+   curl -X POST http://localhost:3001/api/v1/upload/image \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     -F "image=@test-image.jpg" \
+     -F "type=avatar"
+   ```
+
+7. **Monitor in Firebase UI**: Open `http://localhost:4000` to see uploaded files in the emulator
+
+### Testing With Unit Tests
+
+The Firebase service automatically detects test environment and skips initialization unless emulator is enabled:
+
+```bash
+# Run tests with emulator
+FIREBASE_EMULATOR_HOST=localhost:9199 npm test
+
+# Run tests without external dependencies (default)
+npm test
+```
 
 ## Dependencies Added
 

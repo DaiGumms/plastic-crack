@@ -88,7 +88,12 @@ class ImageProcessingService {
       };
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Image processing error:', error);
+      console.error('Image processing error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        code: (error as { code?: string })?.code,
+        name: error instanceof Error ? error.name : 'Unknown'
+      });
       throw new Error('Failed to process image');
     }
   }
