@@ -29,6 +29,7 @@ import {
   Login,
   PersonAdd,
   Collections,
+  Category,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -61,6 +62,7 @@ export const Header = () => {
 
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
+    { label: 'Models', path: '/models', icon: <Category /> },
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },

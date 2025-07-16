@@ -80,7 +80,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   };
 
   const modelCount =
-    collection._count?.models || collection.models?.length || 0;
+    collection._count?.userModels || collection.userModels?.length || 0;
 
   return (
     <Card
@@ -129,7 +129,9 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           {viewMode === 'grid' ? (
             <CategoryIcon sx={{ fontSize: 64, color: 'grey.400' }} />
           ) : (
-            getGameSystemIconFromCollection(collection, { sx: { fontSize: 48 } })
+            getGameSystemIconFromCollection(collection, {
+              sx: { fontSize: 48 },
+            })
           )}
         </Box>
       )}

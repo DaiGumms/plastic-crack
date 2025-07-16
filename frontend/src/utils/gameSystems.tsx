@@ -107,7 +107,8 @@ export const getGameSystemDbId = async (
 ): Promise<string> => {
   // For now, we'll use a simple API call to get the game systems
   // and find the matching one by shortName
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+  const baseUrl =
+    import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
   const response = await fetch(`${baseUrl}/game-systems`);
   if (!response.ok) {
     throw new Error('Failed to fetch game systems');

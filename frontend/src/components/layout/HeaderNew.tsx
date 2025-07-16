@@ -28,6 +28,8 @@ import {
   Home,
   Login,
   PersonAdd,
+  Collections,
+  Category,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -63,6 +65,8 @@ export const Header: React.FC = () => {
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
+          { label: 'Models', path: '/models', icon: <Category /> },
+          { label: 'Collections', path: '/collections', icon: <Collections /> },
           { label: 'Profile', path: '/profile', icon: <Person /> },
           { label: 'Settings', path: '/settings', icon: <Settings /> },
         ]

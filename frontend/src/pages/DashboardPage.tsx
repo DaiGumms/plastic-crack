@@ -64,7 +64,13 @@ export const DashboardPage = () => {
   ];
 
   const quickActions = [
-    { label: 'Add Model', icon: <Add />, to: '/models/add', color: 'primary' },
+    { label: 'Add Model', icon: <Add />, to: '/models', color: 'primary' },
+    {
+      label: 'Browse Models',
+      icon: <Collections />,
+      to: '/models',
+      color: 'info',
+    },
     {
       label: 'Take Photo',
       icon: <PhotoCamera />,
@@ -76,12 +82,6 @@ export const DashboardPage = () => {
       icon: <TrendingUp />,
       to: '/deals',
       color: 'success',
-    },
-    {
-      label: 'Gallery',
-      icon: <Collections />,
-      to: '/gallery',
-      color: 'warning',
     },
   ];
 
