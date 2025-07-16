@@ -42,11 +42,11 @@ export interface PaginationOptions {
 
 export interface CollectionWithStats extends Collection {
   _count: {
-    models: number;
+    userModels: number;
   };
   totalValue?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  models?: Array<any>; // For detailed view with models
+  userModels?: Array<any>; // For detailed view with models
 }
 
 export class CollectionService {
@@ -90,7 +90,7 @@ export class CollectionService {
           },
           _count: {
             select: {
-              models: true,
+              userModels: true,
             },
           },
         },
@@ -189,10 +189,10 @@ export class CollectionService {
         },
         _count: {
           select: {
-            models: true,
+            userModels: true,
           },
         },
-        models: {
+        userModels: {
           select: {
             purchasePrice: true,
           },
@@ -203,7 +203,7 @@ export class CollectionService {
     // Calculate total value for each collection
     const collectionsWithStats: CollectionWithStats[] = collections.map(
       collection => {
-        const totalValue = collection.models.reduce((sum, model) => {
+        const totalValue = collection.userModels.reduce((sum, model) => {
           return sum + (model.purchasePrice?.toNumber() || 0);
         }, 0);
 
@@ -252,10 +252,14 @@ export class CollectionService {
             publisher: true,
           },
         },
-        models: {
+        userModels: {
           include: {
-            gameSystem: true,
-            faction: true,
+            model: {
+              include: {
+                gameSystem: true,
+                faction: true,
+              },
+            },
             photos: {
               where: { isPrimary: true },
               take: 1,
@@ -270,7 +274,7 @@ export class CollectionService {
         },
         _count: {
           select: {
-            models: true,
+            userModels: true,
           },
         },
       },
@@ -286,14 +290,14 @@ export class CollectionService {
     }
 
     // Calculate total value
-    const totalValue = collection.models.reduce((sum, model) => {
+    const totalValue = collection.userModels.reduce((sum, model) => {
       return sum + (model.purchasePrice?.toNumber() || 0);
     }, 0);
 
-    const { models, ...collectionData } = collection;
+    const { userModels, ...collectionData } = collection;
     return {
       ...collectionData,
-      models,
+      userModels,
       totalValue: totalValue > 0 ? totalValue : undefined,
     };
   }
@@ -346,7 +350,7 @@ export class CollectionService {
           },
           _count: {
             select: {
-              models: true,
+              userModels: true,
             },
           },
         },
@@ -373,7 +377,7 @@ export class CollectionService {
       include: {
         _count: {
           select: {
-            models: true,
+            userModels: true,
           },
         },
       },
@@ -387,7 +391,7 @@ export class CollectionService {
       throw new AppError('Access denied', 403);
     }
 
-    if (existingCollection._count.models > 0) {
+    if (existingCollection._count.userModels > 0) {
       throw new AppError(
         'Cannot delete collection with models. Remove all models first.',
         400
@@ -472,10 +476,10 @@ export class CollectionService {
         },
         _count: {
           select: {
-            models: true,
+            userModels: true,
           },
         },
-        models: {
+        userModels: {
           select: {
             purchasePrice: true,
           },
@@ -485,7 +489,7 @@ export class CollectionService {
     });
 
     return collections.map(collection => {
-      const totalValue = collection.models.reduce((sum, model) => {
+      const totalValue = collection.userModels.reduce((sum, model) => {
         return sum + (model.purchasePrice?.toNumber() || 0);
       }, 0);
 

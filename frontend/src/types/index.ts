@@ -59,27 +59,143 @@ export interface RegisterData {
 }
 
 // Model/Collection types
+export interface ModelLike {
+  id: string;
+  userId: string;
+  modelId: string;
+  createdAt: string;
+}
+
+// Model Library types - Available models that users can add to collections
+export interface LibraryModel {
+  id: string;
+  name: string;
+  description?: string;
+  gameSystemId: string;
+  factionId: string;
+
+  // Model Details
+  pointsCost?: number;
+  officialImageUrl?: string;
+
+  // Metadata
+  isOfficial: boolean;
+  tags: string[];
+
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+
+  // Relations
+  gameSystem?: {
+    id: string;
+    name: string;
+    shortName: string;
+  };
+  faction?: {
+    id: string;
+    name: string;
+  };
+}
+
+// User's collection model instances - instances of library models in user collections
 export interface UserModel {
   id: string;
   userId: string;
-  name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus: 'unpainted' | 'in_progress' | 'completed';
+  modelId: string; // References LibraryModel (renamed from libraryModelId)
+  collectionId: string;
+
+  // User customizations
+  customName?: string; // User's custom name for this instance
+  paintingStatus:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
   notes?: string;
-  imageUrls?: string[];
+  tags: string[]; // User's custom tags (renamed from userTags)
+
+  // Purchase Information
+  purchasePrice?: number;
+  purchaseDate?: string;
+
+  // Custom user fields
+  customPointsCost?: number; // User's custom point cost override
+
+  // Visibility
+  isPublic: boolean;
+
+  // Timestamps
   createdAt: string;
   updatedAt: string;
+
+  // Relations
+  model?: LibraryModel; // Renamed from libraryModel
+  collection?: {
+    id: string;
+    name: string;
+    user?: {
+      id: string;
+      username: string;
+      displayName?: string;
+      profileImageUrl?: string;
+    };
+  };
+  photos?: {
+    id: string;
+    fileName: string;
+    originalUrl: string;
+    thumbnailUrl?: string;
+    description?: string;
+    isPrimary: boolean;
+  }[];
+  likes?: ModelLike[];
+  _count?: {
+    likes: number;
+  };
 }
 
-export interface CreateModelData {
-  name: string;
-  faction?: string;
-  gameSystem?: string;
-  pointsValue?: number;
-  paintingStatus?: 'unpainted' | 'in_progress' | 'completed';
+export interface CreateUserModelData {
+  modelId: string; // Renamed from libraryModelId
+  collectionId: string;
+  customName?: string;
+  paintingStatus?:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
   notes?: string;
+  tags?: string[]; // Renamed from userTags
+  purchasePrice?: number;
+  purchaseDate?: string;
+  customPointsCost?: number;
+  isPublic?: boolean;
+}
+
+// Backend API expects this structure for creating models
+export interface CreateModelRequest {
+  name: string;
+  description?: string;
+  gameSystemId: string;
+  factionId?: string;
+  collectionId: string;
+  paintingStatus?:
+    | 'UNPAINTED'
+    | 'PRIMED'
+    | 'BASE_COATED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'SHOWCASE';
+  notes?: string;
+  tags?: string[];
+  purchasePrice?: number;
+  purchaseDate?: string;
+  pointsCost?: number;
+  isPublic?: boolean;
 }
 
 export interface Collection {
@@ -107,8 +223,10 @@ export interface Collection {
     profileImageUrl?: string;
   };
   models?: UserModel[];
+  userModels?: UserModel[];
   _count?: {
     models: number;
+    userModels: number;
   };
 }
 
@@ -148,6 +266,28 @@ export interface CollectionStats {
   mostRecentModel?: UserModel;
 }
 
+// Game System and Faction types
+export interface GameSystem {
+  id: string;
+  name: string;
+  shortName: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Faction {
+  id: string;
+  name: string;
+  description?: string;
+  gameSystemId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  gameSystem?: GameSystem;
+}
+
 // API response types
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -172,3 +312,6 @@ export interface ApiError {
   status: number;
   code?: string;
 }
+
+// Type aliases for backward compatibility
+export type CreateModelData = CreateModelRequest;
