@@ -440,6 +440,38 @@ router.put(
 );
 
 /**
+ * GET /api/v1/collections/:id/deletion-info
+ * Get collection deletion information (for confirmation dialog)
+ */
+router.get(
+  '/:id/deletion-info',
+  authenticateToken,
+  validateCollectionId,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const collectionId = req.params.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new AppError('User not authenticated', 401);
+      }
+
+      const deletionInfo = await collectionService.getCollectionDeletionInfo(
+        collectionId,
+        userId
+      );
+
+      res.json({
+        success: true,
+        data: deletionInfo,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * DELETE /api/v1/collections/:id
  * Delete collection
  */

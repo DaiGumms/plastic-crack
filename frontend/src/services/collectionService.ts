@@ -127,6 +127,27 @@ export class CollectionService {
   }
 
   /**
+   * Get collection deletion information
+   */
+  static async getCollectionDeletionInfo(id: string): Promise<{
+    collection: { id: string; name: string };
+    modelCount: number;
+  }> {
+    const response = await api.get<ApiResponse<{
+      collection: { id: string; name: string };
+      modelCount: number;
+    }>>(`${CollectionService.BASE_PATH}/${id}/deletion-info`);
+    
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.message || 'Failed to fetch collection deletion info'
+      );
+    }
+    
+    return response.data.data;
+  }
+
+  /**
    * Delete a collection
    */
   static async deleteCollection(id: string): Promise<void> {

@@ -368,7 +368,7 @@ export class CollectionService {
   }
 
   /**
-   * Delete a collection
+   * Delete a collection (with cascade deletion of user models)
    */
   async deleteCollection(collectionId: string, userId: string): Promise<void> {
     // Check if collection exists and user owns it
@@ -391,16 +391,53 @@ export class CollectionService {
       throw new AppError('Access denied', 403);
     }
 
-    if (existingCollection._count.userModels > 0) {
-      throw new AppError(
-        'Cannot delete collection with models. Remove all models first.',
-        400
-      );
+    // Use transaction to ensure atomicity
+    await this.prisma.$transaction(async (tx) => {
+      // Delete all user models in the collection first
+      await tx.userModel.deleteMany({
+        where: { collectionId },
+      });
+
+      // Then delete the collection
+      await tx.collection.delete({
+        where: { id: collectionId },
+      });
+    });
+  }
+
+  /**
+   * Get collection deletion info (for confirmation dialog)
+   */
+  async getCollectionDeletionInfo(collectionId: string, userId: string): Promise<{
+    collection: { id: string; name: string };
+    modelCount: number;
+  }> {
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+      select: {
+        id: true,
+        name: true,
+        userId: true,
+        _count: {
+          select: {
+            userModels: true,
+          },
+        },
+      },
+    });
+
+    if (!collection) {
+      throw new AppError('Collection not found', 404);
     }
 
-    await this.prisma.collection.delete({
-      where: { id: collectionId },
-    });
+    if (collection.userId !== userId) {
+      throw new AppError('Access denied', 403);
+    }
+
+    return {
+      collection: { id: collection.id, name: collection.name },
+      modelCount: collection._count.userModels,
+    };
   }
 
   /**
