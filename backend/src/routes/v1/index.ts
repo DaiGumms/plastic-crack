@@ -8,6 +8,7 @@ import { healthRoutes } from './health';
 import libraryModelRoutes from './libraryModel.routes';
 import { modelRoutes } from './model.routes';
 import { redisRoutes } from './redis';
+import { uploadRoutes } from './upload.routes';
 import { userRoutes } from './user.routes';
 
 const router = Router();
@@ -37,6 +38,9 @@ router.use('/library/models', libraryModelRoutes);
 
 // Model management routes (user models)
 router.use('/models', modelRoutes);
+
+// File upload routes
+router.use('/upload', uploadRoutes);
 
 // Placeholder for future routes
 router.get('/', (req, res) => {

@@ -31,6 +31,23 @@ interface Config {
     httpOnly: boolean;
     sameSite: boolean | 'lax' | 'strict' | 'none';
   };
+  firebase: {
+    serviceAccount: {
+      projectId: string;
+      privateKey: string;
+      clientEmail: string;
+    };
+    storageBucket: string;
+  };
+  upload: {
+    maxFileSize: number;
+    allowedMimeTypes: string[];
+    imageCompression: {
+      quality: number;
+      maxWidth: number;
+      maxHeight: number;
+    };
+  };
 }
 
 const config: Config = {
@@ -66,6 +83,28 @@ const config: Config = {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  },
+  firebase: {
+    serviceAccount: {
+      projectId: process.env.FIREBASE_PROJECT_ID || '',
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') || '',
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
+    },
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+  },
+  upload: {
+    maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB default
+    allowedMimeTypes: [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ],
+    imageCompression: {
+      quality: parseInt(process.env.IMAGE_QUALITY || '80', 10),
+      maxWidth: parseInt(process.env.IMAGE_MAX_WIDTH || '2048', 10),
+      maxHeight: parseInt(process.env.IMAGE_MAX_HEIGHT || '2048', 10),
+    },
   },
 };
 
