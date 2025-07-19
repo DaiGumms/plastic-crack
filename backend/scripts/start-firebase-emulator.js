@@ -11,25 +11,25 @@ const path = require('path');
 console.log('🔥 Starting Firebase Storage Emulator...');
 
 // Start Firebase emulator with demo project
-const emulator = spawn('firebase', [
-  'emulators:start',
-  '--only', 'storage',
-  '--project', 'demo-plastic-crack'
-], {
-  stdio: 'inherit',
-  cwd: __dirname,
-  env: {
-    ...process.env,
-    FIREBASE_EMULATOR_HUB: 'localhost:4400',
-    GCLOUD_PROJECT: 'demo-plastic-crack'
+const emulator = spawn(
+  'firebase',
+  ['emulators:start', '--only', 'storage', '--project', 'demo-plastic-crack'],
+  {
+    stdio: 'inherit',
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      FIREBASE_EMULATOR_HUB: 'localhost:4400',
+      GCLOUD_PROJECT: 'demo-plastic-crack',
+    },
   }
-});
+);
 
-emulator.on('close', (code) => {
+emulator.on('close', code => {
   console.log(`Firebase emulator exited with code ${code}`);
 });
 
-emulator.on('error', (error) => {
+emulator.on('error', error => {
   console.error('Failed to start Firebase emulator:', error);
 });
 

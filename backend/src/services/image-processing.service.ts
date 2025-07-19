@@ -36,7 +36,7 @@ class ImageProcessingService {
       quality = config.upload.imageCompression.quality,
       maxWidth = config.upload.imageCompression.maxWidth,
       maxHeight = config.upload.imageCompression.maxHeight,
-      format = 'jpeg'
+      format = 'jpeg',
     } = options;
 
     try {
@@ -44,7 +44,7 @@ class ImageProcessingService {
 
       // Get original metadata
       const metadata = await pipeline.metadata();
-      
+
       // Resize if needed
       if (metadata.width && metadata.height) {
         if (metadata.width > maxWidth || metadata.height > maxHeight) {
@@ -61,10 +61,10 @@ class ImageProcessingService {
           pipeline = pipeline.jpeg({ quality, progressive: true });
           break;
         case 'png':
-          pipeline = pipeline.png({ 
-            quality, 
+          pipeline = pipeline.png({
+            quality,
             compressionLevel: 9,
-            progressive: true 
+            progressive: true,
           });
           break;
         case 'webp':
@@ -75,7 +75,9 @@ class ImageProcessingService {
       }
 
       // Process the image
-      const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
+      const { data, info } = await pipeline.toBuffer({
+        resolveWithObject: true,
+      });
 
       return {
         buffer: data,
@@ -92,7 +94,7 @@ class ImageProcessingService {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : 'No stack trace',
         code: (error as { code?: string })?.code,
-        name: error instanceof Error ? error.name : 'Unknown'
+        name: error instanceof Error ? error.name : 'Unknown',
       });
       throw new Error('Failed to process image');
     }
@@ -104,7 +106,9 @@ class ImageProcessingService {
   async createResponsiveSizes(
     inputBuffer: Buffer,
     sizes: Array<{ width: number; height: number; suffix: string }>
-  ): Promise<Array<{ buffer: Buffer; suffix: string; info: ProcessedImage['info'] }>> {
+  ): Promise<
+    Array<{ buffer: Buffer; suffix: string; info: ProcessedImage['info'] }>
+  > {
     const results = [];
 
     for (const size of sizes) {
@@ -203,7 +207,7 @@ class ImageProcessingService {
       .split('.')[0]
       .replace(/[^a-zA-Z0-9]/g, '_')
       .toLowerCase();
-    
+
     return `${baseName}_${timestamp}_${randomSuffix}.${format}`;
   }
 
@@ -213,12 +217,12 @@ class ImageProcessingService {
   async getOptimalFormat(buffer: Buffer): Promise<'jpeg' | 'png' | 'webp'> {
     try {
       const metadata = await sharp(buffer).metadata();
-      
+
       // If image has transparency, prefer PNG or WebP
       if (metadata.hasAlpha) {
         return 'webp'; // WebP handles transparency better than PNG for photos
       }
-      
+
       // For photos without transparency, JPEG is usually smaller
       return 'jpeg';
     } catch {

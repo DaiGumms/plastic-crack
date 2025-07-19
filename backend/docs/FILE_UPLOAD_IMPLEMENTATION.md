@@ -1,10 +1,12 @@
 # File Upload and Image Processing Service Implementation
 
-This document describes the implementation of Issue #25: File upload and image processing service with Firebase Storage integration.
+This document describes the implementation of Issue #25: File upload and image processing service
+with Firebase Storage integration.
 
 ## Overview
 
 The implementation provides a comprehensive file upload system that:
+
 - Uses Firebase Storage for cost-effective cloud storage with built-in CDN
 - Maintains existing JWT authentication (no disruption to current auth system)
 - Provides image optimization to minimize storage costs
@@ -15,6 +17,7 @@ The implementation provides a comprehensive file upload system that:
 ### Services Layer
 
 #### 1. Firebase Service (`src/services/firebase.service.ts`)
+
 - Initializes Firebase Admin SDK
 - Handles file uploads to Firebase Storage
 - Manages file deletion and existence checks
@@ -22,6 +25,7 @@ The implementation provides a comprehensive file upload system that:
 - Organized file path generation for different use cases
 
 #### 2. Image Processing Service (`src/services/image-processing.service.ts`)
+
 - Image validation and sanitization using Sharp
 - Compression and optimization to reduce storage costs
 - Format conversion (JPEG, PNG, WebP)
@@ -29,6 +33,7 @@ The implementation provides a comprehensive file upload system that:
 - Metadata extraction
 
 #### 3. Upload Service (`src/services/upload.service.ts`)
+
 - Coordinates Firebase and image processing services
 - Multer configuration for file uploads
 - Request validation and metadata extraction
@@ -37,27 +42,33 @@ The implementation provides a comprehensive file upload system that:
 ### API Routes (`src/routes/v1/upload.routes.ts`)
 
 #### POST `/api/v1/upload/image`
+
 Upload a single optimized image:
+
 ```json
 {
   "type": "avatar|collection-thumbnail|model-image",
   "collectionId": "uuid", // required for collection-thumbnail and model-image
-  "modelId": "uuid",      // required for model-image
+  "modelId": "uuid", // required for model-image
   "description": "string",
   "tags": "comma,separated,tags"
 }
 ```
 
 #### POST `/api/v1/upload/responsive`
+
 Upload multiple responsive sizes:
+
 - Thumbnail (150x150)
-- Medium (800x600) 
+- Medium (800x600)
 - Large (1920x1080)
 
 #### DELETE `/api/v1/upload/{filePath}`
+
 Delete uploaded files (with user ownership validation)
 
 #### GET `/api/v1/upload/limits`
+
 Get upload configuration and limits
 
 ## File Organization Structure
@@ -77,6 +88,7 @@ Get upload configuration and limits
 ## Configuration
 
 ### Environment Variables
+
 ```bash
 # Firebase Configuration
 FIREBASE_PROJECT_ID=your-firebase-project-id
@@ -124,36 +136,42 @@ IMAGE_MAX_HEIGHT=2048      # Max height in pixels
 ## Features Implemented
 
 ### ✅ Multer middleware for file uploads
+
 - Memory storage for processing before upload
 - File size limits (10MB default)
 - MIME type validation
 - Single file upload support
 
 ### ✅ Image validation and sanitization
+
 - Format validation (JPEG, PNG, WebP, GIF)
 - Dimension limits (max 10k pixels)
 - Corruption detection
 - Metadata extraction
 
 ### ✅ Image resizing and optimization
+
 - Smart compression based on content
 - Format optimization (transparency detection)
 - Progressive JPEG encoding
 - Configurable quality settings
 
 ### ✅ Cloud storage integration (Firebase Storage)
+
 - Firebase Storage instead of AWS S3
 - Automatic CDN distribution
 - Public URL generation
 - File deletion and management
 
 ### ✅ File metadata storage
+
 - Upload metadata in Firebase Storage
 - User ID, type, description, tags
 - Original filename preservation
 - Processing information
 
 ### ✅ Image serving optimization
+
 - Firebase Storage CDN
 - Public URL access
 - Format optimization
@@ -179,6 +197,7 @@ IMAGE_MAX_HEIGHT=2048      # Max height in pixels
 ## Usage Examples
 
 ### Upload Avatar
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/upload/image \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -187,6 +206,7 @@ curl -X POST http://localhost:3001/api/v1/upload/image \
 ```
 
 ### Upload Collection Thumbnail
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/upload/image \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -196,6 +216,7 @@ curl -X POST http://localhost:3001/api/v1/upload/image \
 ```
 
 ### Upload Model Image with Tags
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/upload/image \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -221,6 +242,7 @@ curl -X POST http://localhost:3001/api/v1/upload/image \
 The implementation includes comprehensive error handling and validation. To test:
 
 ### Option 1: Production Firebase Setup
+
 1. Set up Firebase project and configure environment variables
 2. Start the backend server
 3. Use the provided curl examples or integrate with frontend
@@ -228,6 +250,7 @@ The implementation includes comprehensive error handling and validation. To test
 5. Test file deletion and access controls
 
 ### Option 2: Firebase Emulator (Recommended for Development)
+
 1. **Firebase CLI Setup**: Ensure Firebase CLI is installed (`npm install -g firebase-tools`)
 2. **Environment Configuration**: Set emulator environment variables in `.env`:
    ```bash
@@ -235,23 +258,28 @@ The implementation includes comprehensive error handling and validation. To test
    FIREBASE_EMULATOR_HOST=localhost:9199
    ```
 3. **Start Firebase Emulator**: From the backend directory:
+
    ```bash
    npm run firebase:emulator
    ```
+
    This starts the Firebase Storage emulator at `localhost:9199` with UI at `localhost:4000`
 
 4. **Start Backend Server**: In another terminal:
+
    ```bash
    npm run dev
    ```
 
 5. **Test Configuration**: Run configuration test:
+
    ```bash
    npx tsx scripts/test-firebase-config.js
    npx tsx scripts/test-firebase-service.js
    ```
 
 6. **Test File Upload**: Use curl or frontend to test uploads:
+
    ```bash
    curl -X POST http://localhost:3001/api/v1/upload/image \
      -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -263,7 +291,8 @@ The implementation includes comprehensive error handling and validation. To test
 
 ### Testing With Unit Tests
 
-The Firebase service automatically detects test environment and skips initialization unless emulator is enabled:
+The Firebase service automatically detects test environment and skips initialization unless emulator
+is enabled:
 
 ```bash
 # Run tests with emulator

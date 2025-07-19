@@ -311,8 +311,8 @@ const ModelsPage: React.FC = () => {
         onFilterChange={handleFilterChange}
         onAddToCollection={handleAddToCollection}
         onViewDetails={handleViewDetails}
-        gameSystems={gameSystems as any}
-        factions={factions as any}
+        gameSystems={gameSystems as GameSystem[]}
+        factions={factions as Faction[]}
         showAddButtons={collections.length > 0}
       />
 

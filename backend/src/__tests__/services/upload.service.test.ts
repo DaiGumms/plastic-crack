@@ -1,4 +1,7 @@
-import { UploadService, FileUploadMetadata } from '../../services/upload.service';
+import {
+  UploadService,
+  FileUploadMetadata,
+} from '../../services/upload.service';
 import { AppError } from '../../middleware/errorHandler';
 import { AuthenticatedRequest } from '../../types/auth';
 
@@ -24,8 +27,12 @@ jest.mock('../../services/image-processing.service', () => ({
 import { firebaseService } from '../../services/firebase.service';
 import { imageProcessingService } from '../../services/image-processing.service';
 
-const mockFirebaseService = firebaseService as jest.Mocked<typeof firebaseService>;
-const mockImageProcessingService = imageProcessingService as jest.Mocked<typeof imageProcessingService>;
+const mockFirebaseService = firebaseService as jest.Mocked<
+  typeof firebaseService
+>;
+const mockImageProcessingService = imageProcessingService as jest.Mocked<
+  typeof imageProcessingService
+>;
 
 describe('UploadService', () => {
   let uploadService: UploadService;
@@ -50,7 +57,9 @@ describe('UploadService', () => {
 
     beforeEach(() => {
       // Setup default mocks
-      mockImageProcessingService.validateImage.mockResolvedValue({ isValid: true });
+      mockImageProcessingService.validateImage.mockResolvedValue({
+        isValid: true,
+      });
       mockImageProcessingService.getOptimalFormat.mockResolvedValue('jpeg');
       mockImageProcessingService.processImage.mockResolvedValue({
         buffer: Buffer.from('processed image'),
@@ -61,9 +70,15 @@ describe('UploadService', () => {
           size: 1200,
         },
       });
-      mockImageProcessingService.generateFilename.mockReturnValue('generated-filename.jpg');
-      mockFirebaseService.generateFilePath.mockReturnValue('users/user123/avatar/generated-filename.jpg');
-      mockFirebaseService.uploadFile.mockResolvedValue('https://storage.googleapis.com/bucket/path/to/file.jpg');
+      mockImageProcessingService.generateFilename.mockReturnValue(
+        'generated-filename.jpg'
+      );
+      mockFirebaseService.generateFilePath.mockReturnValue(
+        'users/user123/avatar/generated-filename.jpg'
+      );
+      mockFirebaseService.uploadFile.mockResolvedValue(
+        'https://storage.googleapis.com/bucket/path/to/file.jpg'
+      );
     });
 
     it('should upload image successfully', async () => {
@@ -82,11 +97,18 @@ describe('UploadService', () => {
         filePath: 'users/user123/avatar/generated-filename.jpg',
       });
 
-      expect(mockImageProcessingService.validateImage).toHaveBeenCalledWith(mockFile.buffer);
-      expect(mockImageProcessingService.getOptimalFormat).toHaveBeenCalledWith(mockFile.buffer);
-      expect(mockImageProcessingService.processImage).toHaveBeenCalledWith(mockFile.buffer, {
-        format: 'jpeg',
-      });
+      expect(mockImageProcessingService.validateImage).toHaveBeenCalledWith(
+        mockFile.buffer
+      );
+      expect(mockImageProcessingService.getOptimalFormat).toHaveBeenCalledWith(
+        mockFile.buffer
+      );
+      expect(mockImageProcessingService.processImage).toHaveBeenCalledWith(
+        mockFile.buffer,
+        {
+          format: 'jpeg',
+        }
+      );
       expect(mockFirebaseService.uploadFile).toHaveBeenCalled();
     });
 
@@ -96,27 +118,34 @@ describe('UploadService', () => {
         error: 'Invalid image format',
       });
 
-      await expect(uploadService.uploadImage(mockFile, mockMetadata))
-        .rejects.toThrow(AppError);
+      await expect(
+        uploadService.uploadImage(mockFile, mockMetadata)
+      ).rejects.toThrow(AppError);
 
       expect(mockImageProcessingService.processImage).not.toHaveBeenCalled();
       expect(mockFirebaseService.uploadFile).not.toHaveBeenCalled();
     });
 
     it('should handle processing errors', async () => {
-      mockImageProcessingService.processImage.mockRejectedValue(new Error('Processing failed'));
+      mockImageProcessingService.processImage.mockRejectedValue(
+        new Error('Processing failed')
+      );
 
-      await expect(uploadService.uploadImage(mockFile, mockMetadata))
-        .rejects.toThrow(AppError);
+      await expect(
+        uploadService.uploadImage(mockFile, mockMetadata)
+      ).rejects.toThrow(AppError);
 
       expect(mockFirebaseService.uploadFile).not.toHaveBeenCalled();
     });
 
     it('should handle upload errors', async () => {
-      mockFirebaseService.uploadFile.mockRejectedValue(new Error('Upload failed'));
+      mockFirebaseService.uploadFile.mockRejectedValue(
+        new Error('Upload failed')
+      );
 
-      await expect(uploadService.uploadImage(mockFile, mockMetadata))
-        .rejects.toThrow(AppError);
+      await expect(
+        uploadService.uploadImage(mockFile, mockMetadata)
+      ).rejects.toThrow(AppError);
     });
 
     it('should handle collection thumbnail uploads', async () => {
@@ -128,12 +157,15 @@ describe('UploadService', () => {
 
       await uploadService.uploadImage(mockFile, collectionMetadata);
 
-      expect(mockFirebaseService.generateFilePath).toHaveBeenCalledWith('collection-thumbnail', {
-        userId: 'user123',
-        collectionId: 'collection123',
-        modelId: undefined,
-        filename: 'generated-filename.jpg',
-      });
+      expect(mockFirebaseService.generateFilePath).toHaveBeenCalledWith(
+        'collection-thumbnail',
+        {
+          userId: 'user123',
+          collectionId: 'collection123',
+          modelId: undefined,
+          filename: 'generated-filename.jpg',
+        }
+      );
     });
 
     it('should handle model image uploads', async () => {
@@ -146,12 +178,15 @@ describe('UploadService', () => {
 
       await uploadService.uploadImage(mockFile, modelMetadata);
 
-      expect(mockFirebaseService.generateFilePath).toHaveBeenCalledWith('model-image', {
-        userId: 'user123',
-        collectionId: 'collection123',
-        modelId: 'model456',
-        filename: 'generated-filename.jpg',
-      });
+      expect(mockFirebaseService.generateFilePath).toHaveBeenCalledWith(
+        'model-image',
+        {
+          userId: 'user123',
+          collectionId: 'collection123',
+          modelId: 'model456',
+          filename: 'generated-filename.jpg',
+        }
+      );
     });
   });
 
@@ -171,7 +206,9 @@ describe('UploadService', () => {
     };
 
     beforeEach(() => {
-      mockImageProcessingService.validateImage.mockResolvedValue({ isValid: true });
+      mockImageProcessingService.validateImage.mockResolvedValue({
+        isValid: true,
+      });
       mockImageProcessingService.createResponsiveSizes.mockResolvedValue([
         {
           buffer: Buffer.from('small image'),
@@ -189,32 +226,38 @@ describe('UploadService', () => {
           info: { format: 'jpeg', width: 1920, height: 1080, size: 2400 },
         },
       ]);
-      mockImageProcessingService.generateFilename.mockImplementation((name, format) => 
-        `${name.replace('.jpg', '')}.${format}`
+      mockImageProcessingService.generateFilename.mockImplementation(
+        (name, format) => `${name.replace('.jpg', '')}.${format}`
       );
-      mockFirebaseService.generateFilePath.mockImplementation((type, options) => 
-        `users/${options.userId}/path/${options.filename}`
+      mockFirebaseService.generateFilePath.mockImplementation(
+        (type, options) => `users/${options.userId}/path/${options.filename}`
       );
-      mockFirebaseService.uploadFile.mockResolvedValue('https://storage.googleapis.com/bucket/path/to/file.jpg');
+      mockFirebaseService.uploadFile.mockResolvedValue(
+        'https://storage.googleapis.com/bucket/path/to/file.jpg'
+      );
     });
 
     it('should upload responsive images successfully', async () => {
-      const results = await uploadService.uploadResponsiveImages(mockFile, mockMetadata);
+      const results = await uploadService.uploadResponsiveImages(
+        mockFile,
+        mockMetadata
+      );
 
       expect(results).toHaveLength(3);
       expect(results[0].originalName).toBe('test.jpg_thumbnail');
       expect(results[1].originalName).toBe('test.jpg_medium');
       expect(results[2].originalName).toBe('test.jpg_large');
 
-      expect(mockImageProcessingService.validateImage).toHaveBeenCalledWith(mockFile.buffer);
-      expect(mockImageProcessingService.createResponsiveSizes).toHaveBeenCalledWith(
-        mockFile.buffer,
-        [
-          { width: 150, height: 150, suffix: 'thumbnail' },
-          { width: 800, height: 600, suffix: 'medium' },
-          { width: 1920, height: 1080, suffix: 'large' },
-        ]
+      expect(mockImageProcessingService.validateImage).toHaveBeenCalledWith(
+        mockFile.buffer
       );
+      expect(
+        mockImageProcessingService.createResponsiveSizes
+      ).toHaveBeenCalledWith(mockFile.buffer, [
+        { width: 150, height: 150, suffix: 'thumbnail' },
+        { width: 800, height: 600, suffix: 'medium' },
+        { width: 1920, height: 1080, suffix: 'large' },
+      ]);
       expect(mockFirebaseService.uploadFile).toHaveBeenCalledTimes(3);
     });
 
@@ -224,30 +267,37 @@ describe('UploadService', () => {
         error: 'Invalid image format',
       });
 
-      await expect(uploadService.uploadResponsiveImages(mockFile, mockMetadata))
-        .rejects.toThrow(AppError);
+      await expect(
+        uploadService.uploadResponsiveImages(mockFile, mockMetadata)
+      ).rejects.toThrow(AppError);
 
-      expect(mockImageProcessingService.createResponsiveSizes).not.toHaveBeenCalled();
+      expect(
+        mockImageProcessingService.createResponsiveSizes
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle processing errors', async () => {
-      mockImageProcessingService.createResponsiveSizes.mockRejectedValue(new Error('Processing failed'));
+      mockImageProcessingService.createResponsiveSizes.mockRejectedValue(
+        new Error('Processing failed')
+      );
 
-      await expect(uploadService.uploadResponsiveImages(mockFile, mockMetadata))
-        .rejects.toThrow(AppError);
+      await expect(
+        uploadService.uploadResponsiveImages(mockFile, mockMetadata)
+      ).rejects.toThrow(AppError);
     });
 
     it('should accept custom sizes', async () => {
-      const customSizes = [
-        { width: 200, height: 200, suffix: 'custom' },
-      ];
+      const customSizes = [{ width: 200, height: 200, suffix: 'custom' }];
 
-      await uploadService.uploadResponsiveImages(mockFile, mockMetadata, customSizes);
-
-      expect(mockImageProcessingService.createResponsiveSizes).toHaveBeenCalledWith(
-        mockFile.buffer,
+      await uploadService.uploadResponsiveImages(
+        mockFile,
+        mockMetadata,
         customSizes
       );
+
+      expect(
+        mockImageProcessingService.createResponsiveSizes
+      ).toHaveBeenCalledWith(mockFile.buffer, customSizes);
     });
   });
 
@@ -263,23 +313,30 @@ describe('UploadService', () => {
     it('should handle delete errors', async () => {
       const filePath = 'users/user123/avatar/test-image.jpg';
 
-      mockFirebaseService.deleteFile.mockRejectedValue(new Error('Delete failed'));
+      mockFirebaseService.deleteFile.mockRejectedValue(
+        new Error('Delete failed')
+      );
 
-      await expect(uploadService.deleteFile(filePath))
-        .rejects.toThrow(AppError);
+      await expect(uploadService.deleteFile(filePath)).rejects.toThrow(
+        AppError
+      );
     });
   });
 
   describe('validateUploadRequest', () => {
-    const createMockRequest = (body: any, userId?: string): AuthenticatedRequest => ({
-      user: userId ? { id: userId } : undefined,
-      body,
-    } as AuthenticatedRequest);
+    const createMockRequest = (
+      body: any,
+      userId?: string
+    ): AuthenticatedRequest =>
+      ({
+        user: userId ? { id: userId } : undefined,
+        body,
+      }) as AuthenticatedRequest;
 
     it('should validate avatar upload request', () => {
       const req = createMockRequest({ type: 'avatar' }, 'user123');
       const result = uploadService.validateUploadRequest(req);
-      
+
       expect(result).toEqual({
         userId: 'user123',
         type: 'avatar',
@@ -291,15 +348,18 @@ describe('UploadService', () => {
     });
 
     it('should validate collection thumbnail upload request', () => {
-      const req = createMockRequest({
-        type: 'collection-thumbnail',
-        collectionId: 'collection123',
-        description: 'Test collection',
-        tags: 'tag1, tag2',
-      }, 'user123');
-      
+      const req = createMockRequest(
+        {
+          type: 'collection-thumbnail',
+          collectionId: 'collection123',
+          description: 'Test collection',
+          tags: 'tag1, tag2',
+        },
+        'user123'
+      );
+
       const result = uploadService.validateUploadRequest(req);
-      
+
       expect(result).toEqual({
         userId: 'user123',
         type: 'collection-thumbnail',
@@ -311,14 +371,17 @@ describe('UploadService', () => {
     });
 
     it('should validate model image upload request', () => {
-      const req = createMockRequest({
-        type: 'model-image',
-        collectionId: 'collection123',
-        modelId: 'model456',
-      }, 'user123');
-      
+      const req = createMockRequest(
+        {
+          type: 'model-image',
+          collectionId: 'collection123',
+          modelId: 'model456',
+        },
+        'user123'
+      );
+
       const result = uploadService.validateUploadRequest(req);
-      
+
       expect(result).toEqual({
         userId: 'user123',
         type: 'model-image',
@@ -331,43 +394,47 @@ describe('UploadService', () => {
 
     it('should throw error for unauthenticated user', () => {
       const req = createMockRequest({ type: 'avatar' });
-      
-      expect(() => uploadService.validateUploadRequest(req))
-        .toThrow(AppError);
+
+      expect(() => uploadService.validateUploadRequest(req)).toThrow(AppError);
     });
 
     it('should throw error for invalid type', () => {
       const req = createMockRequest({ type: 'invalid' }, 'user123');
-      
-      expect(() => uploadService.validateUploadRequest(req))
-        .toThrow(AppError);
+
+      expect(() => uploadService.validateUploadRequest(req)).toThrow(AppError);
     });
 
     it('should throw error for collection thumbnail without collectionId', () => {
-      const req = createMockRequest({ type: 'collection-thumbnail' }, 'user123');
-      
-      expect(() => uploadService.validateUploadRequest(req))
-        .toThrow(AppError);
+      const req = createMockRequest(
+        { type: 'collection-thumbnail' },
+        'user123'
+      );
+
+      expect(() => uploadService.validateUploadRequest(req)).toThrow(AppError);
     });
 
     it('should throw error for model image without collectionId', () => {
-      const req = createMockRequest({
-        type: 'model-image',
-        modelId: 'model456',
-      }, 'user123');
-      
-      expect(() => uploadService.validateUploadRequest(req))
-        .toThrow(AppError);
+      const req = createMockRequest(
+        {
+          type: 'model-image',
+          modelId: 'model456',
+        },
+        'user123'
+      );
+
+      expect(() => uploadService.validateUploadRequest(req)).toThrow(AppError);
     });
 
     it('should throw error for model image without modelId', () => {
-      const req = createMockRequest({
-        type: 'model-image',
-        collectionId: 'collection123',
-      }, 'user123');
-      
-      expect(() => uploadService.validateUploadRequest(req))
-        .toThrow(AppError);
+      const req = createMockRequest(
+        {
+          type: 'model-image',
+          collectionId: 'collection123',
+        },
+        'user123'
+      );
+
+      expect(() => uploadService.validateUploadRequest(req)).toThrow(AppError);
     });
   });
 
@@ -384,7 +451,7 @@ describe('UploadService', () => {
       // Mock MulterError properly by creating an instance that passes instanceof check
       const multer = require('multer');
       const multerError = new multer.MulterError('LIMIT_FILE_SIZE', 'image');
-      
+
       const result = uploadService.handleUploadError(multerError);
       expect(result).toBeInstanceOf(AppError);
       expect(result.message).toContain('File too large');

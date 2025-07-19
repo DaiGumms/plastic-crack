@@ -56,7 +56,28 @@ const validateCreateCollection = [
     }),
   body('imageUrl')
     .optional()
-    .isURL()
+    .custom(value => {
+      if (!value) return true; // Optional field
+
+      // In development/emulator mode, allow localhost URLs
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const useEmulator = process.env.USE_FIREBASE_EMULATOR === 'true';
+
+      if (
+        (isDevelopment || useEmulator) &&
+        value.startsWith('http://localhost:')
+      ) {
+        return true;
+      }
+
+      // For production, use standard URL validation
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        throw new Error('Image URL must be a valid URL');
+      }
+    })
     .withMessage('Image URL must be a valid URL'),
 ];
 
@@ -93,7 +114,28 @@ const validateUpdateCollection = [
     }),
   body('imageUrl')
     .optional()
-    .isURL()
+    .custom(value => {
+      if (!value) return true; // Optional field
+
+      // In development/emulator mode, allow localhost URLs
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const useEmulator = process.env.USE_FIREBASE_EMULATOR === 'true';
+
+      if (
+        (isDevelopment || useEmulator) &&
+        value.startsWith('http://localhost:')
+      ) {
+        return true;
+      }
+
+      // For production, use standard URL validation
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        throw new Error('Image URL must be a valid URL');
+      }
+    })
     .withMessage('Image URL must be a valid URL'),
 ];
 

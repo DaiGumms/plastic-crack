@@ -4,9 +4,12 @@ export { Input } from './ui/Input';
 export { NotificationContainer } from './ui/NotificationContainer';
 export { OptimizedImage, ResponsiveImage } from './ui/OptimizedImage';
 export { LazyLoad } from './ui/LazyLoad';
-export { DragDropUpload } from './ui/DragDropUpload';
-export { UploadDialog } from './ui/UploadDialog';
-export { ImageInput } from './ui/ImageInput';
+
+// Upload Components (new drag-drop implementation)
+export { default as DragDropUpload } from './ui/DragDropUpload';
+export { default as UploadDialog } from './ui/UploadDialog';
+export { default as ImageInput } from './ui/ImageInput';
+export { default as UploadExamples } from './UploadExamples';
 
 // Layout Components
 export { Layout } from './layout/Layout';

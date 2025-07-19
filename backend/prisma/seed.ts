@@ -343,7 +343,7 @@ async function main() {
   const createdUsers: any[] = [];
   for (const userData of mockUsers) {
     const hashedPassword = await bcrypt.hash('demo123', 10); // Simple password for mock users
-    
+
     const user = await prisma.user.upsert({
       where: { email: userData.email },
       update: {},
@@ -368,7 +368,7 @@ async function main() {
   const spaceMarinesFaction = await prisma.faction.findFirst({
     where: { name: 'Space Marines', gameSystem: { shortName: 'W40K' } },
   });
-  
+
   const chaosFaction = await prisma.faction.findFirst({
     where: { name: 'Chaos Space Marines', gameSystem: { shortName: 'W40K' } },
   });
@@ -392,7 +392,8 @@ async function main() {
       update: {},
       create: {
         name: 'Captain in Terminator Armor',
-        description: 'Space Marine Captain equipped with tactical dreadnought armor',
+        description:
+          'Space Marine Captain equipped with tactical dreadnought armor',
         gameSystemId: warhammer40k.id,
         factionId: spaceMarinesFaction.id,
         modelType: 'Character',
@@ -520,7 +521,8 @@ async function main() {
     const alexCollection1 = await prisma.collection.create({
       data: {
         name: 'Ultramarines 2nd Company',
-        description: 'My pride and joy - a fully painted Ultramarines battle company with custom weathering effects.',
+        description:
+          'My pride and joy - a fully painted Ultramarines battle company with custom weathering effects.',
         isPublic: true,
         userId: createdUsers[0].id,
         gameSystemId: warhammer40k.id,
@@ -530,7 +532,9 @@ async function main() {
     // Add user models to the collection
     const captainUserModel = await prisma.userModel.create({
       data: {
-        modelId: masterModels.find(m => m.name === 'Captain in Terminator Armor')?.id || masterModels[0].id,
+        modelId:
+          masterModels.find(m => m.name === 'Captain in Terminator Armor')
+            ?.id || masterModels[0].id,
         collectionId: alexCollection1.id,
         userId: createdUsers[0].id,
         customName: 'Captain Alexius',
@@ -549,7 +553,8 @@ async function main() {
           userId: createdUsers[0].id,
           customName: 'Tactical Squad Alexius',
           paintingStatus: 'COMPLETED',
-          notes: '10-man tactical squad with plasma cannon. Battle-worn appearance.',
+          notes:
+            '10-man tactical squad with plasma cannon. Battle-worn appearance.',
           purchaseDate: new Date('2023-05-20'),
           tags: ['Completed', 'Weathering'],
         },
@@ -562,7 +567,8 @@ async function main() {
     const sarahCollection = await prisma.collection.create({
       data: {
         name: 'Tournament Army - Iron Hands',
-        description: 'My competitive Iron Hands list. Optimized for current meta.',
+        description:
+          'My competitive Iron Hands list. Optimized for current meta.',
         isPublic: true,
         userId: createdUsers[1].id,
         gameSystemId: warhammer40k.id,
@@ -571,7 +577,9 @@ async function main() {
 
     const sarahCaptain = await prisma.userModel.create({
       data: {
-        modelId: masterModels.find(m => m.name === 'Captain in Terminator Armor')?.id || masterModels[0].id,
+        modelId:
+          masterModels.find(m => m.name === 'Captain in Terminator Armor')
+            ?.id || masterModels[0].id,
         collectionId: sarahCollection.id,
         userId: createdUsers[1].id,
         customName: 'Iron Father Kardan',
@@ -584,11 +592,16 @@ async function main() {
   }
 
   // Mike's Collection (Private)
-  if (createdUsers[2] && stormcastFaction && masterModels.find(m => m.name === 'Lord-Aquilor')) {
+  if (
+    createdUsers[2] &&
+    stormcastFaction &&
+    masterModels.find(m => m.name === 'Lord-Aquilor')
+  ) {
     const mikeCollection = await prisma.collection.create({
       data: {
         name: 'My First Army - Stormcast',
-        description: 'Learning to paint with these golden warriors. Slowly improving!',
+        description:
+          'Learning to paint with these golden warriors. Slowly improving!',
         isPublic: false,
         userId: createdUsers[2].id,
         gameSystemId: ageOfSigmar.id,
@@ -612,10 +625,10 @@ async function main() {
   console.log('✅ Mock users and collections created successfully!');
   console.log(`👥 Created users: ${createdUsers.length}`);
   console.log(`🎨 Created master models: ${masterModels.length}`);
-  
+
   const totalCollections = await prisma.collection.count();
   const totalUserModels = await prisma.userModel.count();
-  
+
   console.log(`📚 Total collections in database: ${totalCollections}`);
   console.log(`🎨 Total user models in database: ${totalUserModels}`);
 }

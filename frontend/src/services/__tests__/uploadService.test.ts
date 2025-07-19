@@ -5,7 +5,9 @@ describe('uploadService', () => {
   describe('validateFile', () => {
     it('should validate file types correctly', () => {
       const validFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      const invalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
+      const invalidFile = new File(['test'], 'test.txt', {
+        type: 'text/plain',
+      });
 
       const validResult = uploadService.validateFile(validFile);
       const invalidResult = uploadService.validateFile(invalidFile);
@@ -78,7 +80,9 @@ describe('uploadService', () => {
       expect(uploadService.prepareTags('   ')).toEqual([]);
 
       // Test tag limit (20 tags max)
-      const manyTags = Array.from({ length: 25 }, (_, i) => `tag${i + 1}`).join(',');
+      const manyTags = Array.from({ length: 25 }, (_, i) => `tag${i + 1}`).join(
+        ','
+      );
       const result = uploadService.prepareTags(manyTags);
       expect(result).toHaveLength(20);
     });

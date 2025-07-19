@@ -3,18 +3,17 @@
  * Tests for image validation, optimization, and processing
  */
 
-import {
-  beforeAll,
-  beforeEach,
-  afterAll,
-  describe,
-  it,
-  expect,
-  jest,
-} from '@jest/globals';
+import { beforeAll, describe, it, expect, jest } from '@jest/globals';
 
-import { imageProcessingService, ImageProcessingService } from '../../services/image-processing.service';
-import { createTestImage, createCorruptImage, createLargeTestImage } from '../utils/test-helpers';
+import {
+  imageProcessingService,
+  ImageProcessingService,
+} from '../../services/image-processing.service';
+import {
+  createTestImage,
+  createCorruptImage,
+  createLargeTestImage,
+} from '../utils/test-helpers';
 
 describe('ImageProcessingService', () => {
   let service: ImageProcessingService;
@@ -55,12 +54,14 @@ describe('ImageProcessingService', () => {
       const originalResult = await service.processImage(testImageBuffer, {
         quality: 100,
       });
-      
+
       const compressedResult = await service.processImage(testImageBuffer, {
         quality: 50,
       });
 
-      expect(compressedResult.buffer.length).toBeLessThan(originalResult.buffer.length);
+      expect(compressedResult.buffer.length).toBeLessThan(
+        originalResult.buffer.length
+      );
     });
 
     it('should convert to specified format', async () => {
@@ -80,9 +81,9 @@ describe('ImageProcessingService', () => {
     });
 
     it('should throw error for corrupt image', async () => {
-      await expect(service.processImage(corruptImageBuffer))
-        .rejects
-        .toThrow('Failed to process image');
+      await expect(service.processImage(corruptImageBuffer)).rejects.toThrow(
+        'Failed to process image'
+      );
     });
 
     it('should not enlarge small images', async () => {
@@ -106,7 +107,10 @@ describe('ImageProcessingService', () => {
         { width: 800, height: 600, suffix: 'large' },
       ];
 
-      const results = await service.createResponsiveSizes(testImageBuffer, sizes);
+      const results = await service.createResponsiveSizes(
+        testImageBuffer,
+        sizes
+      );
 
       expect(results).toHaveLength(3);
       expect(results[0].suffix).toBe('thumbnail');
@@ -123,12 +127,14 @@ describe('ImageProcessingService', () => {
     it('should continue processing even if one size fails', async () => {
       // Mock processImage to fail for medium size
       const originalProcessImage = service.processImage;
-      jest.spyOn(service, 'processImage').mockImplementation(async (buffer, options) => {
-        if (options?.maxWidth === 400) {
-          throw new Error('Processing failed');
-        }
-        return originalProcessImage.call(service, buffer, options);
-      });
+      jest
+        .spyOn(service, 'processImage')
+        .mockImplementation(async (buffer, options) => {
+          if (options?.maxWidth === 400) {
+            throw new Error('Processing failed');
+          }
+          return originalProcessImage.call(service, buffer, options);
+        });
 
       const sizes = [
         { width: 150, height: 150, suffix: 'thumbnail' },
@@ -136,7 +142,10 @@ describe('ImageProcessingService', () => {
         { width: 800, height: 600, suffix: 'large' },
       ];
 
-      const results = await service.createResponsiveSizes(testImageBuffer, sizes);
+      const results = await service.createResponsiveSizes(
+        testImageBuffer,
+        sizes
+      );
 
       // Should have 2 results (thumbnail and large), medium should have failed
       expect(results).toHaveLength(2);
@@ -216,9 +225,9 @@ describe('ImageProcessingService', () => {
     });
 
     it('should throw for invalid image', async () => {
-      await expect(service.getImageMetadata(corruptImageBuffer))
-        .rejects
-        .toThrow();
+      await expect(
+        service.getImageMetadata(corruptImageBuffer)
+      ).rejects.toThrow();
     });
   });
 

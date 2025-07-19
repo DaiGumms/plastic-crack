@@ -14,7 +14,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const gameSystems = await gameSystemService.getActiveSystems();
     res.json(gameSystems);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch game systems' });
   }
 });

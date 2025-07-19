@@ -25,7 +25,9 @@ import {
 import { useAuthStore } from '../store/authStore';
 import { userService } from '../services/userService';
 import { ProfilePrivacyControls } from '../components/profile/ProfilePrivacyControls';
+import { UploadDialog } from '../components/ui/UploadDialog';
 import type { PrivacySettings } from '../components/profile/ProfilePrivacyControls';
+import type { UploadFile } from '../components/ui/DragDropUpload';
 
 interface ProfileFormData {
   firstName: string;
@@ -58,6 +60,7 @@ export const UserProfilePage: React.FC = () => {
     showModelsCount: true,
     showCollectionsCount: true,
   });
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
 
   const handleInputChange =
     (field: keyof ProfileFormData) =>
@@ -138,39 +141,32 @@ export const UserProfilePage: React.FC = () => {
     setSuccess(null);
   };
 
-  const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleAvatarUploadComplete = async (results: UploadFile[]) => {
+    const successfulUploads = results.filter(
+      file => file.status === 'success' && file.result?.url
+    );
 
-    // Validate file
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (successfulUploads.length > 0) {
+      const avatarUrl = successfulUploads[0].result!.url;
 
-    if (!allowedTypes.includes(file.type)) {
-      setError('File must be JPEG, PNG, or WebP format');
-      return;
+      try {
+        // Update avatar URL in backend
+        const updatedUser = await userService.updateAvatar(avatarUrl);
+        updateUser(updatedUser);
+        setSuccess('Avatar updated successfully!');
+        setTimeout(() => setSuccess(null), 3000);
+        setAvatarDialogOpen(false);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to update avatar'
+        );
+      }
     }
+  };
 
-    if (file.size > maxSize) {
-      setError('File size must be less than 5MB');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const updatedUser = await userService.uploadAvatar(file);
-      updateUser(updatedUser);
-      setSuccess('Avatar updated successfully!');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload avatar');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAvatarUploadError = (error: string) => {
+    setError(error);
+    setTimeout(() => setError(null), 5000);
   };
 
   const getDisplayName = () => {
@@ -251,33 +247,23 @@ export const UserProfilePage: React.FC = () => {
               >
                 {getInitials()}
               </Avatar>
-              <input
-                accept='image/jpeg,image/png,image/webp'
-                style={{ display: 'none' }}
-                id='avatar-upload'
-                type='file'
-                onChange={handleAvatarUpload}
-                data-testid='avatar-upload-input'
-              />
-              <label htmlFor='avatar-upload'>
-                <IconButton
-                  component='span'
-                  size='small'
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 16,
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                    },
-                  }}
-                  data-testid='avatar-upload-button'
-                >
-                  <PhotoCameraIcon fontSize='small' />
-                </IconButton>
-              </label>
+              <IconButton
+                size='small'
+                onClick={() => setAvatarDialogOpen(true)}
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 16,
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+                data-testid='avatar-upload-button'
+              >
+                <PhotoCameraIcon fontSize='small' />
+              </IconButton>
             </Box>
             <Box>
               <Typography variant='h6' data-testid='display-name'>
@@ -420,6 +406,15 @@ export const UserProfilePage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Avatar Upload Dialog */}
+      <UploadDialog
+        open={avatarDialogOpen}
+        onClose={() => setAvatarDialogOpen(false)}
+        uploadType='avatar'
+        onUploadComplete={handleAvatarUploadComplete}
+        onUploadError={handleAvatarUploadError}
+      />
     </Box>
   );
 };

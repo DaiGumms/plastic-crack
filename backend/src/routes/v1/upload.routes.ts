@@ -1,18 +1,41 @@
 /**
  * Upload Routes
- * RESTful API endpoints for file uploads and image processing
- * Implements Issue #25 acceptance criteria
+ * RESTful API endpoints for file uploads and image process        c        const photoData = {
+          fileName: result.fileName,
+          originalUrl: result.url,
+          description: metadata.description,
+          isPrimary: false, // First photo could be primary, but let user decide
+          fileSize: result.size,
+          width: result.dimensions?.width,
+          height: result.dimensions?.height,
+        };
+
+        await modelService.addUserModelPhotos(metadata.modelId, metadata.userId, [photoData]);ata = {
+          fileName: result.fileName,
+          originalUrl: result.url,
+          description: metadata.description,
+          isPrimary: false, // First photo could be primary, but let user decide
+          fileSize: result.size,
+          width: result.dimensions?.width,
+          height: result.dimensions?.height,
+        };
+
+        await modelService.addUserModelPhotos(metadata.modelId, metadata.userId, [photoData]);lements Issue #25 acceptance criteria
  */
 
 import { Router, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 
+import { PrismaClient } from '../../generated/prisma';
 import { authenticateToken } from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
+import { ModelService } from '../../services/model.service';
 import { uploadService } from '../../services/upload.service';
 import { AuthenticatedRequest } from '../../types/auth';
 
 const router = Router();
+const prisma = new PrismaClient();
+const modelService = new ModelService(prisma);
 
 /**
  * Validation middleware
@@ -33,15 +56,17 @@ const handleValidationErrors = (
 const validateUpload = [
   body('type')
     .isIn(['avatar', 'collection-thumbnail', 'model-image'])
-    .withMessage('Type must be one of: avatar, collection-thumbnail, model-image'),
+    .withMessage(
+      'Type must be one of: avatar, collection-thumbnail, model-image'
+    ),
   body('collectionId')
     .optional()
-    .isUUID()
-    .withMessage('Collection ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('Collection ID cannot be empty'),
   body('modelId')
     .optional()
-    .isUUID()
-    .withMessage('Model ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('Model ID cannot be empty'),
   body('description')
     .optional()
     .isLength({ max: 500 })
@@ -73,6 +98,25 @@ router.post(
 
       // Upload the image
       const result = await uploadService.uploadImage(req.file, metadata);
+
+      // If this is a model image upload, create photo record in database
+      if (metadata.type === 'model-image' && metadata.modelId) {
+        const photoData = {
+          fileName: result.filename,
+          originalUrl: result.url,
+          description: metadata.description,
+          isPrimary: false, // First photo could be primary, but let user decide
+          fileSize: result.size,
+          width: result.dimensions?.width,
+          height: result.dimensions?.height,
+        };
+
+        await modelService.addUserModelPhotos(
+          metadata.modelId,
+          metadata.userId,
+          [photoData]
+        );
+      }
 
       res.status(201).json({
         success: true,
@@ -110,7 +154,34 @@ router.post(
       const metadata = uploadService.validateUploadRequest(req);
 
       // Upload responsive images
-      const results = await uploadService.uploadResponsiveImages(req.file, metadata);
+      const results = await uploadService.uploadResponsiveImages(
+        req.file,
+        metadata
+      );
+
+      // If this is a model image upload, create photo record in database
+      if (
+        metadata.type === 'model-image' &&
+        metadata.modelId &&
+        results.length > 0
+      ) {
+        // Use the largest/original size for the database record
+        const originalResult = results[results.length - 1]; // Typically the largest size
+        const photoData = {
+          fileName: originalResult.filename,
+          originalUrl: originalResult.url,
+          thumbnailUrl: results.length > 1 ? results[0].url : undefined, // First is usually thumbnail
+          description: metadata.description,
+          isPrimary: false,
+          fileSize: originalResult.size,
+          width: originalResult.dimensions?.width,
+          height: originalResult.dimensions?.height,
+        };
+
+        await modelService.addModelPhotos(metadata.modelId, metadata.userId, [
+          photoData,
+        ]);
+      }
 
       res.status(201).json({
         success: true,
@@ -140,7 +211,7 @@ router.delete(
     try {
       // Extract file path from URL (everything after /upload/)
       const filePath = req.params[0];
-      
+
       if (!filePath) {
         throw new AppError('File path is required', 400);
       }
@@ -151,7 +222,10 @@ router.delete(
       // Verify the file belongs to the authenticated user
       const userId = req.user?.id;
       if (!userId || !decodedFilePath.startsWith(`users/${userId}/`)) {
-        throw new AppError('Access denied: Cannot delete files belonging to other users', 403);
+        throw new AppError(
+          'Access denied: Cannot delete files belonging to other users',
+          403
+        );
       }
 
       // Delete the file
@@ -171,29 +245,21 @@ router.delete(
  * GET /api/v1/upload/limits
  * Get upload configuration and limits
  */
-router.get(
-  '/limits',
-  (req: AuthenticatedRequest, res: Response) => {
-    res.json({
-      success: true,
-      data: {
-        maxFileSize: '10MB',
-        maxFileSizeBytes: 10485760,
-        allowedMimeTypes: [
-          'image/jpeg',
-          'image/png',
-          'image/webp',
-          'image/gif',
-        ],
-        supportedFormats: ['JPEG', 'PNG', 'WebP', 'GIF'],
-        maxDimensions: {
-          width: 2048,
-          height: 2048,
-        },
-        compressionQuality: 80,
+router.get('/limits', (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    data: {
+      maxFileSize: '10MB',
+      maxFileSizeBytes: 10485760,
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+      supportedFormats: ['JPEG', 'PNG', 'WebP', 'GIF'],
+      maxDimensions: {
+        width: 2048,
+        height: 2048,
       },
-    });
-  }
-);
+      compressionQuality: 80,
+    },
+  });
+});
 
 export { router as uploadRoutes };

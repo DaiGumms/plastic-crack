@@ -84,7 +84,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
   const handleUploadComplete = (results: UploadFile[]) => {
     setIsUploading(false);
     onUploadComplete?.(results);
-    
+
     // Auto-close dialog after successful upload
     setTimeout(() => {
       handleClose();
@@ -106,27 +106,29 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="md"
+      maxWidth='md'
       fullWidth
       PaperProps={{
         sx: { minHeight: '500px' },
       }}
     >
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Typography variant='h6'>
             {title || getDefaultTitle(uploadType)}
           </Typography>
-          <IconButton
-            onClick={handleClose}
-            disabled={isUploading}
-            size="small"
-          >
+          <IconButton onClick={handleClose} disabled={isUploading} size='small'>
             <CloseIcon />
           </IconButton>
         </Box>
         {(description || getDefaultDescription(uploadType)) && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
             {description || getDefaultDescription(uploadType)}
           </Typography>
         )}
@@ -143,7 +145,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
           showDescriptions={showDescriptions}
           disabled={isUploading}
           height={hasFiles ? 150 : 250}
-          variant="dropzone"
+          variant='dropzone'
           onUploadStart={handleUploadStart}
           onUploadComplete={handleUploadComplete}
           onUploadError={handleUploadError}
@@ -152,21 +154,16 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
       </DialogContent>
 
       <DialogActions sx={{ p: 2 }}>
-        <Button
-          onClick={handleClose}
-          disabled={isUploading}
-          variant="outlined"
-        >
+        <Button onClick={handleClose} disabled={isUploading} variant='outlined'>
           Cancel
         </Button>
-        
+
         {/* Additional info about file limits */}
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="caption" color="text.secondary">
-            {uploadType === 'avatar' 
+          <Typography variant='caption' color='text.secondary'>
+            {uploadType === 'avatar'
               ? 'Max 1 file • JPEG, PNG, WebP • 10MB max'
-              : `Max ${maxFiles} files • JPEG, PNG, WebP • 10MB each`
-            }
+              : `Max ${maxFiles} files • JPEG, PNG, WebP • 10MB each`}
           </Typography>
         </Box>
       </DialogActions>

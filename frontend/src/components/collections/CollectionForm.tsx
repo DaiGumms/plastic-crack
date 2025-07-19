@@ -22,6 +22,7 @@ import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ImageInput } from '../ui/ImageInput';
 import type {
   Collection,
   CreateCollectionData,
@@ -306,23 +307,52 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
               )}
             />
 
-            {/* Image URL */}
+            {/* Cover Image */}
             <Controller
               name='imageUrl'
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label='Cover Image URL'
-                  fullWidth
-                  error={!!errors.imageUrl}
-                  helperText={
-                    errors.imageUrl?.message ||
-                    'Optional URL for collection cover image'
-                  }
-                  disabled={loading}
-                />
-              )}
+              render={({ field }) => {
+                // Determine if we're editing (collection exists) vs creating new (no collection)
+                const isEditingMode = !!collection;
+
+                // For editing existing collections, show upload functionality if collection has an ID
+                // For new collections, only show URL input until collection is saved
+                const canUpload = isEditingMode && collection?.id;
+
+                return canUpload ? (
+                  // Editing existing collection - show full upload functionality
+                  <ImageInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    label='Cover Image'
+                    placeholder='Enter image URL or upload an image'
+                    uploadType='collection-thumbnail'
+                    collectionId={collection.id}
+                    error={!!errors.imageUrl}
+                    helperText={
+                      errors.imageUrl?.message ||
+                      'Add a cover image via URL or upload'
+                    }
+                    disabled={loading}
+                  />
+                ) : (
+                  // Creating new collection - URL input only (upload available after saving)
+                  <Box>
+                    <TextField
+                      {...field}
+                      label='Cover Image URL'
+                      placeholder='Enter image URL'
+                      fullWidth
+                      error={!!errors.imageUrl}
+                      helperText={
+                        errors.imageUrl?.message ||
+                        'Enter a URL for the cover image (you can upload after creating the collection)'
+                      }
+                      disabled={loading}
+                    />
+                  </Box>
+                );
+              }}
             />
 
             {/* Tags */}

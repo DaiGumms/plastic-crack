@@ -131,8 +131,7 @@ export const CollectionsPage: React.FC = () => {
   // Mutations
   const createMutation = useMutation({
     mutationFn: CollectionService.createCollection,
-    onSuccess: newCollection => {
-      console.log('✅ Collection created successfully:', newCollection);
+    onSuccess: () => {
       // Invalidate all collections queries
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       // Refetch the current collections data
@@ -157,7 +156,6 @@ export const CollectionsPage: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: CollectionService.deleteCollection,
     onSuccess: () => {
-      console.log('✅ Collection deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       setDeleteConfirmOpen(false);
       setCollectionToDelete(null);
@@ -205,9 +203,11 @@ export const CollectionsPage: React.FC = () => {
   const handleDeleteCollection = async (collection: Collection) => {
     setCollectionToDelete(collection);
     setLoadingDeletionInfo(true);
-    
+
     try {
-      const info = await CollectionService.getCollectionDeletionInfo(collection.id);
+      const info = await CollectionService.getCollectionDeletionInfo(
+        collection.id
+      );
       setDeletionInfo(info);
       setDeleteConfirmOpen(true);
     } catch (error) {
@@ -215,7 +215,7 @@ export const CollectionsPage: React.FC = () => {
       // Fallback to basic deletion without model count
       setDeletionInfo({
         collection: { id: collection.id, name: collection.name },
-        modelCount: 0
+        modelCount: 0,
       });
       setDeleteConfirmOpen(true);
     } finally {
@@ -500,15 +500,20 @@ export const CollectionsPage: React.FC = () => {
               'Loading collection information...'
             ) : (
               <>
-                Are you sure you want to delete "{deletionInfo?.collection.name || collectionToDelete?.name}"?
+                Are you sure you want to delete "
+                {deletionInfo?.collection.name || collectionToDelete?.name}"?
                 {deletionInfo && deletionInfo.modelCount > 0 && (
                   <>
-                    <br /><br />
-                    <strong>Warning:</strong> This collection contains <strong>{deletionInfo.modelCount}</strong> model{deletionInfo.modelCount !== 1 ? 's' : ''}. 
-                    All models in this collection will also be permanently deleted.
+                    <br />
+                    <br />
+                    <strong>Warning:</strong> This collection contains{' '}
+                    <strong>{deletionInfo.modelCount}</strong> model
+                    {deletionInfo.modelCount !== 1 ? 's' : ''}. All models in
+                    this collection will also be permanently deleted.
                   </>
                 )}
-                <br /><br />
+                <br />
+                <br />
                 This action cannot be undone.
               </>
             )}

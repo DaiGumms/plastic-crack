@@ -23,7 +23,7 @@ import type { UploadFile } from './ui/DragDropUpload';
  * Example component demonstrating how to use the upload functionality
  * This shows integration examples for all three upload types:
  * - Profile avatars (single upload)
- * - Collection thumbnails (single upload)  
+ * - Collection thumbnails (single upload)
  * - Model images (batch upload)
  */
 export const UploadExamples: React.FC = () => {
@@ -70,21 +70,30 @@ export const UploadExamples: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant='h4' gutterBottom>
         Upload Component Examples
       </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        This page demonstrates the drag-and-drop upload functionality for different use cases.
+      <Typography variant='body1' color='text.secondary' paragraph>
+        This page demonstrates the drag-and-drop upload functionality for
+        different use cases.
       </Typography>
 
       {/* Upload Feedback */}
       {uploadSuccess && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setUploadSuccess(null)}>
+        <Alert
+          severity='success'
+          sx={{ mb: 2 }}
+          onClose={() => setUploadSuccess(null)}
+        >
           {uploadSuccess}
         </Alert>
       )}
       {uploadError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
+        <Alert
+          severity='error'
+          sx={{ mb: 2 }}
+          onClose={() => setUploadError(null)}
+        >
           {uploadError}
         </Alert>
       )}
@@ -94,16 +103,17 @@ export const UploadExamples: React.FC = () => {
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <PersonIcon color="primary" />
-              <Typography variant="h6">Profile Avatar Upload</Typography>
+              <PersonIcon color='primary' />
+              <Typography variant='h6'>Profile Avatar Upload</Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Single image upload for user profile avatars. Only one image can be selected.
+            <Typography variant='body2' color='text.secondary' paragraph>
+              Single image upload for user profile avatars. Only one image can
+              be selected.
             </Typography>
-            
+
             {/* Option 1: Using UploadDialog */}
             <Button
-              variant="outlined"
+              variant='outlined'
               startIcon={<UploadIcon />}
               onClick={() => setAvatarDialogOpen(true)}
               sx={{ mb: 2 }}
@@ -113,20 +123,24 @@ export const UploadExamples: React.FC = () => {
 
             {/* Option 2: Using ImageInput */}
             <Divider sx={{ my: 2 }}>
-              <Typography variant="caption">OR</Typography>
+              <Typography variant='caption'>OR</Typography>
             </Divider>
-            
+
             <ImageInput
               value={avatarUrl}
               onChange={setAvatarUrl}
-              uploadType="avatar"
-              label="Profile Avatar"
-              placeholder="Enter avatar URL or upload a file"
+              uploadType='avatar'
+              label='Profile Avatar'
+              placeholder='Enter avatar URL or upload a file'
               showPreview={true}
             />
 
             {avatarUrl && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                sx={{ mt: 1 }}
+              >
                 Current avatar URL: {avatarUrl}
               </Typography>
             )}
@@ -137,15 +151,16 @@ export const UploadExamples: React.FC = () => {
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <CollectionsIcon color="primary" />
-              <Typography variant="h6">Collection Thumbnail Upload</Typography>
+              <CollectionsIcon color='primary' />
+              <Typography variant='h6'>Collection Thumbnail Upload</Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Upload a thumbnail image for collections. Typically used in collection forms.
+            <Typography variant='body2' color='text.secondary' paragraph>
+              Upload a thumbnail image for collections. Typically used in
+              collection forms.
             </Typography>
-            
+
             <Button
-              variant="outlined"
+              variant='outlined'
               startIcon={<UploadIcon />}
               onClick={() => setCollectionDialogOpen(true)}
               sx={{ mb: 2 }}
@@ -156,14 +171,18 @@ export const UploadExamples: React.FC = () => {
             <ImageInput
               value={collectionThumbnailUrl}
               onChange={setCollectionThumbnailUrl}
-              uploadType="collection-thumbnail"
-              label="Collection Thumbnail"
-              placeholder="Enter thumbnail URL or upload a file"
+              uploadType='collection-thumbnail'
+              label='Collection Thumbnail'
+              placeholder='Enter thumbnail URL or upload a file'
               showPreview={true}
             />
 
             {collectionThumbnailUrl && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                sx={{ mt: 1 }}
+              >
                 Current thumbnail URL: {collectionThumbnailUrl}
               </Typography>
             )}
@@ -174,16 +193,16 @@ export const UploadExamples: React.FC = () => {
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <CameraIcon color="primary" />
-              <Typography variant="h6">Model Photos Upload</Typography>
+              <CameraIcon color='primary' />
+              <Typography variant='h6'>Model Photos Upload</Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Batch upload multiple photos of painted models. Users can upload up to 20 images at once
-              and add descriptions to each photo.
+            <Typography variant='body2' color='text.secondary' paragraph>
+              Batch upload multiple photos of painted models. Users can upload
+              up to 20 images at once and add descriptions to each photo.
             </Typography>
-            
+
             <Button
-              variant="outlined"
+              variant='outlined'
               startIcon={<UploadIcon />}
               onClick={() => setModelDialogOpen(true)}
               sx={{ mb: 2 }}
@@ -193,14 +212,14 @@ export const UploadExamples: React.FC = () => {
 
             {modelImages.length > 0 && (
               <Box>
-                <Typography variant="subtitle2" gutterBottom>
+                <Typography variant='subtitle2' gutterBottom>
                   Uploaded Model Images ({modelImages.length}):
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                   {modelImages.map((url, index) => (
                     <Box
                       key={index}
-                      component="img"
+                      component='img'
                       src={url}
                       alt={`Model ${index + 1}`}
                       sx={{
@@ -224,27 +243,29 @@ export const UploadExamples: React.FC = () => {
       <UploadDialog
         open={avatarDialogOpen}
         onClose={() => setAvatarDialogOpen(false)}
-        uploadType="avatar"
-        onUploadComplete={(results) => handleUploadComplete(results, 'avatar')}
+        uploadType='avatar'
+        onUploadComplete={results => handleUploadComplete(results, 'avatar')}
         onUploadError={handleUploadError}
       />
 
       <UploadDialog
         open={collectionDialogOpen}
         onClose={() => setCollectionDialogOpen(false)}
-        uploadType="collection-thumbnail"
-        collectionId="example-collection-id" // In real usage, this would be dynamic
-        onUploadComplete={(results) => handleUploadComplete(results, 'collection')}
+        uploadType='collection-thumbnail'
+        collectionId='123e4567-e89b-12d3-a456-426614174000' // Valid UUID for testing
+        onUploadComplete={results =>
+          handleUploadComplete(results, 'collection')
+        }
         onUploadError={handleUploadError}
       />
 
       <UploadDialog
         open={modelDialogOpen}
         onClose={() => setModelDialogOpen(false)}
-        uploadType="model-image"
-        collectionId="example-collection-id" // In real usage, this would be dynamic
-        modelId="example-model-id" // In real usage, this would be dynamic
-        onUploadComplete={(results) => handleUploadComplete(results, 'model')}
+        uploadType='model-image'
+        collectionId='123e4567-e89b-12d3-a456-426614174000' // Valid UUID for testing
+        modelId='456e7890-e89b-12d3-a456-426614174001' // Valid UUID for testing
+        onUploadComplete={results => handleUploadComplete(results, 'model')}
         onUploadError={handleUploadError}
       />
     </Box>

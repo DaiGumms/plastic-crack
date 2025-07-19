@@ -863,4 +863,67 @@ export class ModelService {
       },
     };
   }
+
+  /**
+   * Add photos to a user model instance
+   */
+  async addUserModelPhotos(
+    userModelId: string,
+    userId: string,
+    photosData: ModelPhotoData[]
+  ): Promise<UserModel> {
+    // Verify user model exists and user owns it
+    const userModel = await this.prisma.userModel.findUnique({
+      where: { id: userModelId },
+    });
+
+    if (!userModel) {
+      throw new AppError('User model not found', 404);
+    }
+
+    if (userModel.userId !== userId) {
+      throw new AppError('Access denied', 403);
+    }
+
+    // If setting a primary photo, remove primary status from existing photos
+    const hasPrimary = photosData.some(photo => photo.isPrimary);
+    if (hasPrimary) {
+      await this.prisma.userModelPhoto.updateMany({
+        where: { userModelId, isPrimary: true },
+        data: { isPrimary: false },
+      });
+    }
+
+    // Add new photos
+    await this.prisma.userModelPhoto.createMany({
+      data: photosData.map(photo => ({
+        fileName: photo.fileName,
+        originalUrl: photo.originalUrl,
+        thumbnailUrl: photo.thumbnailUrl,
+        description: photo.description,
+        isPrimary: photo.isPrimary || false,
+        sortOrder: photo.sortOrder || 0,
+        fileSize: photo.fileSize,
+        width: photo.width,
+        height: photo.height,
+        mimeType: photo.mimeType,
+        userModelId,
+      })),
+    });
+
+    // Return updated user model with photos
+    const updatedUserModel = await this.prisma.userModel.findUnique({
+      where: { id: userModelId },
+      include: {
+        photos: true,
+        model: true,
+      },
+    });
+
+    if (!updatedUserModel) {
+      throw new AppError('Failed to retrieve updated user model', 500);
+    }
+
+    return updatedUserModel;
+  }
 }

@@ -60,14 +60,14 @@ class UploadService {
    * Upload a single image file
    */
   async uploadImage(
-    file: File, 
+    file: File,
     metadata: UploadMetadata,
     onProgress?: (progress: number) => void
   ): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('image', file);
     formData.append('type', metadata.type);
-    
+
     if (metadata.collectionId) {
       formData.append('collectionId', metadata.collectionId);
     }
@@ -86,9 +86,11 @@ class UploadService {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           if (onProgress && progressEvent.total) {
-            const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            const percentage = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
             onProgress(percentage);
           }
         },
@@ -97,7 +99,8 @@ class UploadService {
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;
-      const message = apiError.response?.data?.message || 'Failed to upload image';
+      const message =
+        apiError.response?.data?.message || 'Failed to upload image';
       throw new Error(message);
     }
   }
@@ -113,7 +116,7 @@ class UploadService {
     const formData = new FormData();
     formData.append('image', file);
     formData.append('type', metadata.type);
-    
+
     if (metadata.collectionId) {
       formData.append('collectionId', metadata.collectionId);
     }
@@ -132,9 +135,11 @@ class UploadService {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           if (onProgress && progressEvent.total) {
-            const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            const percentage = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
             onProgress(percentage);
           }
         },
@@ -143,7 +148,9 @@ class UploadService {
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;
-      const message = apiError.response?.data?.message || 'Failed to upload responsive images';
+      const message =
+        apiError.response?.data?.message ||
+        'Failed to upload responsive images';
       throw new Error(message);
     }
   }
@@ -156,10 +163,13 @@ class UploadService {
     metadata: UploadMetadata,
     useResponsive: boolean = false,
     onFileProgress?: (fileId: string, progress: number) => void,
-    onFileComplete?: (fileId: string, result: UploadResponse | ResponsiveUploadResponse) => void,
+    onFileComplete?: (
+      fileId: string,
+      result: UploadResponse | ResponsiveUploadResponse
+    ) => void,
     onFileError?: (fileId: string, error: string) => void
   ): Promise<void> {
-    const uploadPromises = files.map(async (uploadFile) => {
+    const uploadPromises = files.map(async uploadFile => {
       try {
         // Prepare metadata for this specific file
         const fileMetadata: UploadMetadata = {
@@ -168,21 +178,20 @@ class UploadService {
         };
 
         // Upload the file
-        const result = useResponsive 
+        const result = useResponsive
           ? await this.uploadResponsiveImage(
               uploadFile.file,
               fileMetadata,
-              (progress) => onFileProgress?.(uploadFile.id, progress)
+              progress => onFileProgress?.(uploadFile.id, progress)
             )
-          : await this.uploadImage(
-              uploadFile.file,
-              fileMetadata,
-              (progress) => onFileProgress?.(uploadFile.id, progress)
+          : await this.uploadImage(uploadFile.file, fileMetadata, progress =>
+              onFileProgress?.(uploadFile.id, progress)
             );
 
         onFileComplete?.(uploadFile.id, result);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Upload failed';
         onFileError?.(uploadFile.id, errorMessage);
       }
     });
@@ -200,7 +209,8 @@ class UploadService {
       await api.delete(`/upload/${encodedPath}`);
     } catch (error) {
       const apiError = error as ApiError;
-      const message = apiError.response?.data?.message || 'Failed to delete file';
+      const message =
+        apiError.response?.data?.message || 'Failed to delete file';
       throw new Error(message);
     }
   }
@@ -214,7 +224,8 @@ class UploadService {
       return response.data;
     } catch (error) {
       const apiError = error as ApiError;
-      const message = apiError.response?.data?.message || 'Failed to get upload limits';
+      const message =
+        apiError.response?.data?.message || 'Failed to get upload limits';
       throw new Error(message);
     }
   }
@@ -225,13 +236,18 @@ class UploadService {
   validateFile(
     file: File,
     maxFileSize: number = 10 * 1024 * 1024, // 10MB default
-    allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    allowedTypes: string[] = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ]
   ): { isValid: boolean; error?: string } {
     // Check file type
     if (!allowedTypes.includes(file.type)) {
       return {
         isValid: false,
-        error: `File type ${file.type} is not supported. Accepted types: ${allowedTypes.join(', ')}`
+        error: `File type ${file.type} is not supported. Accepted types: ${allowedTypes.join(', ')}`,
       };
     }
 
@@ -239,7 +255,7 @@ class UploadService {
     if (file.size > maxFileSize) {
       return {
         isValid: false,
-        error: `File size ${(file.size / 1024 / 1024).toFixed(1)}MB exceeds maximum size of ${(maxFileSize / 1024 / 1024).toFixed(1)}MB`
+        error: `File size ${(file.size / 1024 / 1024).toFixed(1)}MB exceeds maximum size of ${(maxFileSize / 1024 / 1024).toFixed(1)}MB`,
       };
     }
 
@@ -247,7 +263,7 @@ class UploadService {
     if (file.size === 0) {
       return {
         isValid: false,
-        error: 'File is empty'
+        error: 'File is empty',
       };
     }
 
@@ -273,7 +289,7 @@ class UploadService {
    */
   prepareTags(tagsString?: string): string[] {
     if (!tagsString?.trim()) return [];
-    
+
     return tagsString
       .split(',')
       .map(tag => tag.trim())
@@ -305,7 +321,7 @@ class UploadService {
    * Get file extension from filename
    */
   getFileExtension(filename: string): string {
-    return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
+    return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
   }
 }
 

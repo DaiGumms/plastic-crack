@@ -72,7 +72,14 @@ export const ImageInput: React.FC<ImageInputProps> = ({
 
   const handleUploadComplete = (results: UploadFile[]) => {
     if (results.length > 0 && results[0].result?.url) {
-      onChange(results[0].result.url);
+      const uploadedUrl = results[0].result.url;
+      console.log('Image uploaded successfully! URL:', uploadedUrl);
+      onChange(uploadedUrl);
+
+      // Show a brief notification for collection thumbnails that they need to save
+      if (uploadType === 'collection-thumbnail') {
+        // Could add a toast notification here in the future
+      }
     }
     setUploadDialogOpen(false);
   };
@@ -87,7 +94,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({
 
   return (
     <Box>
-      <Typography variant="subtitle2" gutterBottom>
+      <Typography variant='subtitle2' gutterBottom>
         {displayLabel}
       </Typography>
 
@@ -96,18 +103,14 @@ export const ImageInput: React.FC<ImageInputProps> = ({
         {showPreview && value && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {isAvatar ? (
-              <Avatar
-                src={value}
-                sx={{ width: 80, height: 80 }}
-                alt="Preview"
-              >
+              <Avatar src={value} sx={{ width: 80, height: 80 }} alt='Preview'>
                 <ImageIcon />
               </Avatar>
             ) : (
               <Box
-                component="img"
+                component='img'
                 src={value}
-                alt="Preview"
+                alt='Preview'
                 sx={{
                   width: 120,
                   height: 80,
@@ -116,7 +119,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({
                   border: 1,
                   borderColor: 'divider',
                 }}
-                onError={(e) => {
+                onError={e => {
                   // Hide broken images
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -125,8 +128,8 @@ export const ImageInput: React.FC<ImageInputProps> = ({
             <IconButton
               onClick={handleClearImage}
               disabled={disabled}
-              color="error"
-              size="small"
+              color='error'
+              size='small'
             >
               <ClearIcon />
             </IconButton>
@@ -144,11 +147,11 @@ export const ImageInput: React.FC<ImageInputProps> = ({
           disabled={disabled}
           InputProps={{
             endAdornment: value ? (
-              <InputAdornment position="end">
+              <InputAdornment position='end'>
                 <IconButton
                   onClick={handleClearImage}
                   disabled={disabled}
-                  size="small"
+                  size='small'
                 >
                   <ClearIcon />
                 </IconButton>
@@ -160,7 +163,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({
         {/* Divider */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Divider sx={{ flexGrow: 1 }} />
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant='caption' color='text.secondary'>
             OR
           </Typography>
           <Divider sx={{ flexGrow: 1 }} />
@@ -168,18 +171,17 @@ export const ImageInput: React.FC<ImageInputProps> = ({
 
         {/* Upload Button */}
         <Button
-          variant="outlined"
+          variant='outlined'
           startIcon={<UploadIcon />}
           onClick={() => setUploadDialogOpen(true)}
           disabled={disabled}
           fullWidth={fullWidth}
         >
-          {uploadType === 'avatar' 
-            ? 'Upload Avatar' 
+          {uploadType === 'avatar'
+            ? 'Upload Avatar'
             : uploadType === 'collection-thumbnail'
-            ? 'Upload Thumbnail'
-            : 'Upload Photos'
-          }
+              ? 'Upload Thumbnail'
+              : 'Upload Photos'}
         </Button>
       </Stack>
 

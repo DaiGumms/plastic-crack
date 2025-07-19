@@ -261,8 +261,7 @@ export class CollectionService {
               },
             },
             photos: {
-              where: { isPrimary: true },
-              take: 1,
+              orderBy: { isPrimary: 'desc' },
             },
             _count: {
               select: {
@@ -392,7 +391,7 @@ export class CollectionService {
     }
 
     // Use transaction to ensure atomicity
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async tx => {
       // Delete all user models in the collection first
       await tx.userModel.deleteMany({
         where: { collectionId },
@@ -408,7 +407,10 @@ export class CollectionService {
   /**
    * Get collection deletion info (for confirmation dialog)
    */
-  async getCollectionDeletionInfo(collectionId: string, userId: string): Promise<{
+  async getCollectionDeletionInfo(
+    collectionId: string,
+    userId: string
+  ): Promise<{
     collection: { id: string; name: string };
     modelCount: number;
   }> {
