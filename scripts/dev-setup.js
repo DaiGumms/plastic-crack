@@ -15,7 +15,7 @@ const colors = {
   red: '\x1b[31m',
   blue: '\x1b[34m',
   reset: '\x1b[0m',
-  bold: '\x1b[1m'
+  bold: '\x1b[1m',
 };
 
 function log(message, color = colors.reset) {
@@ -23,7 +23,9 @@ function log(message, color = colors.reset) {
 }
 
 function logStep(step, message) {
-  log(`${colors.bold}[${step}]${colors.reset} ${colors.blue}${message}${colors.reset}`);
+  log(
+    `${colors.bold}[${step}]${colors.reset} ${colors.blue}${message}${colors.reset}`
+  );
 }
 
 function logSuccess(message) {
@@ -40,31 +42,33 @@ function logError(message) {
 
 function execCommand(command, options = {}) {
   try {
-    const result = execSync(command, { 
-      stdio: 'pipe', 
+    const result = execSync(command, {
+      stdio: 'pipe',
       encoding: 'utf8',
-      ...options 
+      ...options,
     });
     return { success: true, output: result };
   } catch (error) {
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: error.message,
       output: error.stdout || '',
-      stderr: error.stderr || ''
+      stderr: error.stderr || '',
     };
   }
 }
 
 async function checkDockerServices() {
   logStep('1', 'Checking Docker services...');
-  
+
   // Check if Docker Compose services are running
-  const psResult = execCommand('docker-compose ps --services --filter status=running');
-  
+  const psResult = execCommand(
+    'docker-compose ps --services --filter status=running'
+  );
+
   if (!psResult.success || !psResult.output.trim()) {
     logWarning('Docker services not running, starting them...');
-    
+
     const startResult = execCommand('docker-compose up -d');
     if (!startResult.success) {
       logError('Failed to start Docker services');
@@ -73,7 +77,7 @@ async function checkDockerServices() {
       process.exit(1);
     }
     logSuccess('Docker services started');
-    
+
     // Wait for services to be fully ready
     log('Waiting for services to initialize...');
     await new Promise(resolve => setTimeout(resolve, 5000));
@@ -84,7 +88,7 @@ async function checkDockerServices() {
 
 async function installDependencies() {
   logStep('2', 'Installing dependencies...');
-  
+
   // Check if node_modules exists at root
   if (!existsSync('node_modules')) {
     log('Installing root dependencies...');
@@ -95,19 +99,21 @@ async function installDependencies() {
       process.exit(1);
     }
   }
-  
+
   // Clean npm cache if needed and try installing workspace dependencies
   log('Installing workspace dependencies...');
   let result = execCommand('npm run install:workspaces');
   if (!result.success) {
     logWarning('First attempt failed, clearing npm cache and retrying...');
     execCommand('npm cache clean --force');
-    
+
     // Try individual installations
     const workspaces = ['backend', 'frontend', 'shared'];
     for (const workspace of workspaces) {
       log(`Installing ${workspace} dependencies...`);
-      const wsResult = execCommand(`cd ${workspace} && npm install`, { cwd: process.cwd() });
+      const wsResult = execCommand(`cd ${workspace} && npm install`, {
+        cwd: process.cwd(),
+      });
       if (!wsResult.success) {
         logError(`Failed to install ${workspace} dependencies`);
         logError(wsResult.error);
@@ -119,13 +125,13 @@ async function installDependencies() {
   } else {
     logSuccess('All workspace dependencies installed');
   }
-  
+
   logSuccess('Dependencies installation completed');
 }
 
 async function setupDatabase() {
   logStep('3', 'Setting up database...');
-  
+
   // Wait for database to be ready
   log('Waiting for database connection...');
   const waitResult = execCommand('node scripts/wait-for-db.js');
@@ -134,7 +140,7 @@ async function setupDatabase() {
     logError(waitResult.error);
     process.exit(1);
   }
-  
+
   // Generate Prisma client
   log('Generating Prisma client...');
   const generateResult = execCommand('npm run db:generate');
@@ -143,7 +149,7 @@ async function setupDatabase() {
     logError(generateResult.error);
     process.exit(1);
   }
-  
+
   // Run migrations
   log('Running database migrations...');
   const migrateResult = execCommand('npm run db:migrate');
@@ -151,7 +157,7 @@ async function setupDatabase() {
     logWarning('Migration may have failed, but continuing...');
     log(migrateResult.output);
   }
-  
+
   // Seed database
   log('Seeding database...');
   const seedResult = execCommand('npm run db:seed');
@@ -161,34 +167,34 @@ async function setupDatabase() {
   } else {
     logSuccess('Database seeded successfully');
   }
-  
+
   logSuccess('Database setup complete');
 }
 
 async function startDevelopmentServers() {
   logStep('4', 'Starting development servers...');
-  
+
   log('🚀 Starting backend and frontend servers...');
   log('📝 Backend will be available at: http://localhost:3001');
   log('🌐 Frontend will be available at: http://localhost:3000');
   log('');
   log('💡 Press Ctrl+C to stop all services');
   log('');
-  
+
   // Use spawn to keep the process running and show output
   const devProcess = spawn('npm', ['run', 'dev'], {
     stdio: 'inherit',
-    shell: true
+    shell: true,
   });
-  
+
   // Handle process termination
   process.on('SIGINT', () => {
     log('\n🛑 Shutting down development servers...');
     devProcess.kill('SIGINT');
     process.exit(0);
   });
-  
-  devProcess.on('error', (error) => {
+
+  devProcess.on('error', error => {
     logError(`Development server error: ${error.message}`);
     process.exit(1);
   });
@@ -196,15 +202,16 @@ async function startDevelopmentServers() {
 
 async function main() {
   try {
-    log(`${colors.bold}🎯 Plastic Crack Development Environment Setup${colors.reset}`);
+    log(
+      `${colors.bold}🎯 Plastic Crack Development Environment Setup${colors.reset}`
+    );
     log('===============================================');
     log('');
-    
+
     await checkDockerServices();
     await installDependencies();
     await setupDatabase();
     await startDevelopmentServers();
-    
   } catch (error) {
     logError(`Setup failed: ${error.message}`);
     process.exit(1);
