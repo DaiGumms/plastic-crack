@@ -27,6 +27,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Add as AddIcon,
   Search as SearchIcon,
+  LocalOffer as TagIcon,
 } from '@mui/icons-material';
 import type { LibraryModel, GameSystem, Faction } from '../../types';
 
@@ -80,6 +81,8 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
   const [selectedGameSystem, setSelectedGameSystem] = useState<string>('');
   const [selectedFaction, setSelectedFaction] = useState<string>('');
   const [selectedOfficial, setSelectedOfficial] = useState<string>('');
+  const [tagInput, setTagInput] = useState('');
+  const [filters, setFilters] = useState<LibraryModelFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [expandedSystems, setExpandedSystems] = useState<Set<string>>(
     new Set()
@@ -137,19 +140,23 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
   );
 
   // Handle filter changes
-  const handleFilterChange = useCallback(() => {
-    const filters: LibraryModelFilters = {
+  const handleFilterChange = useCallback((newFilters?: Partial<LibraryModelFilters>) => {
+    const updatedFilters: LibraryModelFilters = {
       search: searchQuery || undefined,
       gameSystemId: selectedGameSystem || undefined,
       factionId: selectedFaction || undefined,
       isOfficial: selectedOfficial ? selectedOfficial === 'true' : undefined,
+      tags: filters.tags,
+      ...newFilters,
     };
-    onFilterChange?.(filters);
+    setFilters(updatedFilters);
+    onFilterChange?.(updatedFilters);
   }, [
     searchQuery,
     selectedGameSystem,
     selectedFaction,
     selectedOfficial,
+    filters.tags,
     onFilterChange,
   ]);
 
@@ -164,6 +171,8 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
     setSelectedGameSystem('');
     setSelectedFaction('');
     setSelectedOfficial('');
+    setTagInput('');
+    setFilters({});
   };
 
   // Handle game system accordion toggle
@@ -285,6 +294,33 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
               </Select>
             </FormControl>
 
+            <TextField
+              size='small'
+              label="Tags"
+              placeholder="Enter tags separated by commas"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const newTags = tagInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                  if (newTags.length > 0) {
+                    const existingTags = filters.tags || [];
+                    const uniqueTags = [...new Set([...existingTags, ...newTags])];
+                    handleFilterChange({ tags: uniqueTags });
+                    setTagInput('');
+                  }
+                }
+              }}
+              sx={{ minWidth: 200 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <TagIcon fontSize='small' />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
             <Button
               variant='outlined'
               size='small'
@@ -300,7 +336,8 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
         {(searchQuery ||
           selectedGameSystem ||
           selectedFaction ||
-          selectedOfficial) && (
+          selectedOfficial ||
+          (filters.tags && filters.tags.length > 0)) && (
           <Stack direction='row' spacing={1} sx={{ mb: 2 }}>
             {searchQuery && (
               <Chip
@@ -309,6 +346,21 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
                 size='small'
               />
             )}
+            {filters.tags &&
+              filters.tags.length > 0 &&
+              filters.tags.map(tag => (
+                <Chip
+                  key={tag}
+                  label={`Tag: ${tag}`}
+                  onDelete={() => {
+                    handleFilterChange({
+                      tags: filters.tags?.filter(t => t !== tag),
+                    });
+                  }}
+                  size='small'
+                  color='secondary'
+                />
+              ))}
             {selectedGameSystem && (
               <Chip
                 label={`System: ${gameSystems.find(s => s.id === selectedGameSystem)?.name}`}
