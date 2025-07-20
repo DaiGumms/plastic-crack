@@ -19,11 +19,11 @@ export async function createTestImage(
       width,
       height,
       channels: 3,
-      background: { r: 255, g: 0, b: 0 } // Red background
-    }
+      background: { r: 255, g: 0, b: 0 }, // Red background
+    },
   })
-  .toFormat(format)
-  .toBuffer();
+    .toFormat(format)
+    .toBuffer();
 }
 
 /**
@@ -74,7 +74,10 @@ export function createMockRequest(
 /**
  * Save test image to disk for manual inspection (development only)
  */
-export async function saveTestImage(buffer: Buffer, filename: string): Promise<void> {
+export async function saveTestImage(
+  buffer: Buffer,
+  filename: string
+): Promise<void> {
   if (process.env.NODE_ENV === 'development') {
     const testDir = path.join(__dirname, '../test-images');
     await fs.promises.mkdir(testDir, { recursive: true });

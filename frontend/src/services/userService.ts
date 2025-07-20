@@ -51,6 +51,19 @@ class UserService {
     }
   }
 
+  async updateAvatar(avatarUrl: string): Promise<UserProfile> {
+    try {
+      const response = await api.patch('/users/avatar', { avatarUrl });
+      return response.data.data; // Extract data from the API response wrapper
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+      throw new Error('Failed to update avatar');
+    }
+  }
+
   async getProfile(): Promise<UserProfile> {
     try {
       const response = await api.get('/users/profile');

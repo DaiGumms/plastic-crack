@@ -229,12 +229,6 @@ const validateModelId = [
   param('id').isLength({ min: 1 }).withMessage('Model ID is required'),
 ];
 
-const validateCollectionId = [
-  param('collectionId')
-    .isLength({ min: 1 })
-    .withMessage('Collection ID is required'),
-];
-
 /**
  * Error handling middleware
  */

@@ -9,6 +9,7 @@ export interface UserProfileData {
   bio?: string;
   location?: string;
   website?: string;
+  avatarUrl?: string;
 }
 
 export interface PrivacySettings {
@@ -163,10 +164,17 @@ export class UserService {
       const fullName = `${firstName} ${lastName}`.trim();
       updateData.displayName = profileData.displayName || fullName || undefined;
 
+      // Map avatarUrl to profileImageUrl for database
+      const dbUpdateData: Record<string, unknown> = { ...updateData };
+      if (updateData.avatarUrl !== undefined) {
+        dbUpdateData.profileImageUrl = updateData.avatarUrl;
+        delete dbUpdateData.avatarUrl;
+      }
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
-          ...updateData,
+          ...dbUpdateData,
           updatedAt: new Date(),
         },
         select: {
@@ -189,7 +197,14 @@ export class UserService {
         },
       });
 
-      return updatedUser;
+      // Map profileImageUrl to avatarUrl for frontend compatibility
+      const { profileImageUrl, ...userWithoutProfileImage } = updatedUser;
+      const finalProfile = {
+        ...userWithoutProfileImage,
+        avatarUrl: profileImageUrl,
+      };
+
+      return finalProfile;
     } catch (error) {
       if (process.env.NODE_ENV !== 'test') {
         // eslint-disable-next-line no-console

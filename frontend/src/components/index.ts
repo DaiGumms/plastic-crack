@@ -5,6 +5,12 @@ export { NotificationContainer } from './ui/NotificationContainer';
 export { OptimizedImage, ResponsiveImage } from './ui/OptimizedImage';
 export { LazyLoad } from './ui/LazyLoad';
 
+// Upload Components (new drag-drop implementation)
+export { default as DragDropUpload } from './ui/DragDropUpload';
+export { default as UploadDialog } from './ui/UploadDialog';
+export { default as ImageInput } from './ui/ImageInput';
+export { default as UploadExamples } from './UploadExamples';
+
 // Layout Components
 export { Layout } from './layout/Layout';
 

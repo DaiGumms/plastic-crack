@@ -14,6 +14,7 @@ export interface LibraryModelFilters {
 }
 
 export class LibraryModelService {
+  // eslint-disable-next-line no-unused-vars
   constructor(private prisma: PrismaClient) {}
 
   /**

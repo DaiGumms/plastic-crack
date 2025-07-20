@@ -28,6 +28,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import type { FieldValues } from 'react-hook-form';
 import * as yup from 'yup';
+import { DragDropUpload } from '../ui/DragDropUpload';
 import type { UserModel, CreateModelData } from '../../types';
 
 // Validation schema
@@ -543,6 +544,44 @@ const ModelForm: React.FC<ModelFormProps> = ({
                   />
                 )}
               />
+            </Box>
+
+            <Divider />
+
+            {/* Photos */}
+            <Box>
+              <Typography variant='h6' gutterBottom>
+                Photos
+              </Typography>
+              {model?.id ? (
+                <>
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    sx={{ mb: 2 }}
+                  >
+                    Upload photos of your painted model (up to 10 images)
+                  </Typography>
+                  <DragDropUpload
+                    uploadType='model-image'
+                    variant='dropzone'
+                    collectionId={watch('collectionId')}
+                    modelId={model.id}
+                    onUploadComplete={results => {
+                      // Handle uploaded photos here
+                      // You might want to store these URLs and associate them with the model
+                      console.log('Photos uploaded:', results);
+                    }}
+                    onUploadError={error => {
+                      console.error('Photo upload error:', error);
+                    }}
+                  />
+                </>
+              ) : (
+                <Typography variant='body2' color='text.secondary'>
+                  Photo upload will be available after creating the model
+                </Typography>
+              )}
             </Box>
 
             <Divider />

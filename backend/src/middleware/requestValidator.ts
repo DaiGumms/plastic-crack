@@ -111,15 +111,18 @@ export const requestValidator = (
   // Set default content-type validation for POST/PUT/PATCH requests
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const contentType = req.get('Content-Type');
-    
+
     // Allow multipart/form-data for file uploads and application/json for API requests
-    if (contentType && 
-        !contentType.includes('application/json') && 
-        !contentType.includes('multipart/form-data')) {
+    if (
+      contentType &&
+      !contentType.includes('application/json') &&
+      !contentType.includes('multipart/form-data')
+    ) {
       res.status(400).json({
         success: false,
         error: {
-          message: 'Content-Type must be application/json or multipart/form-data',
+          message:
+            'Content-Type must be application/json or multipart/form-data',
         },
         timestamp: new Date().toISOString(),
       });

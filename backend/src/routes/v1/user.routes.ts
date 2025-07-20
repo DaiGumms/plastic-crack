@@ -235,6 +235,50 @@ router.put(
 );
 
 /**
+ * @route PATCH /api/v1/users/avatar
+ * @desc Update current user's avatar URL
+ * @access Private
+ */
+router.patch(
+  '/avatar',
+  authenticateToken,
+  rateLimiter(10, 60 * 1000), // 10 requests per minute
+  body('avatarUrl')
+    .custom(value => {
+      // Allow localhost URLs for Firebase emulator and any valid URL for production
+      const isValidUrl = /^https?:\/\/.+/.test(value);
+      if (!isValidUrl) {
+        throw new Error('Avatar URL must be a valid URL');
+      }
+      return true;
+    })
+    .isLength({ max: 500 })
+    .withMessage('Avatar URL must be less than 500 characters'),
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const { avatarUrl } = req.body;
+      const updatedProfile = await UserService.updateUserProfile(req.user.id, {
+        avatarUrl,
+      });
+
+      res.json({
+        message: 'Avatar updated successfully',
+        data: updatedProfile,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to update avatar';
+      res.status(400).json({ message });
+    }
+  }
+);
+
+/**
  * @route PUT /api/v1/users/privacy
  * @desc Update privacy settings
  * @access Private

@@ -54,10 +54,12 @@ class UploadService {
       fileFilter: (req, file, cb) => {
         // Check MIME type
         if (!config.upload.allowedMimeTypes.includes(file.mimetype)) {
-          return cb(new AppError(
-            `Invalid file type. Allowed types: ${config.upload.allowedMimeTypes.join(', ')}`,
-            400
-          ));
+          return cb(
+            new AppError(
+              `Invalid file type. Allowed types: ${config.upload.allowedMimeTypes.join(', ')}`,
+              400
+            )
+          );
         }
         cb(null, true);
       },
@@ -75,19 +77,28 @@ class UploadService {
    * Process and upload image file
    */
   async uploadImage(
-    file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
+    file: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+      size: number;
+    },
     metadata: FileUploadMetadata
   ): Promise<UploadResult> {
     try {
       // Validate the image
-      const validation = await imageProcessingService.validateImage(file.buffer);
+      const validation = await imageProcessingService.validateImage(
+        file.buffer
+      );
       if (!validation.isValid) {
         throw new AppError(validation.error || 'Invalid image file', 400);
       }
 
       // Determine optimal format
-      const optimalFormat = await imageProcessingService.getOptimalFormat(file.buffer);
-      
+      const optimalFormat = await imageProcessingService.getOptimalFormat(
+        file.buffer
+      );
+
       // Process the image
       const processed = await imageProcessingService.processImage(file.buffer, {
         format: optimalFormat,
@@ -141,8 +152,8 @@ class UploadService {
       console.error('Upload error details:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : 'No stack trace',
-        code: (error as any)?.code,
-        name: error instanceof Error ? error.name : 'Unknown'
+        code: (error as Record<string, unknown>)?.code,
+        name: error instanceof Error ? error.name : 'Unknown',
       });
       throw new AppError('Failed to upload image', 500);
     }
@@ -152,7 +163,12 @@ class UploadService {
    * Upload multiple responsive sizes
    */
   async uploadResponsiveImages(
-    file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
+    file: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+      size: number;
+    },
     metadata: FileUploadMetadata,
     sizes: Array<{ width: number; height: number; suffix: string }> = [
       { width: 150, height: 150, suffix: 'thumbnail' },
@@ -162,16 +178,16 @@ class UploadService {
   ): Promise<UploadResult[]> {
     try {
       // Validate the image
-      const validation = await imageProcessingService.validateImage(file.buffer);
+      const validation = await imageProcessingService.validateImage(
+        file.buffer
+      );
       if (!validation.isValid) {
         throw new AppError(validation.error || 'Invalid image file', 400);
       }
 
       // Create responsive sizes
-      const responsiveImages = await imageProcessingService.createResponsiveSizes(
-        file.buffer,
-        sizes
-      );
+      const responsiveImages =
+        await imageProcessingService.createResponsiveSizes(file.buffer, sizes);
 
       const results: UploadResult[] = [];
 
@@ -252,16 +268,25 @@ class UploadService {
       throw new AppError('User not authenticated', 401);
     }
 
-    if (!type || !['avatar', 'collection-thumbnail', 'model-image'].includes(type)) {
+    if (
+      !type ||
+      !['avatar', 'collection-thumbnail', 'model-image'].includes(type)
+    ) {
       throw new AppError('Invalid upload type', 400);
     }
 
     if (type === 'collection-thumbnail' && !collectionId) {
-      throw new AppError('Collection ID required for collection thumbnail', 400);
+      throw new AppError(
+        'Collection ID required for collection thumbnail',
+        400
+      );
     }
 
     if (type === 'model-image' && (!collectionId || !modelId)) {
-      throw new AppError('Collection ID and Model ID required for model image', 400);
+      throw new AppError(
+        'Collection ID and Model ID required for model image',
+        400
+      );
     }
 
     return {

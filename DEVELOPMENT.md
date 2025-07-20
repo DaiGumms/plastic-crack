@@ -1,6 +1,7 @@
 # Plastic Crack Development Guide
 
-This comprehensive guide will help you set up and contribute to the Plastic Crack development environment.
+This comprehensive guide will help you set up and contribute to the Plastic Crack development
+environment.
 
 ## Quick Start 🚀
 
@@ -15,8 +16,9 @@ npm run setup
 This command will:
 
 1. **🐳 Start Docker Services**: Automatically starts PostgreSQL and Redis containers
-2. **📦 Install Dependencies**: Installs all dependencies for root, backend, frontend, and shared packages
-3. **🗄️ Setup Database**: 
+2. **📦 Install Dependencies**: Installs all dependencies for root, backend, frontend, and shared
+   packages
+3. **🗄️ Setup Database**:
    - Waits for database to be ready
    - Generates Prisma client
    - Runs database migrations
@@ -365,7 +367,8 @@ npm run build  # Creates production builds
 
 ### Docker Deployment
 
-Production Docker images are automatically built and pushed to GitHub Container Registry on main branch pushes.
+Production Docker images are automatically built and pushed to GitHub Container Registry on main
+branch pushes.
 
 ## Next Steps
 

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -13,18 +13,48 @@ import {
   Skeleton,
   Alert,
   Paper,
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Public as PublicIcon,
   Lock as PrivateIcon,
+  MoreVert as MoreVertIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  PhotoCamera as PhotoCameraIcon,
 } from '@mui/icons-material';
 import { CollectionService } from '../services/collectionService';
+import { modelService } from '../services/modelService';
+import { UploadDialog } from '../components/ui/UploadDialog';
+import { ModelPhotoCarousel } from '../components/ui/ModelPhotoCarousel';
 import { formatDistanceToNow } from 'date-fns';
+import type { UserModel, CreateModelData } from '../types';
+import type { UploadFile } from '../components/ui/DragDropUpload';
 
 export const CollectionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // State for dialogs and menus
+  const [editingModel, setEditingModel] = useState<UserModel | null>(null);
+  const [modelToDelete, setModelToDelete] = useState<UserModel | null>(null);
+  const [photoUploadModel, setPhotoUploadModel] = useState<UserModel | null>(
+    null
+  );
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedModel, setSelectedModel] = useState<UserModel | null>(null);
 
   const {
     data: collection,
@@ -35,6 +65,88 @@ export const CollectionDetailPage: React.FC = () => {
     queryFn: () => CollectionService.getCollection(id!),
     enabled: !!id,
   });
+
+  // Mutations for model operations
+  const updateModelMutation = useMutation({
+    mutationFn: ({
+      modelId,
+      data,
+    }: {
+      modelId: string;
+      data: Partial<CreateModelData>;
+    }) => modelService.updateModel(modelId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collection', id] });
+      setEditingModel(null);
+    },
+  });
+
+  const deleteModelMutation = useMutation({
+    mutationFn: (modelId: string) => modelService.deleteModel(modelId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collection', id] });
+      setModelToDelete(null);
+    },
+  });
+
+  // Event handlers
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    model: UserModel
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedModel(model);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedModel(null);
+  };
+
+  const handleEditModel = () => {
+    if (selectedModel) {
+      setEditingModel(selectedModel);
+      handleMenuClose();
+    }
+  };
+
+  const handleDeleteModel = () => {
+    if (selectedModel) {
+      setModelToDelete(selectedModel);
+      handleMenuClose();
+    }
+  };
+
+  const handlePhotoUpload = () => {
+    if (selectedModel) {
+      setPhotoUploadModel(selectedModel);
+      handleMenuClose();
+    }
+  };
+
+  const handleModelUpdate = async (data: Partial<CreateModelData>) => {
+    if (editingModel) {
+      await updateModelMutation.mutateAsync({ modelId: editingModel.id, data });
+    }
+  };
+
+  const handleModelDelete = () => {
+    if (modelToDelete) {
+      deleteModelMutation.mutate(modelToDelete.id);
+    }
+  };
+
+  const handlePhotoUploadComplete = async (results: UploadFile[]) => {
+    const successfulUploads = results.filter(
+      file => file.status === 'success' && file.result?.url
+    );
+
+    if (successfulUploads.length > 0 && photoUploadModel) {
+      // Refresh the collection data to show new photos
+      queryClient.invalidateQueries({ queryKey: ['collection', id] });
+      setPhotoUploadModel(null);
+    }
+  };
 
   // Use models from collection response instead of separate API call
   const models = collection?.userModels || [];
@@ -183,10 +295,27 @@ export const CollectionDetailPage: React.FC = () => {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'flex-start',
-                      gap: 2,
+                      gap: 3,
+                      flexDirection: { xs: 'column', md: 'row' },
                     }}
                   >
-                    <Box sx={{ flex: 1 }}>
+                    {/* Photo Carousel */}
+                    <Box
+                      sx={{
+                        minWidth: { xs: '100%', md: 280 },
+                        maxWidth: { xs: '100%', md: 280 },
+                      }}
+                    >
+                      <ModelPhotoCarousel
+                        photos={userModel.photos || []}
+                        height={200}
+                        showNavigation={true}
+                        showFullscreenButton={true}
+                      />
+                    </Box>
+
+                    {/* Model Details */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant='h6' component='h3'>
                         {userModel.customName || userModel.model?.name}
                       </Typography>
@@ -223,39 +352,52 @@ export const CollectionDetailPage: React.FC = () => {
                         </Box>
                       )}
                     </Box>
-                    <Box sx={{ textAlign: 'right', minWidth: 120 }}>
-                      <Chip
-                        label={userModel.paintingStatus.replace('_', ' ')}
-                        color={
-                          userModel.paintingStatus === 'COMPLETED'
-                            ? 'success'
-                            : userModel.paintingStatus === 'IN_PROGRESS'
-                              ? 'warning'
-                              : userModel.paintingStatus === 'SHOWCASE'
-                                ? 'primary'
-                                : 'default'
-                        }
+
+                    {/* Status and Actions */}
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}
+                    >
+                      <Box sx={{ textAlign: 'right', minWidth: 120 }}>
+                        <Chip
+                          label={userModel.paintingStatus.replace('_', ' ')}
+                          color={
+                            userModel.paintingStatus === 'COMPLETED'
+                              ? 'success'
+                              : userModel.paintingStatus === 'IN_PROGRESS'
+                                ? 'warning'
+                                : userModel.paintingStatus === 'SHOWCASE'
+                                  ? 'primary'
+                                  : 'default'
+                          }
+                          size='small'
+                          sx={{ mb: 1 }}
+                        />
+                        {userModel.purchasePrice && (
+                          <Typography variant='body2' color='text.secondary'>
+                            ${userModel.purchasePrice.toFixed(2)}
+                          </Typography>
+                        )}
+                        {userModel.purchaseDate && (
+                          <Typography
+                            variant='caption'
+                            color='text.secondary'
+                            display='block'
+                          >
+                            Purchased{' '}
+                            {formatDistanceToNow(
+                              new Date(userModel.purchaseDate),
+                              { addSuffix: true }
+                            )}
+                          </Typography>
+                        )}
+                      </Box>
+                      <IconButton
+                        aria-label='more actions'
+                        onClick={event => handleMenuOpen(event, userModel)}
                         size='small'
-                        sx={{ mb: 1 }}
-                      />
-                      {userModel.purchasePrice && (
-                        <Typography variant='body2' color='text.secondary'>
-                          ${userModel.purchasePrice.toFixed(2)}
-                        </Typography>
-                      )}
-                      {userModel.purchaseDate && (
-                        <Typography
-                          variant='caption'
-                          color='text.secondary'
-                          display='block'
-                        >
-                          Purchased{' '}
-                          {formatDistanceToNow(
-                            new Date(userModel.purchaseDate),
-                            { addSuffix: true }
-                          )}
-                        </Typography>
-                      )}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
                   </Box>
                 </Paper>
@@ -264,6 +406,177 @@ export const CollectionDetailPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleEditModel}>
+          <EditIcon sx={{ mr: 1 }} fontSize='small' />
+          Edit Model
+        </MenuItem>
+        <MenuItem onClick={handlePhotoUpload}>
+          <PhotoCameraIcon sx={{ mr: 1 }} fontSize='small' />
+          Manage Photos
+        </MenuItem>
+        <MenuItem onClick={handleDeleteModel} sx={{ color: 'error.main' }}>
+          <DeleteIcon sx={{ mr: 1 }} fontSize='small' />
+          Delete Model
+        </MenuItem>
+      </Menu>
+
+      {/* Edit Model Dialog */}
+      <Dialog
+        open={Boolean(editingModel)}
+        onClose={() => setEditingModel(null)}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle>Edit Model</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label='Custom Name'
+              defaultValue={editingModel?.customName || ''}
+              fullWidth
+              id='customName'
+            />
+            <TextField
+              label='Notes'
+              defaultValue={editingModel?.notes || ''}
+              multiline
+              rows={3}
+              fullWidth
+              id='notes'
+            />
+            <FormControl fullWidth>
+              <InputLabel>Painting Status</InputLabel>
+              <Select
+                defaultValue={editingModel?.paintingStatus || 'UNPAINTED'}
+                label='Painting Status'
+                id='paintingStatus'
+              >
+                <MenuItem value='UNPAINTED'>Unpainted</MenuItem>
+                <MenuItem value='IN_PROGRESS'>In Progress</MenuItem>
+                <MenuItem value='COMPLETED'>Completed</MenuItem>
+                <MenuItem value='SHOWCASE'>Showcase</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label='Purchase Price'
+              type='number'
+              defaultValue={editingModel?.purchasePrice || ''}
+              fullWidth
+              id='purchasePrice'
+              InputProps={{
+                startAdornment: <span>$</span>,
+              }}
+            />
+            <TextField
+              label='Points Cost'
+              type='number'
+              defaultValue={editingModel?.customPointsCost || ''}
+              fullWidth
+              id='pointsCost'
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditingModel(null)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              const form = document.getElementById(
+                'customName'
+              ) as HTMLInputElement;
+              const notes = document.getElementById(
+                'notes'
+              ) as HTMLInputElement;
+              const status = document.getElementById(
+                'paintingStatus'
+              ) as HTMLInputElement;
+              const price = document.getElementById(
+                'purchasePrice'
+              ) as HTMLInputElement;
+              const points = document.getElementById(
+                'pointsCost'
+              ) as HTMLInputElement;
+
+              const data = {
+                customName: form.value,
+                notes: notes.value,
+                paintingStatus: status.value as
+                  | 'UNPAINTED'
+                  | 'IN_PROGRESS'
+                  | 'COMPLETED'
+                  | 'SHOWCASE',
+                purchasePrice: price.value ? Number(price.value) : undefined,
+                customPointsCost: points.value
+                  ? Number(points.value)
+                  : undefined,
+              };
+
+              handleModelUpdate(data);
+            }}
+            variant='contained'
+            disabled={updateModelMutation.isPending}
+          >
+            {updateModelMutation.isPending ? 'Saving...' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Model Confirmation Dialog */}
+      <Dialog
+        open={Boolean(modelToDelete)}
+        onClose={() => setModelToDelete(null)}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle>Delete Model</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "
+            {modelToDelete?.customName || modelToDelete?.model?.name}"? This
+            action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setModelToDelete(null)}>Cancel</Button>
+          <Button
+            onClick={handleModelDelete}
+            color='error'
+            variant='contained'
+            disabled={deleteModelMutation.isPending}
+          >
+            {deleteModelMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Photo Upload Dialog */}
+      {photoUploadModel && (
+        <UploadDialog
+          open={true}
+          onClose={() => setPhotoUploadModel(null)}
+          uploadType='model-image'
+          collectionId={id}
+          modelId={photoUploadModel.id}
+          onUploadComplete={handlePhotoUploadComplete}
+          onUploadError={error => {
+            console.error('Photo upload error:', error);
+          }}
+        />
+      )}
     </Container>
   );
 };

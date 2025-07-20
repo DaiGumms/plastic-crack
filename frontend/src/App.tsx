@@ -22,6 +22,7 @@ import { SettingsPage } from './pages/settings/SettingsPage';
 import { CollectionsPage } from './pages/CollectionsPage';
 import { CollectionDetailPage } from './pages/CollectionDetailPage';
 import ModelsPage from './pages/ModelsPage';
+import UploadTestingPage from './pages/UploadTestingPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ function App() {
                 <Route path='/' element={<HomePage />} />
                 <Route path='/beta-interest' element={<BetaInterestPage />} />
                 <Route path='/user/:userId' element={<PublicProfilePage />} />
+                <Route path='/test-upload' element={<UploadTestingPage />} />
 
                 {/* Authentication Routes */}
                 <Route

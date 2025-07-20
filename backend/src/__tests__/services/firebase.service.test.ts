@@ -58,16 +58,24 @@ describe('FirebaseService', () => {
       const contentType = 'image/jpeg';
 
       // Mock successful upload
-      mockWriteStream.on.mockImplementation((event: string, callback: Function) => {
-        if (event === 'finish') {
-          setTimeout(callback, 0);
+      mockWriteStream.on.mockImplementation(
+        (event: string, callback: Function) => {
+          if (event === 'finish') {
+            setTimeout(callback, 0);
+          }
+          return mockWriteStream;
         }
-        return mockWriteStream;
-      });
+      );
 
-      const result = await firebaseService.uploadFile(buffer, filePath, contentType);
+      const result = await firebaseService.uploadFile(
+        buffer,
+        filePath,
+        contentType
+      );
 
-      expect(result).toBe(`https://storage.googleapis.com/${mockBucket.name}/${filePath}`);
+      expect(result).toBe(
+        `https://storage.googleapis.com/${mockBucket.name}/${filePath}`
+      );
       expect(mockBucket.file).toHaveBeenCalledWith(filePath);
       expect(mockCreateWriteStream).toHaveBeenCalledWith({
         metadata: {
@@ -84,15 +92,18 @@ describe('FirebaseService', () => {
       const contentType = 'image/jpeg';
 
       // Mock upload error
-      mockWriteStream.on.mockImplementation((event: string, callback: Function) => {
-        if (event === 'error') {
-          setTimeout(() => callback(new Error('Upload failed')), 0);
+      mockWriteStream.on.mockImplementation(
+        (event: string, callback: Function) => {
+          if (event === 'error') {
+            setTimeout(() => callback(new Error('Upload failed')), 0);
+          }
+          return mockWriteStream;
         }
-        return mockWriteStream;
-      });
+      );
 
-      await expect(firebaseService.uploadFile(buffer, filePath, contentType))
-        .rejects.toThrow('Upload failed');
+      await expect(
+        firebaseService.uploadFile(buffer, filePath, contentType)
+      ).rejects.toThrow('Upload failed');
     });
 
     it('should handle make public errors', async () => {
@@ -101,17 +112,22 @@ describe('FirebaseService', () => {
       const contentType = 'image/jpeg';
 
       // Mock successful upload but failed make public
-      mockWriteStream.on.mockImplementation((event: string, callback: Function) => {
-        if (event === 'finish') {
-          setTimeout(callback, 0);
+      mockWriteStream.on.mockImplementation(
+        (event: string, callback: Function) => {
+          if (event === 'finish') {
+            setTimeout(callback, 0);
+          }
+          return mockWriteStream;
         }
-        return mockWriteStream;
-      });
+      );
 
-      mockMakePublic.mockImplementation(() => Promise.reject(new Error('Make public failed')));
+      mockMakePublic.mockImplementation(() =>
+        Promise.reject(new Error('Make public failed'))
+      );
 
-      await expect(firebaseService.uploadFile(buffer, filePath, contentType))
-        .rejects.toThrow('Make public failed');
+      await expect(
+        firebaseService.uploadFile(buffer, filePath, contentType)
+      ).rejects.toThrow('Make public failed');
     });
 
     it('should include custom metadata', async () => {
@@ -120,12 +136,14 @@ describe('FirebaseService', () => {
       const contentType = 'image/jpeg';
       const metadata = { userId: 'user123', type: 'avatar' };
 
-      mockWriteStream.on.mockImplementation((event: string, callback: Function) => {
-        if (event === 'finish') {
-          setTimeout(callback, 0);
+      mockWriteStream.on.mockImplementation(
+        (event: string, callback: Function) => {
+          if (event === 'finish') {
+            setTimeout(callback, 0);
+          }
+          return mockWriteStream;
         }
-        return mockWriteStream;
-      });
+      );
 
       await firebaseService.uploadFile(buffer, filePath, contentType, metadata);
 
@@ -151,10 +169,13 @@ describe('FirebaseService', () => {
     it('should handle delete errors', async () => {
       const filePath = 'test-path/test-image.jpg';
 
-      mockDelete.mockImplementation(() => Promise.reject(new Error('Delete failed')));
+      mockDelete.mockImplementation(() =>
+        Promise.reject(new Error('Delete failed'))
+      );
 
-      await expect(firebaseService.deleteFile(filePath))
-        .rejects.toThrow('Delete failed');
+      await expect(firebaseService.deleteFile(filePath)).rejects.toThrow(
+        'Delete failed'
+      );
     });
   });
 
@@ -182,7 +203,9 @@ describe('FirebaseService', () => {
     it('should handle check errors', async () => {
       const filePath = 'test-path/test-image.jpg';
 
-      mockExists.mockImplementation(() => Promise.reject(new Error('Check failed')));
+      mockExists.mockImplementation(() =>
+        Promise.reject(new Error('Check failed'))
+      );
 
       const exists = await firebaseService.fileExists(filePath);
 
@@ -205,7 +228,9 @@ describe('FirebaseService', () => {
         collectionId: 'collection456',
         filename: 'thumbnail.jpg',
       });
-      expect(path).toBe('users/user123/collections/collection456/thumbnail/thumbnail.jpg');
+      expect(path).toBe(
+        'users/user123/collections/collection456/thumbnail/thumbnail.jpg'
+      );
     });
 
     it('should generate correct path for model image', () => {
@@ -215,7 +240,9 @@ describe('FirebaseService', () => {
         modelId: 'model789',
         filename: 'showcase.jpg',
       });
-      expect(path).toBe('users/user123/collections/collection456/models/model789/showcase.jpg');
+      expect(path).toBe(
+        'users/user123/collections/collection456/models/model789/showcase.jpg'
+      );
     });
 
     it('should throw error for collection thumbnail without collectionId', () => {

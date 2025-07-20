@@ -90,24 +90,22 @@ const config: Config = {
   },
   firebase: {
     serviceAccount: {
-      projectId: process.env.FIREBASE_PROJECT_ID || '',
+      projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') || '',
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
     },
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+    storageBucket:
+      process.env.FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
     emulator: {
-      enabled: process.env.USE_FIREBASE_EMULATOR === 'true' || process.env.NODE_ENV === 'development',
+      enabled:
+        process.env.USE_FIREBASE_EMULATOR === 'true' ||
+        process.env.NODE_ENV === 'development',
       host: process.env.FIREBASE_EMULATOR_HOST || 'localhost:9199',
     },
   },
   upload: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB default
-    allowedMimeTypes: [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-    ],
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     imageCompression: {
       quality: parseInt(process.env.IMAGE_QUALITY || '80', 10),
       maxWidth: parseInt(process.env.IMAGE_MAX_WIDTH || '2048', 10),
