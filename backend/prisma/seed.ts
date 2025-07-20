@@ -338,6 +338,42 @@ async function main() {
       bio: 'Custom conversions and kitbashing specialist. No model is safe from modification!',
       isProfilePublic: true,
     },
+    // Additional users for more test data
+    {
+      username: 'chaos_cultist',
+      email: 'cultist@example.com',
+      displayName: 'Marcus "Chaos" Chen',
+      bio: 'Devoted to the dark gods. My Chaos armies are my pride and joy.',
+      isProfilePublic: true,
+    },
+    {
+      username: 'eldar_mystic',
+      email: 'mystic@example.com',
+      displayName: 'Luna Starweaver',
+      bio: 'Eldar enthusiast and lore expert. Painting since the 90s.',
+      isProfilePublic: true,
+    },
+    {
+      username: 'ork_waaagh',
+      email: 'ork@example.com',
+      displayName: 'Big Boss Gary',
+      bio: 'WAAAGH! More dakka, more speed, more green! Ork player for life.',
+      isProfilePublic: true,
+    },
+    {
+      username: 'necron_overlord',
+      email: 'necron@example.com',
+      displayName: 'The Silent King',
+      bio: 'Ancient collector of Necron legions. Awakening one model at a time.',
+      isProfilePublic: true,
+    },
+    {
+      username: 'tyranid_hive',
+      email: 'hive@example.com',
+      displayName: 'Swarm Mother Emma',
+      bio: 'Bioform enthusiast. My hive fleets are ever-hungry for more biomass.',
+      isProfilePublic: true,
+    },
   ];
 
   const createdUsers: any[] = [];
@@ -518,6 +554,11 @@ async function main() {
 
   // Alex's Collections
   if (createdUsers[0] && masterModels.length > 0) {
+    // Get faction for connection
+    const spaceMarinesFaction = await prisma.faction.findFirst({
+      where: { name: 'Space Marines', gameSystemId: warhammer40k.id },
+    });
+
     const alexCollection1 = await prisma.collection.create({
       data: {
         name: 'Ultramarines 2nd Company',
@@ -526,6 +567,12 @@ async function main() {
         isPublic: true,
         userId: createdUsers[0].id,
         gameSystemId: warhammer40k.id,
+        tags: ['Competitive', 'Painted', 'Space Marines', 'Ultramarines', 'Battle Company'],
+        ...(spaceMarinesFaction && {
+          factions: {
+            connect: [{ id: spaceMarinesFaction.id }],
+          },
+        }),
       },
     });
 
@@ -572,6 +619,7 @@ async function main() {
         isPublic: true,
         userId: createdUsers[1].id,
         gameSystemId: warhammer40k.id,
+        tags: ['Tournament', 'Competitive', 'Iron Hands', 'Meta', 'Space Marines'],
       },
     });
 
@@ -602,9 +650,10 @@ async function main() {
         name: 'My First Army - Stormcast',
         description:
           'Learning to paint with these golden warriors. Slowly improving!',
-        isPublic: false,
+        isPublic: true, // Changed from false to true so it shows in public collections
         userId: createdUsers[2].id,
         gameSystemId: ageOfSigmar.id,
+        tags: ['Beginner', 'Learning', 'Stormcast', 'First Army', 'Age of Sigmar'],
       },
     });
 
@@ -618,6 +667,259 @@ async function main() {
         notes: 'My first character model - pretty proud of how it turned out',
         purchaseDate: new Date('2023-09-01'),
         tags: ['First Model', 'Learning'],
+      },
+    });
+  }
+
+  // Jane's Collection - Vintage W40K
+  if (createdUsers[3] && masterModels.length > 0) {
+    const janeCollection = await prisma.collection.create({
+      data: {
+        name: 'Rogue Trader Classics',
+        description:
+          'My collection of vintage Warhammer 40K models from the early days. Some original Rogue Trader era pieces!',
+        isPublic: true,
+        userId: createdUsers[3].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Vintage', 'Rogue Trader', 'Classic', 'Collector', 'Space Marines'],
+      },
+    });
+
+    const janeModel = await prisma.userModel.create({
+      data: {
+        modelId:
+          masterModels.find(m => m.name === 'Captain in Terminator Armor')
+            ?.id || masterModels[0].id,
+        collectionId: janeCollection.id,
+        userId: createdUsers[3].id,
+        customName: 'Captain Vintage',
+        paintingStatus: 'COMPLETED',
+        notes: 'Original 1987 Terminator Captain - painted with classic techniques',
+        purchaseDate: new Date('1987-03-15'),
+        tags: ['Vintage', 'Classic', 'Historical'],
+      },
+    });
+  }
+
+  // Kevin's Collection - Kitbashed Chaos
+  if (createdUsers[4] && masterModels.length > 0 && chaosFaction) {
+    const kevinCollection = await prisma.collection.create({
+      data: {
+        name: 'Chaos Conversions Workshop',
+        description:
+          'My heavily converted Chaos warband. Every model is unique with custom parts and green stuff work.',
+        isPublic: true,
+        userId: createdUsers[4].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Kitbashed', 'Conversions', 'Chaos', 'Custom', 'Green Stuff'],
+      },
+    });
+
+    const kevinModel = await prisma.userModel.create({
+      data: {
+        modelId:
+          masterModels.find(m => m.name === 'Chaos Lord')?.id || masterModels[0].id,
+        collectionId: kevinCollection.id,
+        userId: createdUsers[4].id,
+        customName: 'Chaos Lord Morteus the Converted',
+        paintingStatus: 'COMPLETED',
+        notes: 'Heavily kitbashed with parts from 5 different kits. Custom daemon weapon.',
+        purchaseDate: new Date('2024-01-10'),
+        tags: ['Kitbashed', 'Custom', 'Chaos', 'Green Stuff'],
+      },
+    });
+  }
+
+  // Additional collections for more test data
+  
+  // Marcus (Chaos Cultist) Collections
+  if (createdUsers[5] && chaosFaction && masterModels.length > 0) {
+    // Get Chaos Space Marines faction
+    const chaosSpaceMarinesFaction = await prisma.faction.findFirst({
+      where: { name: 'Chaos Space Marines', gameSystemId: warhammer40k.id },
+    });
+
+    const chaosCollection1 = await prisma.collection.create({
+      data: {
+        name: 'Word Bearers Legion',
+        description:
+          'The first to fall to Chaos. My Word Bearers army focuses on daemonic possession and dark rituals.',
+        isPublic: true,
+        userId: createdUsers[5].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Chaos', 'Word Bearers', 'Daemons', 'Heresy', 'Legion'],
+        ...(chaosSpaceMarinesFaction && {
+          factions: {
+            connect: [{ id: chaosSpaceMarinesFaction.id }],
+          },
+        }),
+      },
+    });
+
+    const chaosCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Death Guard Plague Marines',
+        description:
+          'Nurgle\'s chosen warriors. Weathered and rusted to perfection with realistic battle damage.',
+        isPublic: true,
+        userId: createdUsers[5].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Death Guard', 'Nurgle', 'Plague Marines', 'Weathering', 'Rust'],
+      },
+    });
+  }
+
+  // Luna (Eldar Mystic) Collections
+  if (createdUsers[6] && masterModels.length > 0) {
+    const eldarCollection1 = await prisma.collection.create({
+      data: {
+        name: 'Craftworld Iyanden',
+        description:
+          'The dying craftworld with its wraithguard and wraithlords. Beautiful bone and spirit stone colors.',
+        isPublic: true,
+        userId: createdUsers[6].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Eldar', 'Craftworld', 'Iyanden', 'Wraithguard', 'Spirit Stones'],
+      },
+    });
+
+    const eldarCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Harlequin Masque',
+        description:
+          'The dancing death of the Harlequins. Intricate diamond patterns and vibrant colors.',
+        isPublic: true,
+        userId: createdUsers[6].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Harlequins', 'Diamond Pattern', 'Vibrant', 'Advanced', 'Eldar'],
+      },
+    });
+  }
+
+  // Gary (Ork Waaagh) Collections
+  if (createdUsers[7] && masterModels.length > 0) {
+    const orkCollection1 = await prisma.collection.create({
+      data: {
+        name: 'Speed Freeks Waaagh',
+        description:
+          'Fast and loud! My Speed Freeks collection with custom buggies and bikes. Red ones go faster!',
+        isPublic: true,
+        userId: createdUsers[7].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Orks', 'Speed Freeks', 'Vehicles', 'Custom', 'Red'],
+      },
+    });
+
+    const orkCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Bad Moons Klan',
+        description:
+          'The richest Orks with the biggest guns. Yellow and brass color scheme with lots of teef!',
+        isPublic: true,
+        userId: createdUsers[7].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Orks', 'Bad Moons', 'Yellow', 'Big Guns', 'Teef'],
+      },
+    });
+  }
+
+  // Silent King (Necron Overlord) Collections
+  if (createdUsers[8] && masterModels.length > 0) {
+    const necronCollection1 = await prisma.collection.create({
+      data: {
+        name: 'Sautekh Dynasty',
+        description:
+          'The classic silver Necrons with green energy effects. OSL on all gauss weapons.',
+        isPublic: true,
+        userId: createdUsers[8].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Necrons', 'Sautekh', 'Silver', 'Green OSL', 'Classic'],
+      },
+    });
+
+    const necronCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Mephrit Dynasty',
+        description:
+          'The destroyers with orange energy. Aggressive color scheme for aggressive tactics.',
+        isPublic: true,
+        userId: createdUsers[8].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Necrons', 'Mephrit', 'Orange', 'Destroyers', 'Aggressive'],
+      },
+    });
+  }
+
+  // Emma (Tyranid Hive) Collections
+  if (createdUsers[9] && masterModels.length > 0) {
+    const tyranidCollection1 = await prisma.collection.create({
+      data: {
+        name: 'Hive Fleet Leviathan',
+        description:
+          'The great devourer approaches. Purple and bone Leviathan scheme with realistic carapace.',
+        isPublic: true,
+        userId: createdUsers[9].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Tyranids', 'Hive Fleet', 'Leviathan', 'Purple', 'Carapace'],
+      },
+    });
+
+    const tyranidCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Genestealer Cult',
+        description:
+          'The hidden infection. Industrial cult colors with weathered mining equipment.',
+        isPublic: true,
+        userId: createdUsers[9].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Genestealer Cult', 'Industrial', 'Mining', 'Hidden', 'Infection'],
+      },
+    });
+  }
+
+  // Additional collections for existing users to increase variety
+  
+  // Alex's second collection
+  if (createdUsers[0] && stormcastFaction) {
+    const alexCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Stormcast Eternals - Hammers of Sigmar',
+        description:
+          'My venture into Age of Sigmar. Golden warriors with advanced NMM techniques.',
+        isPublic: true,
+        userId: createdUsers[0].id,
+        gameSystemId: ageOfSigmar.id,
+        tags: ['Stormcast', 'Golden', 'NMM', 'Advanced', 'Hammers of Sigmar'],
+      },
+    });
+  }
+
+  // Sarah's second collection  
+  if (createdUsers[1] && masterModels.length > 0) {
+    const sarahCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Imperial Knights House Raven',
+        description:
+          'Towering war machines of House Raven. Each knight tells a story of honor and glory.',
+        isPublic: true,
+        userId: createdUsers[1].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Imperial Knights', 'House Raven', 'War Machines', 'Honor', 'Black'],
+      },
+    });
+  }
+
+  // Jane's second collection
+  if (createdUsers[3] && masterModels.length > 0) {
+    const janeCollection2 = await prisma.collection.create({
+      data: {
+        name: 'Epic Scale Titans',
+        description:
+          'Vintage Epic 40K Titans from the 80s and 90s. Rare pieces from the early days of the hobby.',
+        isPublic: true,
+        userId: createdUsers[3].id,
+        gameSystemId: warhammer40k.id,
+        tags: ['Epic', 'Titans', 'Vintage', '80s', 'Rare'],
       },
     });
   }
