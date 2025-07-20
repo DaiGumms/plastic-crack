@@ -39,6 +39,7 @@ import { modelService } from '../services/modelService';
 import { UploadDialog } from '../components/ui/UploadDialog';
 import { ModelPhotoCarousel } from '../components/ui/ModelPhotoCarousel';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '../hooks/useAuth';
 import type { UserModel, CreateModelData } from '../types';
 import type { UploadFile } from '../components/ui/DragDropUpload';
 
@@ -46,6 +47,7 @@ export const CollectionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
 
   // State for dialogs and menus
   const [editingModel, setEditingModel] = useState<UserModel | null>(null);
@@ -61,8 +63,17 @@ export const CollectionDetailPage: React.FC = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['collection', id],
-    queryFn: () => CollectionService.getCollection(id!),
+    queryKey: ['collection', id, isAuthenticated],
+    queryFn: () => {
+      if (!id) throw new Error('Collection ID is required');
+      
+      // Use appropriate endpoint based on authentication
+      if (isAuthenticated) {
+        return CollectionService.getCollection(id);
+      } else {
+        return CollectionService.getPublicCollection(id);
+      }
+    },
     enabled: !!id,
   });
 
@@ -216,6 +227,38 @@ export const CollectionDetailPage: React.FC = () => {
         Back to Collections
       </Button>
 
+      {/* Registration Encouragement for Non-Authenticated Users */}
+      {!isAuthenticated && (
+        <Alert 
+          severity="info" 
+          sx={{ mb: 3 }}
+          action={
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button 
+                color="inherit" 
+                size="small" 
+                variant="outlined"
+                href="/login"
+              >
+                Sign In
+              </Button>
+              <Button 
+                color="inherit" 
+                size="small" 
+                variant="contained"
+                href="/register"
+              >
+                Sign Up
+              </Button>
+            </Box>
+          }
+        >
+          <Typography variant="body2">
+            <strong>Join to unlock the full experience!</strong> Sign up to view detailed model information, create your own collections, and connect with other collectors.
+          </Typography>
+        </Alert>
+      )}
+
       <Card>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
@@ -269,6 +312,23 @@ export const CollectionDetailPage: React.FC = () => {
 
           {modelCount === 0 ? (
             <Alert severity='info'>No models in this collection yet.</Alert>
+          ) : !isAuthenticated ? (
+            <Alert severity='info' sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                <strong>This collection contains {modelCount} model{modelCount !== 1 ? 's' : ''}.</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Sign up to view detailed model information, photos, and collector notes!
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                <Button variant="outlined" size="small" href="/login">
+                  Sign In
+                </Button>
+                <Button variant="contained" size="small" href="/register">
+                  Sign Up
+                </Button>
+              </Box>
+            </Alert>
           ) : isLoading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {[...Array(3)].map((_, index) => (
@@ -391,13 +451,16 @@ export const CollectionDetailPage: React.FC = () => {
                           </Typography>
                         )}
                       </Box>
-                      <IconButton
-                        aria-label='more actions'
-                        onClick={event => handleMenuOpen(event, userModel)}
-                        size='small'
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
+                      {/* Only show actions menu for authenticated collection owners */}
+                      {isAuthenticated && user && collection && user.id === collection.userId && (
+                        <IconButton
+                          aria-label='more actions'
+                          onClick={event => handleMenuOpen(event, userModel)}
+                          size='small'
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      )}
                     </Box>
                   </Box>
                 </Paper>

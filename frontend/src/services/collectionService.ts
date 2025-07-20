@@ -94,6 +94,19 @@ export class CollectionService {
   }
 
   /**
+   * Get a public collection by ID (no authentication required)
+   */
+  static async getPublicCollection(id: string): Promise<Collection> {
+    const response = await api.get<ApiResponse<Collection>>(
+      `${CollectionService.BASE_PATH}/${id}/public`
+    );
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to fetch collection');
+    }
+    return response.data.data;
+  }
+
+  /**
    * Create a new collection
    */
   static async createCollection(

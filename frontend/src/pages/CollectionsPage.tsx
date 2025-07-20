@@ -66,7 +66,7 @@ export const CollectionsPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   // State
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(user ? 0 : 1); // Non-authenticated users start on public collections
   const [viewMode, setViewMode] = useState<ViewMode>(getPersistedViewMode());
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,9 +89,14 @@ export const CollectionsPage: React.FC = () => {
 
   const limit = 12;
 
-  // Determine which collections to fetch based on active tab
+  // Determine which collections to fetch based on active tab and authentication
   const getCollectionsQuery = () => {
     const baseFilters = { ...filters, search: searchQuery || undefined };
+
+    // For non-authenticated users, always show public collections
+    if (!user) {
+      return CollectionService.getPublicCollections(page, limit, baseFilters);
+    }
 
     switch (activeTab) {
       case 0: // My Collections
@@ -110,7 +115,7 @@ export const CollectionsPage: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['collections', activeTab, page, searchQuery, filters],
+    queryKey: ['collections', activeTab, page, searchQuery, filters, !!user],
     queryFn: getCollectionsQuery,
     enabled: activeTab !== 0 || !!user, // Only run for My Collections if user is authenticated
     placeholderData: {
@@ -167,7 +172,9 @@ export const CollectionsPage: React.FC = () => {
 
   // Event handlers
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    // For non-authenticated users, adjust tab index since "My Collections" tab doesn't exist
+    const adjustedValue = !user ? newValue + 1 : newValue;
+    setActiveTab(adjustedValue);
     setPage(1);
   };
 
@@ -362,11 +369,43 @@ export const CollectionsPage: React.FC = () => {
         )}
       </Paper>
 
+      {/* Registration Encouragement for Non-Authenticated Users */}
+      {!user && (
+        <Alert 
+          severity="info" 
+          sx={{ mb: 3 }}
+          action={
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button 
+                color="inherit" 
+                size="small" 
+                variant="outlined"
+                href="/login"
+              >
+                Sign In
+              </Button>
+              <Button 
+                color="inherit" 
+                size="small" 
+                variant="contained"
+                href="/register"
+              >
+                Sign Up
+              </Button>
+            </Box>
+          }
+        >
+          <Typography variant="body2">
+            <strong>Discover amazing collections!</strong> Sign up to create your own collections, save favorites, and unlock access to model details within collections.
+          </Typography>
+        </Alert>
+      )}
+
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label='My Collections' />
-          <Tab label='Public Collections' />
+        <Tabs value={!user ? activeTab - 1 : activeTab} onChange={handleTabChange}>
+          {user && <Tab label='My Collections' />}
+          <Tab label={user ? 'Public Collections' : 'Collections'} />
         </Tabs>
       </Box>
 
@@ -378,21 +417,8 @@ export const CollectionsPage: React.FC = () => {
       )}
 
       {/* Tab Panels */}
-      <TabPanel value={activeTab} index={0}>
-        {!user ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant='h6' gutterBottom>
-              Sign in to view your collections
-            </Typography>
-            <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-              You need to be logged in to view and manage your personal
-              collections.
-            </Typography>
-            <Button variant='contained' href='/login'>
-              Sign In
-            </Button>
-          </Box>
-        ) : (
+      {user && (
+        <TabPanel value={activeTab} index={0}>
           <CollectionGrid
             collections={safeCollectionsData}
             loading={isLoading}
@@ -404,8 +430,8 @@ export const CollectionsPage: React.FC = () => {
             emptySubMessage='Create your first collection to organize your Warhammer models'
             viewMode={viewMode}
           />
-        )}
-      </TabPanel>
+        </TabPanel>
+      )}
 
       <TabPanel value={activeTab} index={1}>
         <CollectionGrid

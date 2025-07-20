@@ -412,7 +412,7 @@ router.get(
 
 /**
  * GET /api/v1/collections/:id
- * Get collection by ID
+ * Get collection by ID (authenticated users)
  */
 router.get(
   '/:id',
@@ -440,6 +440,54 @@ router.get(
       res.json({
         success: true,
         data: collection,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/v1/collections/:id/public
+ * Get public collection by ID (no authentication required)
+ */
+router.get(
+  '/:id/public',
+  validateCollectionId,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const collectionId = req.params.id;
+
+      const collection = await collectionService.getCollectionById(
+        collectionId
+      );
+
+      if (!collection) {
+        throw new AppError('Collection not found', 404);
+      }
+
+      // For public access, remove sensitive model details but keep overview
+      const sanitizedCollection = {
+        ...collection,
+        userModels: collection.userModels?.map(model => ({
+          id: model.id,
+          customName: model.customName,
+          model: {
+            id: model.model?.id,
+            name: model.model?.name,
+            gameSystem: model.model?.gameSystem,
+            faction: model.model?.faction,
+          },
+          photos: model.photos?.slice(0, 1), // Only show first photo
+          createdAt: model.createdAt,
+          // Remove sensitive fields like purchase price, notes, etc.
+        }))
+      };
+
+      res.json({
+        success: true,
+        data: sanitizedCollection,
       });
     } catch (error) {
       next(error);
