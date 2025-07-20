@@ -50,17 +50,23 @@ export class LibraryModelService {
       where.isOfficial = filters.isOfficial;
     }
 
-    if (filters.tags && filters.tags.length > 0) {
-      where.tags = {
-        hasEvery: filters.tags,
-      };
-    }
+    // Store tag filters separately for case-insensitive processing
+    const tagFilters =
+      filters.tags && filters.tags.length > 0 ? filters.tags : null;
+
+    // Remove tags from the main where clause for now
+    // We'll filter by tags after the query for case-insensitive matching
+    // if (filters.tags && filters.tags.length > 0) {
+    //   where.tags = {
+    //     hasEvery: filters.tags,
+    //   };
+    // }
 
     // Get total count
     const total = await this.prisma.model.count({ where });
 
     // Get paginated data
-    const models = await this.prisma.model.findMany({
+    let models = await this.prisma.model.findMany({
       where,
       include: {
         gameSystem: true,
@@ -74,13 +80,27 @@ export class LibraryModelService {
       ],
     });
 
+    // Apply case-insensitive tag filtering if tags were specified
+    if (tagFilters) {
+      models = models.filter(model => {
+        return tagFilters.some(filterTag =>
+          model.tags.some(modelTag =>
+            modelTag.toLowerCase().includes(filterTag.toLowerCase())
+          )
+        );
+      });
+    }
+
+    // Recalculate total after filtering
+    const filteredTotal = tagFilters ? models.length : total;
+
     return {
       data: models,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: filteredTotal,
+        totalPages: Math.ceil(filteredTotal / limit),
       },
     };
   }

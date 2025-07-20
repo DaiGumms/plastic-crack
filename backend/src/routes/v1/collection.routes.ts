@@ -4,7 +4,7 @@
  * Implements Issue #19 acceptance criteria
  */
 
-import { Router, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 
 import { prisma } from '../../lib/database';
@@ -230,8 +230,73 @@ router.get(
             ? (req.query.tags as string[])
             : [req.query.tags as string]
           : undefined,
+        factionIds: req.query.factionIds
+          ? Array.isArray(req.query.factionIds)
+            ? (req.query.factionIds as string[])
+            : [req.query.factionIds as string]
+          : undefined,
         userId: req.query.userId as string,
         gameSystem: req.query.gameSystem as string,
+      };
+
+      const pagination = {
+        page: req.query.page ? parseInt(req.query.page as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
+        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc',
+      };
+
+      const result = await collectionService.getCollections(
+        filters,
+        pagination
+      );
+
+      // Return paginated response format expected by frontend
+      res.json({
+        success: true,
+        data: result.collections,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/v1/collections/public
+ * Get public collections (no authentication required)
+ */
+router.get(
+  '/public',
+  validatePagination,
+  handleValidationErrors,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        search: req.query.search as string,
+        isPublic: true, // Force public only
+        tags: req.query.tags
+          ? Array.isArray(req.query.tags)
+            ? (req.query.tags as string[])
+            : [req.query.tags as string]
+          : undefined,
+        factionIds: req.query.factionIds
+          ? Array.isArray(req.query.factionIds)
+            ? (req.query.factionIds as string[])
+            : [req.query.factionIds as string]
+          : undefined,
+        userId: req.query.userId as string,
+        gameSystem: req.query.gameSystem as string,
+        startDate: req.query.startDate as string,
+        endDate: req.query.endDate as string,
       };
 
       const pagination = {
@@ -412,7 +477,7 @@ router.get(
 
 /**
  * GET /api/v1/collections/:id
- * Get collection by ID
+ * Get collection by ID (authenticated users)
  */
 router.get(
   '/:id',
@@ -440,6 +505,53 @@ router.get(
       res.json({
         success: true,
         data: collection,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/v1/collections/:id/public
+ * Get public collection by ID (no authentication required)
+ */
+router.get(
+  '/:id/public',
+  validateCollectionId,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const collectionId = req.params.id;
+
+      const collection =
+        await collectionService.getCollectionById(collectionId);
+
+      if (!collection) {
+        throw new AppError('Collection not found', 404);
+      }
+
+      // For public access, remove sensitive model details but keep overview
+      const sanitizedCollection = {
+        ...collection,
+        userModels: collection.userModels?.map(model => ({
+          id: model.id,
+          customName: model.customName,
+          model: {
+            id: model.model?.id,
+            name: model.model?.name,
+            gameSystem: model.model?.gameSystem,
+            faction: model.model?.faction,
+          },
+          photos: model.photos?.slice(0, 1), // Only show first photo
+          createdAt: model.createdAt,
+          // Remove sensitive fields like purchase price, notes, etc.
+        })),
+      };
+
+      res.json({
+        success: true,
+        data: sanitizedCollection,
       });
     } catch (error) {
       next(error);
@@ -535,6 +647,53 @@ router.delete(
       res.json({
         success: true,
         message: 'Collection deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /users/search - Search for users by username
+ * Public endpoint for user autocomplete
+ */
+router.get(
+  '/users/search',
+  [
+    query('q')
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Search query is required'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage('Limit must be between 1 and 20'),
+  ],
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array(),
+        });
+      }
+
+      const { q: query, limit = 10 } = req.query as {
+        q: string;
+        limit?: string;
+      };
+
+      const users = await collectionService.searchUsers(
+        query,
+        parseInt(limit as string, 10)
+      );
+
+      res.json({
+        success: true,
+        data: users,
       });
     } catch (error) {
       next(error);

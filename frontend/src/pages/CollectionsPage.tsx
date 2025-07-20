@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -24,6 +24,10 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { Autocomplete } from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -31,16 +35,23 @@ import {
   ViewList as ListViewIcon,
   ViewModule as GridViewIcon,
   Clear as ClearIcon,
+  Person as PersonIcon,
+  LocalOffer as TagIcon,
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CollectionGrid } from '../components/collections/CollectionGrid';
 import { CollectionForm } from '../components/collections/CollectionForm';
 import CollectionService from '../services/collectionService';
+import GameSystemService, {
+  type Faction,
+  type GameSystem,
+} from '../services/gameSystemService';
 import type {
   Collection,
   CreateCollectionData,
   UpdateCollectionData,
   CollectionFilter,
+  UserSearchResult,
 } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import {
@@ -66,7 +77,7 @@ export const CollectionsPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   // State
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(user ? 0 : 1); // Non-authenticated users start on public collections
   const [viewMode, setViewMode] = useState<ViewMode>(getPersistedViewMode());
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,11 +98,88 @@ export const CollectionsPage: React.FC = () => {
   } | null>(null);
   const [loadingDeletionInfo, setLoadingDeletionInfo] = useState(false);
 
+  // Additional filter states
+  const [tagInput, setTagInput] = useState('');
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(
+    null
+  );
+  const [userSearchOptions, setUserSearchOptions] = useState<
+    UserSearchResult[]
+  >([]);
+  const [selectedFactions, setSelectedFactions] = useState<Faction[]>([]);
+  const [availableFactions, setAvailableFactions] = useState<Faction[]>([]);
+  const [availableGameSystems, setAvailableGameSystems] = useState<
+    GameSystem[]
+  >([]);
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
+
   const limit = 12;
 
-  // Determine which collections to fetch based on active tab
+  // Load available game systems on component mount
+  useEffect(() => {
+    const loadGameSystems = async () => {
+      try {
+        const gameSystems = await GameSystemService.getGameSystems();
+        setAvailableGameSystems(gameSystems || []);
+      } catch (error) {
+        console.error('Failed to load game systems:', error);
+      }
+    };
+
+    loadGameSystems();
+  }, []);
+
+  // Load available factions when game system filter changes
+  useEffect(() => {
+    const loadFactions = async () => {
+      if (!filters.gameSystem) {
+        setAvailableFactions([]);
+        setSelectedFactions([]);
+        return;
+      }
+
+      // Find the game system ID from the short name
+      const gameSystem = availableGameSystems.find(
+        gs => gs.shortName === filters.gameSystem
+      );
+      if (!gameSystem) {
+        setAvailableFactions([]);
+        setSelectedFactions([]);
+        return;
+      }
+
+      try {
+        const factions = await GameSystemService.getFactions(gameSystem.id);
+        setAvailableFactions(factions);
+        // Clear selected factions when game system changes
+        setSelectedFactions([]);
+      } catch (error) {
+        console.error('Failed to load factions:', error);
+        setAvailableFactions([]);
+        setSelectedFactions([]);
+      }
+    };
+
+    loadFactions();
+  }, [filters.gameSystem, availableGameSystems]);
+
+  // Update filters when factions are selected
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      factionIds: selectedFactions.map(faction => faction.id),
+    }));
+  }, [selectedFactions]);
+
+  // Determine which collections to fetch based on active tab and authentication
   const getCollectionsQuery = () => {
     const baseFilters = { ...filters, search: searchQuery || undefined };
+
+    // For non-authenticated users, always show public collections
+    if (!user) {
+      return CollectionService.getPublicCollections(page, limit, baseFilters);
+    }
 
     switch (activeTab) {
       case 0: // My Collections
@@ -110,7 +198,7 @@ export const CollectionsPage: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['collections', activeTab, page, searchQuery, filters],
+    queryKey: ['collections', activeTab, page, searchQuery, filters, !!user],
     queryFn: getCollectionsQuery,
     enabled: activeTab !== 0 || !!user, // Only run for My Collections if user is authenticated
     placeholderData: {
@@ -167,7 +255,9 @@ export const CollectionsPage: React.FC = () => {
 
   // Event handlers
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    // For non-authenticated users, adjust tab index since "My Collections" tab doesn't exist
+    const adjustedValue = !user ? newValue + 1 : newValue;
+    setActiveTab(adjustedValue);
     setPage(1);
   };
 
@@ -243,6 +333,11 @@ export const CollectionsPage: React.FC = () => {
 
   const handleClearFilters = () => {
     setFilters({});
+    setTagInput('');
+    setSelectedUser(null);
+    setSelectedFactions([]);
+    setDateFrom(null);
+    setDateTo(null);
     setPage(1);
     setFilterMenuAnchor(null);
   };
@@ -252,6 +347,29 @@ export const CollectionsPage: React.FC = () => {
       filters[key as keyof CollectionFilter] !== undefined &&
       filters[key as keyof CollectionFilter] !== ''
   ).length;
+
+  // User search functionality
+  const handleUserSearch = async (query: string) => {
+    if (query.length < 2) {
+      setUserSearchOptions([]);
+      return;
+    }
+
+    try {
+      const users = await CollectionService.searchUsers(query, 10);
+      setUserSearchOptions(users);
+    } catch (error) {
+      console.error('Failed to search users:', error);
+      setUserSearchOptions([]);
+    }
+  };
+
+  const handleUsersChange = (newUser: UserSearchResult | null) => {
+    setSelectedUser(newUser);
+    handleFilterChange({
+      userId: newUser ? newUser.id : undefined,
+    });
+  };
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
@@ -341,6 +459,20 @@ export const CollectionsPage: React.FC = () => {
                 size='small'
               />
             )}
+            {selectedFactions.length > 0 &&
+              selectedFactions.map(faction => (
+                <Chip
+                  key={faction.id}
+                  label={`Faction: ${faction.name}`}
+                  onDelete={() => {
+                    const newSelectedFactions = selectedFactions.filter(
+                      f => f.id !== faction.id
+                    );
+                    setSelectedFactions(newSelectedFactions);
+                  }}
+                  size='small'
+                />
+              ))}
             {filters.tags &&
               filters.tags.length > 0 &&
               filters.tags.map(tag => (
@@ -355,6 +487,36 @@ export const CollectionsPage: React.FC = () => {
                   size='small'
                 />
               ))}
+            {filters.userId && selectedUser && (
+              <Chip
+                label={`Creator: ${selectedUser.username}`}
+                onDelete={() => {
+                  setSelectedUser(null);
+                  handleFilterChange({ userId: undefined });
+                }}
+                size='small'
+              />
+            )}
+            {filters.createdAfter && (
+              <Chip
+                label={`From: ${new Date(filters.createdAfter).toLocaleDateString()}`}
+                onDelete={() => {
+                  setDateFrom(null);
+                  handleFilterChange({ createdAfter: undefined });
+                }}
+                size='small'
+              />
+            )}
+            {filters.createdBefore && (
+              <Chip
+                label={`To: ${new Date(filters.createdBefore).toLocaleDateString()}`}
+                onDelete={() => {
+                  setDateTo(null);
+                  handleFilterChange({ createdBefore: undefined });
+                }}
+                size='small'
+              />
+            )}
             <Button size='small' onClick={handleClearFilters}>
               Clear All
             </Button>
@@ -362,11 +524,48 @@ export const CollectionsPage: React.FC = () => {
         )}
       </Paper>
 
+      {/* Registration Encouragement for Non-Authenticated Users */}
+      {!user && (
+        <Alert
+          severity='info'
+          sx={{ mb: 3 }}
+          action={
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                color='inherit'
+                size='small'
+                variant='outlined'
+                href='/login'
+              >
+                Sign In
+              </Button>
+              <Button
+                color='inherit'
+                size='small'
+                variant='contained'
+                href='/register'
+              >
+                Sign Up
+              </Button>
+            </Box>
+          }
+        >
+          <Typography variant='body2'>
+            <strong>Discover amazing collections!</strong> Sign up to create
+            your own collections, save favorites, and unlock access to model
+            details within collections.
+          </Typography>
+        </Alert>
+      )}
+
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label='My Collections' />
-          <Tab label='Public Collections' />
+        <Tabs
+          value={!user ? activeTab - 1 : activeTab}
+          onChange={handleTabChange}
+        >
+          {user && <Tab label='My Collections' />}
+          <Tab label={user ? 'Public Collections' : 'Collections'} />
         </Tabs>
       </Box>
 
@@ -378,21 +577,8 @@ export const CollectionsPage: React.FC = () => {
       )}
 
       {/* Tab Panels */}
-      <TabPanel value={activeTab} index={0}>
-        {!user ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant='h6' gutterBottom>
-              Sign in to view your collections
-            </Typography>
-            <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-              You need to be logged in to view and manage your personal
-              collections.
-            </Typography>
-            <Button variant='contained' href='/login'>
-              Sign In
-            </Button>
-          </Box>
-        ) : (
+      {user && (
+        <TabPanel value={activeTab} index={0}>
           <CollectionGrid
             collections={safeCollectionsData}
             loading={isLoading}
@@ -404,8 +590,8 @@ export const CollectionsPage: React.FC = () => {
             emptySubMessage='Create your first collection to organize your Warhammer models'
             viewMode={viewMode}
           />
-        )}
-      </TabPanel>
+        </TabPanel>
+      )}
 
       <TabPanel value={activeTab} index={1}>
         <CollectionGrid
@@ -437,7 +623,7 @@ export const CollectionsPage: React.FC = () => {
         anchorEl={filterMenuAnchor}
         open={Boolean(filterMenuAnchor)}
         onClose={() => setFilterMenuAnchor(null)}
-        PaperProps={{ sx: { minWidth: 300 } }}
+        PaperProps={{ sx: { minWidth: 350 } }}
       >
         <Box sx={{ p: 2 }}>
           <Typography variant='subtitle2' gutterBottom>
@@ -455,10 +641,203 @@ export const CollectionsPage: React.FC = () => {
               label='Game System'
             >
               <MenuItem value=''>All Systems</MenuItem>
-              <MenuItem value='W40K'>Warhammer 40,000</MenuItem>
-              <MenuItem value='AOS'>Age of Sigmar</MenuItem>
+              {availableGameSystems.map(gameSystem => (
+                <MenuItem key={gameSystem.id} value={gameSystem.shortName}>
+                  {gameSystem.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
+
+          <Autocomplete
+            multiple
+            options={availableFactions}
+            value={selectedFactions}
+            onChange={(_, newValue) => {
+              setSelectedFactions(newValue);
+            }}
+            getOptionLabel={option => option.name}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => {
+                const { key, ...tagProps } = getTagProps({ index });
+                return (
+                  <Chip
+                    key={key}
+                    variant='outlined'
+                    label={option.name}
+                    size='small'
+                    {...tagProps}
+                  />
+                );
+              })
+            }
+            renderInput={params => (
+              <TextField
+                {...params}
+                label='Factions'
+                placeholder={
+                  filters.gameSystem
+                    ? 'Select factions...'
+                    : 'Select a game system first'
+                }
+                helperText={
+                  filters.gameSystem
+                    ? 'Filter collections by factions'
+                    : 'Game system must be selected first'
+                }
+                disabled={!filters.gameSystem}
+              />
+            )}
+            sx={{ mb: 2 }}
+            fullWidth
+            disabled={!filters.gameSystem}
+          />
+
+          <TextField
+            fullWidth
+            label='Tags'
+            placeholder='Enter tags separated by commas'
+            value={tagInput}
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                const newTags = tagInput
+                  .split(',')
+                  .map(tag => tag.trim())
+                  .filter(tag => tag.length > 0);
+                if (newTags.length > 0) {
+                  const existingTags = filters.tags || [];
+                  const uniqueTags = [
+                    ...new Set([...existingTags, ...newTags]),
+                  ];
+                  handleFilterChange({ tags: uniqueTags });
+                  setTagInput('');
+                }
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <TagIcon />
+                </InputAdornment>
+              ),
+            }}
+            helperText='Press Enter to add tags'
+            sx={{ mb: 2 }}
+          />
+
+          {filters.tags && filters.tags.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant='caption' color='text.secondary' gutterBottom>
+                Selected Tags:
+              </Typography>
+              <Box
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}
+              >
+                {filters.tags.map(tag => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size='small'
+                    onDelete={() =>
+                      handleFilterChange({
+                        tags: filters.tags?.filter(t => t !== tag),
+                      })
+                    }
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          <Autocomplete
+            options={userSearchOptions}
+            value={selectedUser}
+            onChange={(_, newValue) => handleUsersChange(newValue)}
+            onInputChange={(_, newInputValue) => {
+              handleUserSearch(newInputValue);
+            }}
+            getOptionLabel={option => option.username}
+            renderOption={(props, option) => (
+              <Box component='li' {...props}>
+                <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                <Box>
+                  <Typography variant='body2'>{option.username}</Typography>
+                  {option.displayName && (
+                    <Typography variant='caption' color='text.secondary'>
+                      {option.displayName}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            )}
+            renderInput={params => (
+              <TextField
+                {...params}
+                label='Creator Username'
+                placeholder='Search for a creator...'
+                helperText='Search for a user by username'
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <InputAdornment position='start'>
+                        <PersonIcon />
+                      </InputAdornment>
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            sx={{ mb: 2 }}
+            fullWidth
+          />
+
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Typography variant='subtitle2' sx={{ mb: 1 }}>
+              Published Date Range
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <DatePicker
+                label='From'
+                value={dateFrom}
+                onChange={newValue => {
+                  setDateFrom(newValue);
+                  if (newValue) {
+                    handleFilterChange({
+                      createdAfter: newValue.toISOString(),
+                    });
+                  } else {
+                    handleFilterChange({ createdAfter: undefined });
+                  }
+                }}
+                slotProps={{
+                  textField: { size: 'small', fullWidth: true },
+                }}
+              />
+              <DatePicker
+                label='To'
+                value={dateTo}
+                onChange={newValue => {
+                  setDateTo(newValue);
+                  if (newValue) {
+                    // Set to end of day
+                    const endOfDay = new Date(newValue);
+                    endOfDay.setHours(23, 59, 59, 999);
+                    handleFilterChange({
+                      createdBefore: endOfDay.toISOString(),
+                    });
+                  } else {
+                    handleFilterChange({ createdBefore: undefined });
+                  }
+                }}
+                slotProps={{
+                  textField: { size: 'small', fullWidth: true },
+                }}
+              />
+            </Box>
+          </LocalizationProvider>
 
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
             <Button size='small' onClick={handleClearFilters}>

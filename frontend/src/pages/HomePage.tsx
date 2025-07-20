@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 import { SEOHead, SEOConfigs } from '../components/seo/SEOHead';
+import { CollectionCarousel } from '../components/CollectionCarousel';
 
 export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -250,6 +251,31 @@ export const HomePage: React.FC = () => {
           ))}
         </Box>
       </Container>
+
+      {/* Recent Collections Carousel */}
+      <Box
+        sx={{
+          backgroundColor: alpha(theme.palette.primary.main, 0.02),
+          py: { xs: 4, md: 6 },
+        }}
+      >
+        <Container maxWidth='lg'>
+          <Box textAlign='center' mb={4}>
+            <Typography variant='h3' component='h2' gutterBottom>
+              Recent Collections
+            </Typography>
+            <Typography
+              variant='h6'
+              color='text.secondary'
+              sx={{ maxWidth: 600, mx: 'auto' }}
+            >
+              Discover what the community has been working on lately
+            </Typography>
+          </Box>
+
+          <CollectionCarousel limit={8} />
+        </Container>
+      </Box>
 
       {/* Coming Soon Section */}
       <Box

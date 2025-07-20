@@ -118,21 +118,10 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path='/collections'
-                  element={
-                    <ProtectedRoute>
-                      <CollectionsPage />
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path='/collections' element={<CollectionsPage />} />
                 <Route
                   path='/collections/:id'
-                  element={
-                    <ProtectedRoute>
-                      <CollectionDetailPage />
-                    </ProtectedRoute>
-                  }
+                  element={<CollectionDetailPage />}
                 />
                 <Route
                   path='/models'

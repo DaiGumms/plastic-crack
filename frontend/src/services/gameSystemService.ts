@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse } from '../types';
+import type { ApiResponse } from '../types';
 import api from './api';
 
 export interface GameSystem {
@@ -16,15 +16,17 @@ export interface Faction {
   name: string;
   gameSystemId: string;
   description?: string;
+  isActive: boolean;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
 
 class GameSystemService {
-  private baseUrl = '/api/v1/game-systems';
+  private baseUrl = '/game-systems';
 
-  async getGameSystems(): Promise<PaginatedResponse<GameSystem>> {
-    const response = await api.get<PaginatedResponse<GameSystem>>(this.baseUrl);
+  async getGameSystems(): Promise<GameSystem[]> {
+    const response = await api.get<GameSystem[]>(this.baseUrl);
     return response.data;
   }
 
@@ -39,17 +41,14 @@ class GameSystemService {
   }
 
   async getFactions(gameSystemId: string): Promise<Faction[]> {
-    const response = await api.get<ApiResponse<Faction[]>>(
+    const response = await api.get<Faction[]>(
       `${this.baseUrl}/${gameSystemId}/factions`
     );
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to fetch factions');
-    }
-    return response.data.data;
+    return response.data;
   }
 
   async getAllFactions(): Promise<Faction[]> {
-    const response = await api.get<ApiResponse<Faction[]>>('/api/v1/factions');
+    const response = await api.get<ApiResponse<Faction[]>>('/factions');
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch factions');
     }

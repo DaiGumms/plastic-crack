@@ -17,12 +17,16 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Autocomplete,
 } from '@mui/material';
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ImageInput } from '../ui/ImageInput';
+import GameSystemService, {
+  type Faction,
+} from '../../services/gameSystemService';
 import type {
   Collection,
   CreateCollectionData,
@@ -74,6 +78,8 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   const isEditing = Boolean(collection);
   const [tags, setTags] = useState<string[]>(collection?.tags || []);
   const [newTag, setNewTag] = useState('');
+  const [availableFactions, setAvailableFactions] = useState<Faction[]>([]);
+  const [selectedFactions, setSelectedFactions] = useState<Faction[]>([]);
 
   // Convert database game system to frontend ID for editing
   const getDefaultGameSystem = useCallback(() => {
@@ -111,11 +117,88 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
     });
 
     setTags(collection?.tags || []);
+
+    // Convert collection factions to GameSystemService faction format
+    const convertedFactions = (collection?.factions || []).map(faction => ({
+      id: faction.id,
+      name: faction.name,
+      gameSystemId: collection?.gameSystemId || '',
+      description: undefined,
+      isActive: faction.isActive,
+      sortOrder: 0,
+      createdAt: '',
+      updatedAt: '',
+    }));
+    setSelectedFactions(convertedFactions);
   }, [collection, reset, getDefaultGameSystem]);
+
+  // Load factions when form opens and collection has a game system
+  useEffect(() => {
+    const loadFactions = async () => {
+      if (!open || !collection?.gameSystem?.id) {
+        setAvailableFactions([]);
+        return;
+      }
+
+      try {
+        const factions = await GameSystemService.getFactions(
+          collection.gameSystem.id
+        );
+        setAvailableFactions(factions);
+      } catch (error) {
+        console.error('Failed to load factions:', error);
+        setAvailableFactions([]);
+      }
+    };
+
+    loadFactions();
+  }, [open, collection?.gameSystem?.id]);
+
+  // Watch game system field for new collections to load factions
+  const watchedGameSystem = useWatch({
+    control,
+    name: 'gameSystem',
+  });
+
+  // Load factions when game system changes for new collections
+  useEffect(() => {
+    const loadFactionsForNewCollection = async () => {
+      if (isEditing || !watchedGameSystem || !open) {
+        return;
+      }
+
+      try {
+        // Convert frontend game system ID to database ID
+        const gameSystemId = await getGameSystemDbId(watchedGameSystem);
+        const factions = await GameSystemService.getFactions(gameSystemId);
+        setAvailableFactions(factions);
+        // Clear selected factions when game system changes
+        setSelectedFactions([]);
+      } catch (error) {
+        console.error('Failed to load factions:', error);
+        setAvailableFactions([]);
+        setSelectedFactions([]);
+      }
+    };
+
+    loadFactionsForNewCollection();
+  }, [watchedGameSystem, isEditing, open]);
 
   const handleClose = () => {
     reset();
     setTags(collection?.tags || []);
+    // Convert collection factions to GameSystemService faction format
+    const convertedFactions = (collection?.factions || []).map(faction => ({
+      id: faction.id,
+      name: faction.name,
+      gameSystemId: collection?.gameSystemId || '',
+      description: undefined,
+      isActive: faction.isActive,
+      sortOrder: 0,
+      createdAt: '',
+      updatedAt: '',
+    }));
+    setSelectedFactions(convertedFactions);
     setNewTag('');
     onClose();
   };
@@ -131,6 +214,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
         submitData = {
           ...restData,
           gameSystemId: collection.gameSystemId,
+          factionIds: selectedFactions.map(faction => faction.id),
           tags,
           // Remove empty strings
           description: restData.description?.trim() || undefined,
@@ -142,6 +226,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
         submitData = {
           ...restData,
           gameSystemId,
+          factionIds: selectedFactions.map(faction => faction.id),
           tags,
           // Remove empty strings
           description: restData.description?.trim() || undefined,
@@ -285,6 +370,45 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                 )}
               />
             )}
+
+            {/* Factions */}
+            {(isEditing && collection?.gameSystem) ||
+            (!isEditing && availableFactions.length > 0) ? (
+              <Autocomplete
+                multiple
+                options={availableFactions}
+                value={selectedFactions}
+                onChange={(_, newValue) => {
+                  setSelectedFactions(newValue);
+                }}
+                getOptionLabel={option => option.name}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key}
+                        variant='outlined'
+                        label={option.name}
+                        size='small'
+                        {...tagProps}
+                      />
+                    );
+                  })
+                }
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label='Factions'
+                    placeholder='Select factions (optional)...'
+                    helperText='Choose factions associated with this collection'
+                    disabled={loading}
+                  />
+                )}
+                disabled={loading}
+                fullWidth
+              />
+            ) : null}
 
             {/* Description */}
             <Controller

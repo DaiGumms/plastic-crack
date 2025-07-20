@@ -128,6 +128,7 @@ model Faction {
   // Relations
   gameSystem   GameSystem @relation(fields: [gameSystemId], references: [id])
   models       Model[]
+  collections  Collection[] // Many-to-many with collections
   
   @@unique([name, gameSystemId])
   @@map("factions")
@@ -157,6 +158,7 @@ model Collection {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   gameSystem   GameSystem @relation(fields: [gameSystemId], references: [id])
   userModels   UserModel[]
+  factions     Faction[]  // Many-to-many with factions
   
   @@map("collections")
 }
@@ -235,7 +237,8 @@ model UserModel {
   likes         UserModelLike[]
   modelTags     UserModelTag[]
   
-  @@unique([modelId, collectionId]) // User can only have one instance of a model per collection
+  // Note: Removed unique constraint to allow multiple instances of same model
+  // Users may want multiple copies for different paint schemes, conversions, etc.
   @@map("user_models")
 }
 

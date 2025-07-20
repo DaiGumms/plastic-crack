@@ -212,6 +212,7 @@ export interface Collection {
     description?: string;
     publisher?: string;
   };
+  factions?: Faction[];
   tags: string[];
   imageUrl?: string;
   createdAt: string;
@@ -235,6 +236,7 @@ export interface CreateCollectionData {
   description?: string;
   isPublic?: boolean;
   gameSystemId: string;
+  factionIds?: string[];
   tags?: string[];
   imageUrl?: string;
 }
@@ -244,6 +246,7 @@ export interface UpdateCollectionData {
   description?: string;
   isPublic?: boolean;
   gameSystemId?: string;
+  factionIds?: string[];
   tags?: string[];
   imageUrl?: string;
 }
@@ -254,6 +257,16 @@ export interface CollectionFilter {
   tags?: string[];
   userId?: string;
   gameSystem?: string;
+  factionIds?: string[];
+  createdAfter?: string;
+  createdBefore?: string;
+}
+
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  displayName: string | null;
+  profileImageUrl: string | null;
 }
 
 export interface CollectionStats {

@@ -4,6 +4,7 @@ import type {
   UpdateCollectionData,
   CollectionFilter,
   CollectionStats,
+  UserSearchResult,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
@@ -34,6 +35,15 @@ export class CollectionService {
     if (filters.tags && filters.tags.length > 0) {
       filters.tags.forEach(tag => params.append('tags', tag));
     }
+    if (filters.factionIds && filters.factionIds.length > 0) {
+      filters.factionIds.forEach(factionId =>
+        params.append('factionIds', factionId)
+      );
+    }
+    if (filters.createdAfter)
+      params.append('createdAfter', filters.createdAfter);
+    if (filters.createdBefore)
+      params.append('createdBefore', filters.createdBefore);
 
     const response = await api.get<PaginatedResponse<Collection>>(
       `${CollectionService.BASE_PATH}?${params.toString()}`
@@ -77,7 +87,30 @@ export class CollectionService {
     limit = 10,
     filters: Omit<CollectionFilter, 'isPublic'> = {}
   ): Promise<PaginatedResponse<Collection>> {
-    return this.getCollections(page, limit, { ...filters, isPublic: true });
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    // Add filters to params
+    if (filters.search) params.append('search', filters.search);
+    if (filters.userId) params.append('userId', filters.userId);
+    if (filters.gameSystem) params.append('gameSystem', filters.gameSystem);
+    if (filters.tags && filters.tags.length > 0) {
+      filters.tags.forEach(tag => params.append('tags', tag));
+    }
+    if (filters.factionIds && filters.factionIds.length > 0) {
+      filters.factionIds.forEach(factionId =>
+        params.append('factionIds', factionId)
+      );
+    }
+    if (filters.createdAfter) params.append('startDate', filters.createdAfter);
+    if (filters.createdBefore) params.append('endDate', filters.createdBefore);
+
+    const response = await api.get<PaginatedResponse<Collection>>(
+      `${CollectionService.BASE_PATH}/public?${params.toString()}`
+    );
+    return response.data;
   }
 
   /**
@@ -86,6 +119,19 @@ export class CollectionService {
   static async getCollection(id: string): Promise<Collection> {
     const response = await api.get<ApiResponse<Collection>>(
       `${CollectionService.BASE_PATH}/${id}`
+    );
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to fetch collection');
+    }
+    return response.data.data;
+  }
+
+  /**
+   * Get a public collection by ID (no authentication required)
+   */
+  static async getPublicCollection(id: string): Promise<Collection> {
+    const response = await api.get<ApiResponse<Collection>>(
+      `${CollectionService.BASE_PATH}/${id}/public`
     );
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to fetch collection');
@@ -290,6 +336,33 @@ export class CollectionService {
         response.data.message || 'Failed to fetch collection tags'
       );
     }
+    return response.data.data;
+  }
+
+  /**
+   * Search for users by username for autocomplete
+   */
+  static async searchUsers(
+    query: string,
+    limit = 10
+  ): Promise<UserSearchResult[]> {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const params = new URLSearchParams({
+      q: query.trim(),
+      limit: limit.toString(),
+    });
+
+    const response = await api.get<ApiResponse<UserSearchResult[]>>(
+      `${CollectionService.BASE_PATH}/users/search?${params.toString()}`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to search users');
+    }
+
     return response.data.data;
   }
 }

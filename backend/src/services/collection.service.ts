@@ -12,6 +12,7 @@ export interface CreateCollectionData {
   description?: string;
   isPublic?: boolean;
   gameSystemId: string;
+  factionIds?: string[];
   tags?: string[];
   imageUrl?: string;
 }
@@ -21,6 +22,7 @@ export interface UpdateCollectionData {
   description?: string;
   isPublic?: boolean;
   gameSystemId?: string;
+  factionIds?: string[];
   tags?: string[];
   imageUrl?: string;
 }
@@ -31,6 +33,9 @@ export interface CollectionFilters {
   tags?: string[];
   userId?: string;
   gameSystem?: string;
+  factionIds?: string[];
+  createdAfter?: string;
+  createdBefore?: string;
 }
 
 export interface PaginationOptions {
@@ -66,9 +71,19 @@ export class CollectionService {
     try {
       const collection = await this.prisma.collection.create({
         data: {
-          ...data,
+          name: data.name,
+          description: data.description,
+          isPublic: data.isPublic,
+          gameSystemId: data.gameSystemId,
           userId,
           tags: data.tags || [],
+          imageUrl: data.imageUrl,
+          ...(data.factionIds &&
+            data.factionIds.length > 0 && {
+              factions: {
+                connect: data.factionIds.map(id => ({ id })),
+              },
+            }),
         },
         include: {
           user: {
@@ -86,6 +101,14 @@ export class CollectionService {
               shortName: true,
               description: true,
               publisher: true,
+            },
+          },
+          factions: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              gameSystemId: true,
             },
           },
           _count: {
@@ -146,9 +169,18 @@ export class CollectionService {
       where.isPublic = true;
     }
 
-    if (filters.tags && filters.tags.length > 0) {
-      where.tags = { hasSome: filters.tags };
-    }
+    // Store tag filters separately for case-insensitive processing
+    const tagFilters =
+      filters.tags && filters.tags.length > 0 ? filters.tags : null;
+
+    // Remove tags from the main where clause for now
+    // We'll filter by tags after the query for case-insensitive matching
+    // if (filters.tags && filters.tags.length > 0) {
+    //   // For case-insensitive tag filtering, we'll fetch all collections first
+    //   // and filter programmatically since Prisma doesn't support case-insensitive array operations
+    //   // This is a temporary solution - for better performance, consider using raw SQL
+    //   where.tags = { hasSome: filters.tags };
+    // }
 
     if (filters.userId) {
       where.userId = filters.userId;
@@ -158,6 +190,24 @@ export class CollectionService {
       where.gameSystem = {
         shortName: { equals: filters.gameSystem, mode: 'insensitive' },
       };
+    }
+
+    if (filters.factionIds && filters.factionIds.length > 0) {
+      where.factions = {
+        some: {
+          id: { in: filters.factionIds },
+        },
+      };
+    }
+
+    if (filters.createdAfter || filters.createdBefore) {
+      where.createdAt = {};
+      if (filters.createdAfter) {
+        where.createdAt.gte = new Date(filters.createdAfter);
+      }
+      if (filters.createdBefore) {
+        where.createdAt.lte = new Date(filters.createdBefore);
+      }
     }
 
     // Get total count for pagination
@@ -187,6 +237,14 @@ export class CollectionService {
             publisher: true,
           },
         },
+        factions: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            gameSystemId: true,
+          },
+        },
         _count: {
           select: {
             userModels: true,
@@ -201,7 +259,7 @@ export class CollectionService {
     });
 
     // Calculate total value for each collection
-    const collectionsWithStats: CollectionWithStats[] = collections.map(
+    let collectionsWithStats: CollectionWithStats[] = collections.map(
       collection => {
         const totalValue = collection.userModels.reduce((sum, model) => {
           return sum + (model.purchasePrice?.toNumber() || 0);
@@ -214,11 +272,25 @@ export class CollectionService {
       }
     );
 
-    const totalPages = Math.ceil(total / limit);
+    // Apply case-insensitive tag filtering if tags were specified
+    if (tagFilters) {
+      collectionsWithStats = collectionsWithStats.filter(collection => {
+        return tagFilters.some(filterTag =>
+          collection.tags.some(collectionTag =>
+            collectionTag.toLowerCase().includes(filterTag.toLowerCase())
+          )
+        );
+      });
+    }
+
+    // Recalculate total after filtering
+    const filteredTotal = tagFilters ? collectionsWithStats.length : total;
+
+    const totalPages = Math.ceil(filteredTotal / limit);
 
     return {
       collections: collectionsWithStats,
-      total,
+      total: filteredTotal,
       page,
       limit,
       totalPages,
@@ -250,6 +322,14 @@ export class CollectionService {
             shortName: true,
             description: true,
             publisher: true,
+          },
+        },
+        factions: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            gameSystemId: true,
           },
         },
         userModels: {
@@ -326,8 +406,18 @@ export class CollectionService {
       const updatedCollection = await this.prisma.collection.update({
         where: { id: collectionId },
         data: {
-          ...data,
+          name: data.name,
+          description: data.description,
+          isPublic: data.isPublic,
+          gameSystemId: data.gameSystemId,
+          tags: data.tags,
+          imageUrl: data.imageUrl,
           updatedAt: new Date(),
+          ...(data.factionIds !== undefined && {
+            factions: {
+              set: data.factionIds.map(id => ({ id })),
+            },
+          }),
         },
         include: {
           user: {
@@ -345,6 +435,14 @@ export class CollectionService {
               shortName: true,
               description: true,
               publisher: true,
+            },
+          },
+          factions: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              gameSystemId: true,
             },
           },
           _count: {
@@ -537,5 +635,46 @@ export class CollectionService {
         totalValue: totalValue > 0 ? totalValue : undefined,
       };
     });
+  }
+
+  /**
+   * Search for users by username for autocomplete
+   */
+  async searchUsers(
+    query: string,
+    limit: number = 10
+  ): Promise<
+    Array<{
+      id: string;
+      username: string;
+      displayName: string | null;
+      profileImageUrl: string | null;
+    }>
+  > {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        username: {
+          contains: query.trim(),
+          mode: 'insensitive',
+        },
+        // Remove the isProfilePublic filter - all users should be searchable
+      },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        profileImageUrl: true,
+      },
+      take: limit,
+      orderBy: {
+        username: 'asc',
+      },
+    });
+
+    return users;
   }
 }

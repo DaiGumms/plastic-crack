@@ -19,4 +19,20 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @route GET /api/v1/game-systems/:gameSystemId/factions
+ * @desc Get factions for a specific game system
+ * @access Public
+ */
+router.get('/:gameSystemId/factions', async (req: Request, res: Response) => {
+  try {
+    const { gameSystemId } = req.params;
+    const factions =
+      await gameSystemService.getFactionsByGameSystem(gameSystemId);
+    res.json(factions);
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch factions' });
+  }
+});
+
 export default router;
