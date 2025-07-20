@@ -257,6 +257,7 @@ export interface CollectionFilter {
   tags?: string[];
   userId?: string;
   gameSystem?: string;
+  factionIds?: string[];
   createdAfter?: string;
   createdBefore?: string;
 }

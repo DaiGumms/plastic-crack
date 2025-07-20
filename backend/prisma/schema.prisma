@@ -237,7 +237,8 @@ model UserModel {
   likes         UserModelLike[]
   modelTags     UserModelTag[]
   
-  @@unique([modelId, collectionId]) // User can only have one instance of a model per collection
+  // Note: Removed unique constraint to allow multiple instances of same model
+  // Users may want multiple copies for different paint schemes, conversions, etc.
   @@map("user_models")
 }
 

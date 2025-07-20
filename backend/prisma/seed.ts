@@ -611,6 +611,11 @@ async function main() {
 
   // Sarah's Collection
   if (createdUsers[1] && masterModels.length > 0) {
+    // Get faction for connection
+    const ironHandsFaction = await prisma.faction.findFirst({
+      where: { name: 'Space Marines', gameSystemId: warhammer40k.id },
+    });
+
     const sarahCollection = await prisma.collection.create({
       data: {
         name: 'Tournament Army - Iron Hands',
@@ -620,6 +625,11 @@ async function main() {
         userId: createdUsers[1].id,
         gameSystemId: warhammer40k.id,
         tags: ['Tournament', 'Competitive', 'Iron Hands', 'Meta', 'Space Marines'],
+        ...(ironHandsFaction && {
+          factions: {
+            connect: [{ id: ironHandsFaction.id }],
+          },
+        }),
       },
     });
 
@@ -654,6 +664,9 @@ async function main() {
         userId: createdUsers[2].id,
         gameSystemId: ageOfSigmar.id,
         tags: ['Beginner', 'Learning', 'Stormcast', 'First Army', 'Age of Sigmar'],
+        factions: {
+          connect: [{ id: stormcastFaction.id }],
+        },
       },
     });
 
@@ -673,6 +686,11 @@ async function main() {
 
   // Jane's Collection - Vintage W40K
   if (createdUsers[3] && masterModels.length > 0) {
+    // Get faction for connection
+    const vintageSpaceMarinesFaction = await prisma.faction.findFirst({
+      where: { name: 'Space Marines', gameSystemId: warhammer40k.id },
+    });
+
     const janeCollection = await prisma.collection.create({
       data: {
         name: 'Rogue Trader Classics',
@@ -682,6 +700,11 @@ async function main() {
         userId: createdUsers[3].id,
         gameSystemId: warhammer40k.id,
         tags: ['Vintage', 'Rogue Trader', 'Classic', 'Collector', 'Space Marines'],
+        ...(vintageSpaceMarinesFaction && {
+          factions: {
+            connect: [{ id: vintageSpaceMarinesFaction.id }],
+          },
+        }),
       },
     });
 
@@ -798,6 +821,11 @@ async function main() {
 
   // Gary (Ork Waaagh) Collections
   if (createdUsers[7] && masterModels.length > 0) {
+    // Get faction for connection
+    const orksFaction = await prisma.faction.findFirst({
+      where: { name: 'Orks', gameSystemId: warhammer40k.id },
+    });
+
     const orkCollection1 = await prisma.collection.create({
       data: {
         name: 'Speed Freeks Waaagh',
@@ -807,6 +835,11 @@ async function main() {
         userId: createdUsers[7].id,
         gameSystemId: warhammer40k.id,
         tags: ['Orks', 'Speed Freeks', 'Vehicles', 'Custom', 'Red'],
+        ...(orksFaction && {
+          factions: {
+            connect: [{ id: orksFaction.id }],
+          },
+        }),
       },
     });
 
@@ -819,12 +852,22 @@ async function main() {
         userId: createdUsers[7].id,
         gameSystemId: warhammer40k.id,
         tags: ['Orks', 'Bad Moons', 'Yellow', 'Big Guns', 'Teef'],
+        ...(orksFaction && {
+          factions: {
+            connect: [{ id: orksFaction.id }],
+          },
+        }),
       },
     });
   }
 
   // Silent King (Necron Overlord) Collections
   if (createdUsers[8] && masterModels.length > 0) {
+    // Get faction for connection
+    const necronsFaction = await prisma.faction.findFirst({
+      where: { name: 'Necrons', gameSystemId: warhammer40k.id },
+    });
+
     const necronCollection1 = await prisma.collection.create({
       data: {
         name: 'Sautekh Dynasty',
@@ -834,6 +877,11 @@ async function main() {
         userId: createdUsers[8].id,
         gameSystemId: warhammer40k.id,
         tags: ['Necrons', 'Sautekh', 'Silver', 'Green OSL', 'Classic'],
+        ...(necronsFaction && {
+          factions: {
+            connect: [{ id: necronsFaction.id }],
+          },
+        }),
       },
     });
 
@@ -846,12 +894,25 @@ async function main() {
         userId: createdUsers[8].id,
         gameSystemId: warhammer40k.id,
         tags: ['Necrons', 'Mephrit', 'Orange', 'Destroyers', 'Aggressive'],
+        ...(necronsFaction && {
+          factions: {
+            connect: [{ id: necronsFaction.id }],
+          },
+        }),
       },
     });
   }
 
   // Emma (Tyranid Hive) Collections
   if (createdUsers[9] && masterModels.length > 0) {
+    // Get factions for connection
+    const tyranidsFaction = await prisma.faction.findFirst({
+      where: { name: 'Tyranids', gameSystemId: warhammer40k.id },
+    });
+    const genestealerCultFaction = await prisma.faction.findFirst({
+      where: { name: 'Genestealer Cults', gameSystemId: warhammer40k.id },
+    });
+
     const tyranidCollection1 = await prisma.collection.create({
       data: {
         name: 'Hive Fleet Leviathan',
@@ -861,6 +922,11 @@ async function main() {
         userId: createdUsers[9].id,
         gameSystemId: warhammer40k.id,
         tags: ['Tyranids', 'Hive Fleet', 'Leviathan', 'Purple', 'Carapace'],
+        ...(tyranidsFaction && {
+          factions: {
+            connect: [{ id: tyranidsFaction.id }],
+          },
+        }),
       },
     });
 
@@ -873,6 +939,11 @@ async function main() {
         userId: createdUsers[9].id,
         gameSystemId: warhammer40k.id,
         tags: ['Genestealer Cult', 'Industrial', 'Mining', 'Hidden', 'Infection'],
+        ...(genestealerCultFaction && {
+          factions: {
+            connect: [{ id: genestealerCultFaction.id }],
+          },
+        }),
       },
     });
   }

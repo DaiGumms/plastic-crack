@@ -3,7 +3,7 @@
  * Handles all game system-related business logic and database operations
  */
 
-import { PrismaClient, GameSystem } from '../generated/prisma';
+import { PrismaClient, GameSystem, Faction } from '../generated/prisma';
 
 export class GameSystemService {
   private prisma: PrismaClient;
@@ -41,6 +41,21 @@ export class GameSystemService {
   async getSystemByShortName(shortName: string): Promise<GameSystem | null> {
     return this.prisma.gameSystem.findUnique({
       where: { shortName },
+    });
+  }
+
+  /**
+   * Get factions for a specific game system
+   */
+  async getFactionsByGameSystem(gameSystemId: string): Promise<Faction[]> {
+    return this.prisma.faction.findMany({
+      where: {
+        gameSystemId,
+        isActive: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
     });
   }
 }

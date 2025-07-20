@@ -18,6 +18,8 @@ import {
   Lock as PrivateIcon,
   Palette as PaletteIcon,
   Category as CategoryIcon,
+  Groups as FactionIcon,
+  LocalOffer as TagIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -251,13 +253,47 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           </Typography>
         )}
 
+        {/* Factions */}
+        {collection.factions && collection.factions.length > 0 && (
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              Factions
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {collection.factions.slice(0, 3).map((faction) => (
+                <Chip
+                  key={faction.id}
+                  icon={<FactionIcon sx={{ fontSize: '0.7rem' }} />}
+                  label={faction.name}
+                  size="small"
+                  color="secondary"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              ))}
+              {collection.factions.length > 3 && (
+                <Chip
+                  label={`+${collection.factions.length - 3} more`}
+                  size='small'
+                  variant='outlined'
+                  sx={{ fontSize: '0.75rem', color: 'text.secondary' }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
+
         {/* Tags */}
         {collection.tags && collection.tags.length > 0 && (
           <Box sx={{ mb: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              Tags
+            </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {collection.tags.slice(0, 3).map(tag => (
                 <Chip
                   key={tag}
+                  icon={<TagIcon sx={{ fontSize: '0.7rem' }} />}
                   label={tag}
                   size='small'
                   variant='outlined'

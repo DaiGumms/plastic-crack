@@ -62,13 +62,11 @@ export const Header = () => {
 
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
-    { label: 'Models', path: '/models', icon: <Category /> },
+    { label: 'Collections', path: '/collections', icon: <Collections /> },
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
-          { label: 'Collections', path: '/collections', icon: <Collections /> },
-          { label: 'Profile', path: '/profile', icon: <Person /> },
-          { label: 'Settings', path: '/settings', icon: <Settings /> },
+          { label: 'Models', path: '/models', icon: <Category /> },
         ]
       : []),
   ];

@@ -33,6 +33,7 @@ export interface CollectionFilters {
   tags?: string[];
   userId?: string;
   gameSystem?: string;
+  factionIds?: string[];
   createdAfter?: string;
   createdBefore?: string;
 }
@@ -186,6 +187,14 @@ export class CollectionService {
     if (filters.gameSystem) {
       where.gameSystem = {
         shortName: { equals: filters.gameSystem, mode: 'insensitive' },
+      };
+    }
+
+    if (filters.factionIds && filters.factionIds.length > 0) {
+      where.factions = {
+        some: {
+          id: { in: filters.factionIds },
+        },
       };
     }
 
