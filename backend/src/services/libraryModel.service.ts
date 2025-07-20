@@ -51,8 +51,9 @@ export class LibraryModelService {
     }
 
     // Store tag filters separately for case-insensitive processing
-    const tagFilters = filters.tags && filters.tags.length > 0 ? filters.tags : null;
-    
+    const tagFilters =
+      filters.tags && filters.tags.length > 0 ? filters.tags : null;
+
     // Remove tags from the main where clause for now
     // We'll filter by tags after the query for case-insensitive matching
     // if (filters.tags && filters.tags.length > 0) {
@@ -82,8 +83,8 @@ export class LibraryModelService {
     // Apply case-insensitive tag filtering if tags were specified
     if (tagFilters) {
       models = models.filter(model => {
-        return tagFilters.some(filterTag => 
-          model.tags.some(modelTag => 
+        return tagFilters.some(filterTag =>
+          model.tags.some(modelTag =>
             modelTag.toLowerCase().includes(filterTag.toLowerCase())
           )
         );

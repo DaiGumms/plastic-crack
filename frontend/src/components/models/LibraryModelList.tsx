@@ -140,25 +140,28 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
   );
 
   // Handle filter changes
-  const handleFilterChange = useCallback((newFilters?: Partial<LibraryModelFilters>) => {
-    const updatedFilters: LibraryModelFilters = {
-      search: searchQuery || undefined,
-      gameSystemId: selectedGameSystem || undefined,
-      factionId: selectedFaction || undefined,
-      isOfficial: selectedOfficial ? selectedOfficial === 'true' : undefined,
-      tags: filters.tags,
-      ...newFilters,
-    };
-    setFilters(updatedFilters);
-    onFilterChange?.(updatedFilters);
-  }, [
-    searchQuery,
-    selectedGameSystem,
-    selectedFaction,
-    selectedOfficial,
-    filters.tags,
-    onFilterChange,
-  ]);
+  const handleFilterChange = useCallback(
+    (newFilters?: Partial<LibraryModelFilters>) => {
+      const updatedFilters: LibraryModelFilters = {
+        search: searchQuery || undefined,
+        gameSystemId: selectedGameSystem || undefined,
+        factionId: selectedFaction || undefined,
+        isOfficial: selectedOfficial ? selectedOfficial === 'true' : undefined,
+        tags: filters.tags,
+        ...newFilters,
+      };
+      setFilters(updatedFilters);
+      onFilterChange?.(updatedFilters);
+    },
+    [
+      searchQuery,
+      selectedGameSystem,
+      selectedFaction,
+      selectedOfficial,
+      filters.tags,
+      onFilterChange,
+    ]
+  );
 
   // Apply filters when they change
   useEffect(() => {
@@ -296,16 +299,21 @@ const LibraryModelList: React.FC<LibraryModelListProps> = ({
 
             <TextField
               size='small'
-              label="Tags"
-              placeholder="Enter tags separated by commas"
+              label='Tags'
+              placeholder='Enter tags separated by commas'
               value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  const newTags = tagInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                  const newTags = tagInput
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag.length > 0);
                   if (newTags.length > 0) {
                     const existingTags = filters.tags || [];
-                    const uniqueTags = [...new Set([...existingTags, ...newTags])];
+                    const uniqueTags = [
+                      ...new Set([...existingTags, ...newTags]),
+                    ];
                     handleFilterChange({ tags: uniqueTags });
                     setTagInput('');
                   }

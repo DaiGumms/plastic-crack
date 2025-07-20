@@ -259,20 +259,20 @@ export const HomePage: React.FC = () => {
           py: { xs: 4, md: 6 },
         }}
       >
-        <Container maxWidth="lg">
-          <Box textAlign="center" mb={4}>
-            <Typography variant="h3" component="h2" gutterBottom>
+        <Container maxWidth='lg'>
+          <Box textAlign='center' mb={4}>
+            <Typography variant='h3' component='h2' gutterBottom>
               Recent Collections
             </Typography>
             <Typography
-              variant="h6"
-              color="text.secondary"
+              variant='h6'
+              color='text.secondary'
               sx={{ maxWidth: 600, mx: 'auto' }}
             >
               Discover what the community has been working on lately
             </Typography>
           </Box>
-          
+
           <CollectionCarousel limit={8} />
         </Container>
       </Box>

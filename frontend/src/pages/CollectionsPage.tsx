@@ -42,7 +42,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CollectionGrid } from '../components/collections/CollectionGrid';
 import { CollectionForm } from '../components/collections/CollectionForm';
 import CollectionService from '../services/collectionService';
-import GameSystemService, { type Faction, type GameSystem } from '../services/gameSystemService';
+import GameSystemService, {
+  type Faction,
+  type GameSystem,
+} from '../services/gameSystemService';
 import type {
   Collection,
   CreateCollectionData,
@@ -97,11 +100,17 @@ export const CollectionsPage: React.FC = () => {
 
   // Additional filter states
   const [tagInput, setTagInput] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
-  const [userSearchOptions, setUserSearchOptions] = useState<UserSearchResult[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(
+    null
+  );
+  const [userSearchOptions, setUserSearchOptions] = useState<
+    UserSearchResult[]
+  >([]);
   const [selectedFactions, setSelectedFactions] = useState<Faction[]>([]);
   const [availableFactions, setAvailableFactions] = useState<Faction[]>([]);
-  const [availableGameSystems, setAvailableGameSystems] = useState<GameSystem[]>([]);
+  const [availableGameSystems, setAvailableGameSystems] = useState<
+    GameSystem[]
+  >([]);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
 
@@ -131,7 +140,9 @@ export const CollectionsPage: React.FC = () => {
       }
 
       // Find the game system ID from the short name
-      const gameSystem = availableGameSystems.find(gs => gs.shortName === filters.gameSystem);
+      const gameSystem = availableGameSystems.find(
+        gs => gs.shortName === filters.gameSystem
+      );
       if (!gameSystem) {
         setAvailableFactions([]);
         setSelectedFactions([]);
@@ -157,7 +168,7 @@ export const CollectionsPage: React.FC = () => {
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
-      factionIds: selectedFactions.map(faction => faction.id)
+      factionIds: selectedFactions.map(faction => faction.id),
     }));
   }, [selectedFactions]);
 
@@ -355,8 +366,8 @@ export const CollectionsPage: React.FC = () => {
 
   const handleUsersChange = (newUser: UserSearchResult | null) => {
     setSelectedUser(newUser);
-    handleFilterChange({ 
-      userId: newUser ? newUser.id : undefined 
+    handleFilterChange({
+      userId: newUser ? newUser.id : undefined,
     });
   };
 
@@ -454,7 +465,9 @@ export const CollectionsPage: React.FC = () => {
                   key={faction.id}
                   label={`Faction: ${faction.name}`}
                   onDelete={() => {
-                    const newSelectedFactions = selectedFactions.filter(f => f.id !== faction.id);
+                    const newSelectedFactions = selectedFactions.filter(
+                      f => f.id !== faction.id
+                    );
                     setSelectedFactions(newSelectedFactions);
                   }}
                   size='small'
@@ -513,39 +526,44 @@ export const CollectionsPage: React.FC = () => {
 
       {/* Registration Encouragement for Non-Authenticated Users */}
       {!user && (
-        <Alert 
-          severity="info" 
+        <Alert
+          severity='info'
           sx={{ mb: 3 }}
           action={
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button 
-                color="inherit" 
-                size="small" 
-                variant="outlined"
-                href="/login"
+              <Button
+                color='inherit'
+                size='small'
+                variant='outlined'
+                href='/login'
               >
                 Sign In
               </Button>
-              <Button 
-                color="inherit" 
-                size="small" 
-                variant="contained"
-                href="/register"
+              <Button
+                color='inherit'
+                size='small'
+                variant='contained'
+                href='/register'
               >
                 Sign Up
               </Button>
             </Box>
           }
         >
-          <Typography variant="body2">
-            <strong>Discover amazing collections!</strong> Sign up to create your own collections, save favorites, and unlock access to model details within collections.
+          <Typography variant='body2'>
+            <strong>Discover amazing collections!</strong> Sign up to create
+            your own collections, save favorites, and unlock access to model
+            details within collections.
           </Typography>
         </Alert>
       )}
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs value={!user ? activeTab - 1 : activeTab} onChange={handleTabChange}>
+        <Tabs
+          value={!user ? activeTab - 1 : activeTab}
+          onChange={handleTabChange}
+        >
           {user && <Tab label='My Collections' />}
           <Tab label={user ? 'Public Collections' : 'Collections'} />
         </Tabs>
@@ -623,7 +641,7 @@ export const CollectionsPage: React.FC = () => {
               label='Game System'
             >
               <MenuItem value=''>All Systems</MenuItem>
-              {availableGameSystems.map((gameSystem) => (
+              {availableGameSystems.map(gameSystem => (
                 <MenuItem key={gameSystem.id} value={gameSystem.shortName}>
                   {gameSystem.name}
                 </MenuItem>
@@ -638,27 +656,35 @@ export const CollectionsPage: React.FC = () => {
             onChange={(_, newValue) => {
               setSelectedFactions(newValue);
             }}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={option => option.name}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => {
                 const { key, ...tagProps } = getTagProps({ index });
                 return (
                   <Chip
                     key={key}
-                    variant="outlined"
+                    variant='outlined'
                     label={option.name}
-                    size="small"
+                    size='small'
                     {...tagProps}
                   />
                 );
               })
             }
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
-                label="Factions"
-                placeholder={filters.gameSystem ? "Select factions..." : "Select a game system first"}
-                helperText={filters.gameSystem ? "Filter collections by factions" : "Game system must be selected first"}
+                label='Factions'
+                placeholder={
+                  filters.gameSystem
+                    ? 'Select factions...'
+                    : 'Select a game system first'
+                }
+                helperText={
+                  filters.gameSystem
+                    ? 'Filter collections by factions'
+                    : 'Game system must be selected first'
+                }
                 disabled={!filters.gameSystem}
               />
             )}
@@ -669,16 +695,21 @@ export const CollectionsPage: React.FC = () => {
 
           <TextField
             fullWidth
-            label="Tags"
-            placeholder="Enter tags separated by commas"
+            label='Tags'
+            placeholder='Enter tags separated by commas'
             value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={e => {
               if (e.key === 'Enter') {
-                const newTags = tagInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                const newTags = tagInput
+                  .split(',')
+                  .map(tag => tag.trim())
+                  .filter(tag => tag.length > 0);
                 if (newTags.length > 0) {
                   const existingTags = filters.tags || [];
-                  const uniqueTags = [...new Set([...existingTags, ...newTags])];
+                  const uniqueTags = [
+                    ...new Set([...existingTags, ...newTags]),
+                  ];
                   handleFilterChange({ tags: uniqueTags });
                   setTagInput('');
                 }
@@ -686,29 +717,31 @@ export const CollectionsPage: React.FC = () => {
             }}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">
+                <InputAdornment position='start'>
                   <TagIcon />
                 </InputAdornment>
               ),
             }}
-            helperText="Press Enter to add tags"
+            helperText='Press Enter to add tags'
             sx={{ mb: 2 }}
           />
 
           {filters.tags && filters.tags.length > 0 && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" color="text.secondary" gutterBottom>
+              <Typography variant='caption' color='text.secondary' gutterBottom>
                 Selected Tags:
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+              <Box
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}
+              >
                 {filters.tags.map(tag => (
                   <Chip
                     key={tag}
                     label={tag}
-                    size="small"
-                    onDelete={() => 
-                      handleFilterChange({ 
-                        tags: filters.tags?.filter(t => t !== tag) 
+                    size='small'
+                    onDelete={() =>
+                      handleFilterChange({
+                        tags: filters.tags?.filter(t => t !== tag),
                       })
                     }
                   />
@@ -724,31 +757,31 @@ export const CollectionsPage: React.FC = () => {
             onInputChange={(_, newInputValue) => {
               handleUserSearch(newInputValue);
             }}
-            getOptionLabel={(option) => option.username}
+            getOptionLabel={option => option.username}
             renderOption={(props, option) => (
-              <Box component="li" {...props}>
+              <Box component='li' {...props}>
                 <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
                 <Box>
-                  <Typography variant="body2">{option.username}</Typography>
+                  <Typography variant='body2'>{option.username}</Typography>
                   {option.displayName && (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant='caption' color='text.secondary'>
                       {option.displayName}
                     </Typography>
                   )}
                 </Box>
               </Box>
             )}
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
-                label="Creator Username"
-                placeholder="Search for a creator..."
-                helperText="Search for a user by username"
+                label='Creator Username'
+                placeholder='Search for a creator...'
+                helperText='Search for a user by username'
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
                     <>
-                      <InputAdornment position="start">
+                      <InputAdornment position='start'>
                         <PersonIcon />
                       </InputAdornment>
                       {params.InputProps.startAdornment}
@@ -762,45 +795,45 @@ export const CollectionsPage: React.FC = () => {
           />
 
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            <Typography variant='subtitle2' sx={{ mb: 1 }}>
               Published Date Range
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               <DatePicker
-                label="From"
+                label='From'
                 value={dateFrom}
-                onChange={(newValue) => {
+                onChange={newValue => {
                   setDateFrom(newValue);
                   if (newValue) {
-                    handleFilterChange({ 
-                      createdAfter: newValue.toISOString() 
+                    handleFilterChange({
+                      createdAfter: newValue.toISOString(),
                     });
                   } else {
                     handleFilterChange({ createdAfter: undefined });
                   }
                 }}
                 slotProps={{
-                  textField: { size: 'small', fullWidth: true }
+                  textField: { size: 'small', fullWidth: true },
                 }}
               />
               <DatePicker
-                label="To"
+                label='To'
                 value={dateTo}
-                onChange={(newValue) => {
+                onChange={newValue => {
                   setDateTo(newValue);
                   if (newValue) {
                     // Set to end of day
                     const endOfDay = new Date(newValue);
                     endOfDay.setHours(23, 59, 59, 999);
-                    handleFilterChange({ 
-                      createdBefore: endOfDay.toISOString() 
+                    handleFilterChange({
+                      createdBefore: endOfDay.toISOString(),
                     });
                   } else {
                     handleFilterChange({ createdBefore: undefined });
                   }
                 }}
                 slotProps={{
-                  textField: { size: 'small', fullWidth: true }
+                  textField: { size: 'small', fullWidth: true },
                 }}
               />
             </Box>

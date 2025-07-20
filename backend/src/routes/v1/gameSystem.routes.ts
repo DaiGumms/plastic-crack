@@ -27,7 +27,8 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:gameSystemId/factions', async (req: Request, res: Response) => {
   try {
     const { gameSystemId } = req.params;
-    const factions = await gameSystemService.getFactionsByGameSystem(gameSystemId);
+    const factions =
+      await gameSystemService.getFactionsByGameSystem(gameSystemId);
     res.json(factions);
   } catch {
     res.status(500).json({ error: 'Failed to fetch factions' });

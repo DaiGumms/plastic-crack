@@ -36,10 +36,14 @@ export class CollectionService {
       filters.tags.forEach(tag => params.append('tags', tag));
     }
     if (filters.factionIds && filters.factionIds.length > 0) {
-      filters.factionIds.forEach(factionId => params.append('factionIds', factionId));
+      filters.factionIds.forEach(factionId =>
+        params.append('factionIds', factionId)
+      );
     }
-    if (filters.createdAfter) params.append('createdAfter', filters.createdAfter);
-    if (filters.createdBefore) params.append('createdBefore', filters.createdBefore);
+    if (filters.createdAfter)
+      params.append('createdAfter', filters.createdAfter);
+    if (filters.createdBefore)
+      params.append('createdBefore', filters.createdBefore);
 
     const response = await api.get<PaginatedResponse<Collection>>(
       `${CollectionService.BASE_PATH}?${params.toString()}`
@@ -96,7 +100,9 @@ export class CollectionService {
       filters.tags.forEach(tag => params.append('tags', tag));
     }
     if (filters.factionIds && filters.factionIds.length > 0) {
-      filters.factionIds.forEach(factionId => params.append('factionIds', factionId));
+      filters.factionIds.forEach(factionId =>
+        params.append('factionIds', factionId)
+      );
     }
     if (filters.createdAfter) params.append('startDate', filters.createdAfter);
     if (filters.createdBefore) params.append('endDate', filters.createdBefore);
@@ -336,7 +342,10 @@ export class CollectionService {
   /**
    * Search for users by username for autocomplete
    */
-  static async searchUsers(query: string, limit = 10): Promise<UserSearchResult[]> {
+  static async searchUsers(
+    query: string,
+    limit = 10
+  ): Promise<UserSearchResult[]> {
     if (!query || query.trim().length === 0) {
       return [];
     }
@@ -349,13 +358,11 @@ export class CollectionService {
     const response = await api.get<ApiResponse<UserSearchResult[]>>(
       `${CollectionService.BASE_PATH}/users/search?${params.toString()}`
     );
-    
+
     if (!response.data.success || !response.data.data) {
-      throw new Error(
-        response.data.message || 'Failed to search users'
-      );
+      throw new Error(response.data.message || 'Failed to search users');
     }
-    
+
     return response.data.data;
   }
 }

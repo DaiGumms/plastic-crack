@@ -70,13 +70,15 @@ export const CollectionDetailPage: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedModel, setSelectedModel] = useState<UserModel | null>(null);
   const [showAddModelDialog, setShowAddModelDialog] = useState(false);
-  
+
   // State for Add Model dialog
   const [searchTerm, setSearchTerm] = useState('');
   const [libraryModels, setLibraryModels] = useState<LibraryModel[]>([]);
   const [loadingLibraryModels, setLoadingLibraryModels] = useState(false);
   const [addingModel, setAddingModel] = useState<string | null>(null);
-  const [expandedFactions, setExpandedFactions] = useState<Set<string>>(new Set());
+  const [expandedFactions, setExpandedFactions] = useState<Set<string>>(
+    new Set()
+  );
   const [addModelError, setAddModelError] = useState<string | null>(null);
 
   const {
@@ -87,7 +89,7 @@ export const CollectionDetailPage: React.FC = () => {
     queryKey: ['collection', id, isAuthenticated],
     queryFn: () => {
       if (!id) throw new Error('Collection ID is required');
-      
+
       // Use appropriate endpoint based on authentication
       if (isAuthenticated) {
         return CollectionService.getCollection(id);
@@ -122,7 +124,7 @@ export const CollectionDetailPage: React.FC = () => {
   });
 
   const addLibraryModelMutation = useMutation({
-    mutationFn: (libraryModel: LibraryModel) => 
+    mutationFn: (libraryModel: LibraryModel) =>
       modelService.addLibraryModelToCollection(libraryModel, id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
@@ -135,7 +137,7 @@ export const CollectionDetailPage: React.FC = () => {
     onError: (error: Error) => {
       console.error('Failed to add model to collection:', error);
       setAddingModel(null);
-      
+
       // Handle specific error messages
       if (error.message.includes('already exists in this collection')) {
         setAddModelError('This model is already in your collection.');
@@ -199,7 +201,7 @@ export const CollectionDetailPage: React.FC = () => {
   // Search library models when dialog opens or search term changes
   const searchLibraryModels = useCallback(async () => {
     if (!collection) return;
-    
+
     setLoadingLibraryModels(true);
     try {
       const response = await libraryModelService.getModels(1, 10, {
@@ -225,21 +227,26 @@ export const CollectionDetailPage: React.FC = () => {
 
   // Group library models by faction
   const groupedLibraryModels = React.useMemo(() => {
-    const grouped: { [factionId: string]: { faction: { id: string; name: string }, models: LibraryModel[] } } = {};
-    
+    const grouped: {
+      [factionId: string]: {
+        faction: { id: string; name: string };
+        models: LibraryModel[];
+      };
+    } = {};
+
     libraryModels.forEach(model => {
       if (!model.faction) return;
-      
+
       const factionId = model.faction.id;
       if (!grouped[factionId]) {
         grouped[factionId] = {
           faction: model.faction,
-          models: []
+          models: [],
         };
       }
       grouped[factionId].models.push(model);
     });
-    
+
     return grouped;
   }, [libraryModels]);
 
@@ -348,32 +355,34 @@ export const CollectionDetailPage: React.FC = () => {
 
       {/* Registration Encouragement for Non-Authenticated Users */}
       {!isAuthenticated && (
-        <Alert 
-          severity="info" 
+        <Alert
+          severity='info'
           sx={{ mb: 3 }}
           action={
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button 
-                color="inherit" 
-                size="small" 
-                variant="outlined"
-                href="/login"
+              <Button
+                color='inherit'
+                size='small'
+                variant='outlined'
+                href='/login'
               >
                 Sign In
               </Button>
-              <Button 
-                color="inherit" 
-                size="small" 
-                variant="contained"
-                href="/register"
+              <Button
+                color='inherit'
+                size='small'
+                variant='contained'
+                href='/register'
               >
                 Sign Up
               </Button>
             </Box>
           }
         >
-          <Typography variant="body2">
-            <strong>Join to unlock the full experience!</strong> Sign up to view detailed model information, create your own collections, and connect with other collectors.
+          <Typography variant='body2'>
+            <strong>Join to unlock the full experience!</strong> Sign up to view
+            detailed model information, create your own collections, and connect
+            with other collectors.
           </Typography>
         </Alert>
       )}
@@ -401,18 +410,22 @@ export const CollectionDetailPage: React.FC = () => {
           {/* Factions */}
           {collection.factions && collection.factions.length > 0 && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography
+                variant='subtitle2'
+                color='text.secondary'
+                sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}
+              >
                 <FactionIcon sx={{ fontSize: '1rem' }} />
                 Factions
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {collection.factions.map(faction => (
-                  <Chip 
-                    key={faction.id} 
+                  <Chip
+                    key={faction.id}
                     icon={<FactionIcon sx={{ fontSize: '0.8rem' }} />}
-                    label={faction.name} 
-                    variant='outlined' 
-                    size='small' 
+                    label={faction.name}
+                    variant='outlined'
+                    size='small'
                     color='secondary'
                   />
                 ))}
@@ -423,18 +436,22 @@ export const CollectionDetailPage: React.FC = () => {
           {/* Tags */}
           {collection.tags && collection.tags.length > 0 && (
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography
+                variant='subtitle2'
+                color='text.secondary'
+                sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}
+              >
                 <TagIcon sx={{ fontSize: '1rem' }} />
                 Tags
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {collection.tags.map(tag => (
-                  <Chip 
-                    key={tag} 
+                  <Chip
+                    key={tag}
                     icon={<TagIcon sx={{ fontSize: '0.8rem' }} />}
-                    label={tag} 
-                    variant='outlined' 
-                    size='small' 
+                    label={tag}
+                    variant='outlined'
+                    size='small'
                   />
                 ))}
               </Box>
@@ -462,56 +479,74 @@ export const CollectionDetailPage: React.FC = () => {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant='h6'>
-              Models ({modelCount})
-            </Typography>
-            {isAuthenticated && user && collection && user.id === collection.userId && (
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={handleAddModel}
-                size="small"
-              >
-                Add Model
-              </Button>
-            )}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography variant='h6'>Models ({modelCount})</Typography>
+            {isAuthenticated &&
+              user &&
+              collection &&
+              user.id === collection.userId && (
+                <Button
+                  variant='outlined'
+                  startIcon={<AddIcon />}
+                  onClick={handleAddModel}
+                  size='small'
+                >
+                  Add Model
+                </Button>
+              )}
           </Box>
 
           {modelCount === 0 ? (
             <Box>
               <Alert severity='info' sx={{ mb: 2 }}>
                 No models in this collection yet.
-                {isAuthenticated && user && collection && user.id === collection.userId && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Start building your collection by adding some models!
-                  </Typography>
-                )}
+                {isAuthenticated &&
+                  user &&
+                  collection &&
+                  user.id === collection.userId && (
+                    <Typography variant='body2' sx={{ mt: 1 }}>
+                      Start building your collection by adding some models!
+                    </Typography>
+                  )}
               </Alert>
-              {isAuthenticated && user && collection && user.id === collection.userId && (
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddModel}
-                  sx={{ mb: 2 }}
-                >
-                  Add Your First Model
-                </Button>
-              )}
+              {isAuthenticated &&
+                user &&
+                collection &&
+                user.id === collection.userId && (
+                  <Button
+                    variant='contained'
+                    startIcon={<AddIcon />}
+                    onClick={handleAddModel}
+                    sx={{ mb: 2 }}
+                  >
+                    Add Your First Model
+                  </Button>
+                )}
             </Box>
           ) : !isAuthenticated ? (
             <Alert severity='info' sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>This collection contains {modelCount} model{modelCount !== 1 ? 's' : ''}.</strong>
+              <Typography variant='body2'>
+                <strong>
+                  This collection contains {modelCount} model
+                  {modelCount !== 1 ? 's' : ''}.
+                </strong>
               </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Sign up to view detailed model information, photos, and collector notes!
+              <Typography variant='body2' sx={{ mt: 1 }}>
+                Sign up to view detailed model information, photos, and
+                collector notes!
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                <Button variant="outlined" size="small" href="/login">
+                <Button variant='outlined' size='small' href='/login'>
                   Sign In
                 </Button>
-                <Button variant="contained" size="small" href="/register">
+                <Button variant='contained' size='small' href='/register'>
                   Sign Up
                 </Button>
               </Box>
@@ -639,15 +674,18 @@ export const CollectionDetailPage: React.FC = () => {
                         )}
                       </Box>
                       {/* Only show actions menu for authenticated collection owners */}
-                      {isAuthenticated && user && collection && user.id === collection.userId && (
-                        <IconButton
-                          aria-label='more actions'
-                          onClick={event => handleMenuOpen(event, userModel)}
-                          size='small'
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      )}
+                      {isAuthenticated &&
+                        user &&
+                        collection &&
+                        user.id === collection.userId && (
+                          <IconButton
+                            aria-label='more actions'
+                            onClick={event => handleMenuOpen(event, userModel)}
+                            size='small'
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        )}
                     </Box>
                   </Box>
                 </Paper>
@@ -824,111 +862,123 @@ export const CollectionDetailPage: React.FC = () => {
         <DialogContent sx={{ pt: 2 }}>
           <TextField
             fullWidth
-            label="Search models"
-            variant="outlined"
+            label='Search models'
+            variant='outlined'
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             sx={{ mb: 2 }}
-            placeholder="Search by model name..."
+            placeholder='Search by model name...'
           />
-          
+
           {loadingLibraryModels ? (
-            <Box display="flex" justifyContent="center" p={3}>
+            <Box display='flex' justifyContent='center' p={3}>
               <CircularProgress />
             </Box>
           ) : (
             <Box>
               {Object.keys(groupedLibraryModels).length === 0 ? (
                 <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography color="text.secondary">
-                    {searchTerm.trim() ? "No models found" : "Start typing to search models"}
+                  <Typography color='text.secondary'>
+                    {searchTerm.trim()
+                      ? 'No models found'
+                      : 'Start typing to search models'}
                   </Typography>
                   {searchTerm.trim() && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    <Typography
+                      variant='body2'
+                      color='text.secondary'
+                      sx={{ mt: 1 }}
+                    >
                       Try adjusting your search terms
                     </Typography>
                   )}
                 </Box>
               ) : (
-                Object.entries(groupedLibraryModels).map(([factionId, factionData]) => (
-                  <Accordion
-                    key={factionId}
-                    expanded={expandedFactions.has(factionId)}
-                    onChange={() => handleFactionToggle(factionId)}
-                    sx={{
-                      mb: 1,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      '&:before': { display: 'none' },
-                      '&.Mui-expanded': { margin: 'auto' },
-                    }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
+                Object.entries(groupedLibraryModels).map(
+                  ([factionId, factionData]) => (
+                    <Accordion
+                      key={factionId}
+                      expanded={expandedFactions.has(factionId)}
+                      onChange={() => handleFactionToggle(factionId)}
                       sx={{
-                        backgroundColor: 'action.hover',
-                        '& .MuiAccordionSummary-content': {
-                          alignItems: 'center',
-                        },
+                        mb: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        '&:before': { display: 'none' },
+                        '&.Mui-expanded': { margin: 'auto' },
                       }}
                     >
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'primary.main' }}>
-                        {factionData.faction.name}
-                      </Typography>
-                      <Chip
-                        size="small"
-                        label={factionData.models.length}
-                        variant="outlined"
-                        sx={{ ml: 1 }}
-                      />
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: 0 }}>
-                      <List dense>
-                        {factionData.models.map((model) => (
-                          <ListItem
-                            key={model.id}
-                            sx={{
-                              pl: 3,
-                              border: 1,
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              mb: 1,
-                              mx: 1,
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              '&:hover': {
-                                backgroundColor: 'action.hover',
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={model.name}
-                              secondary={`Points: ${model.pointsCost || 'Unknown'} • ${model.description || 'No description'}`}
-                              sx={{ flex: 1 }}
-                            />
-                            <Button
-                              variant="contained"
-                              size="small"
-                              onClick={() => handleAddLibraryModel(model)}
-                              disabled={addingModel === model.id || addLibraryModelMutation.isPending}
-                              sx={{ ml: 2 }}
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        sx={{
+                          backgroundColor: 'action.hover',
+                          '& .MuiAccordionSummary-content': {
+                            alignItems: 'center',
+                          },
+                        }}
+                      >
+                        <Typography
+                          variant='subtitle1'
+                          sx={{ fontWeight: 'medium', color: 'primary.main' }}
+                        >
+                          {factionData.faction.name}
+                        </Typography>
+                        <Chip
+                          size='small'
+                          label={factionData.models.length}
+                          variant='outlined'
+                          sx={{ ml: 1 }}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ p: 0 }}>
+                        <List dense>
+                          {factionData.models.map(model => (
+                            <ListItem
+                              key={model.id}
+                              sx={{
+                                pl: 3,
+                                border: 1,
+                                borderColor: 'divider',
+                                borderRadius: 1,
+                                mb: 1,
+                                mx: 1,
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                '&:hover': {
+                                  backgroundColor: 'action.hover',
+                                },
+                              }}
                             >
-                              {addingModel === model.id ? 'Adding...' : 'Add'}
-                            </Button>
-                          </ListItem>
-                        ))}
-                      </List>
-                    </AccordionDetails>
-                  </Accordion>
-                ))
+                              <ListItemText
+                                primary={model.name}
+                                secondary={`Points: ${model.pointsCost || 'Unknown'} • ${model.description || 'No description'}`}
+                                sx={{ flex: 1 }}
+                              />
+                              <Button
+                                variant='contained'
+                                size='small'
+                                onClick={() => handleAddLibraryModel(model)}
+                                disabled={
+                                  addingModel === model.id ||
+                                  addLibraryModelMutation.isPending
+                                }
+                                sx={{ ml: 2 }}
+                              >
+                                {addingModel === model.id ? 'Adding...' : 'Add'}
+                              </Button>
+                            </ListItem>
+                          ))}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
+                  )
+                )
               )}
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowAddModelDialog(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setShowAddModelDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 

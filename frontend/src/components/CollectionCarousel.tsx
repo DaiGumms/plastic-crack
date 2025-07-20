@@ -11,8 +11,8 @@ import {
   Skeleton,
   IconButton,
 } from '@mui/material';
-import { 
-  ChevronLeft, 
+import {
+  ChevronLeft,
   ChevronRight,
   Groups as FactionIcon,
   LocalOffer as TagIcon,
@@ -57,7 +57,9 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
         },
       }}
     >
-      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent
+        sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}
+      >
         {/* Header with user info */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar
@@ -68,9 +70,13 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
           </Avatar>
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
             <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              variant='caption'
+              color='text.secondary'
+              sx={{
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
             >
               {collection.user.displayName || collection.user.username}
             </Typography>
@@ -79,8 +85,8 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
 
         {/* Collection name */}
         <Typography
-          variant="h6"
-          component="h3"
+          variant='h6'
+          component='h3'
           sx={{
             fontWeight: 600,
             mb: 1,
@@ -94,8 +100,8 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
 
         {/* Description */}
         <Typography
-          variant="body2"
-          color="text.secondary"
+          variant='body2'
+          color='text.secondary'
           sx={{
             flexGrow: 1,
             mb: 2,
@@ -110,32 +116,48 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
         </Typography>
 
         {/* Game system */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center', mb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 0.5,
+            alignItems: 'center',
+            mb: 1,
+          }}
+        >
           <Chip
             label={collection.gameSystem.shortName}
-            size="small"
-            color="primary"
-            variant="outlined"
+            size='small'
+            color='primary'
+            variant='outlined'
             sx={{ fontSize: '0.75rem' }}
           />
         </Box>
 
         {/* Factions */}
         {collection.factions && collection.factions.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center', mb: 1 }}>
-            {collection.factions.slice(0, 2).map((faction) => (
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              alignItems: 'center',
+              mb: 1,
+            }}
+          >
+            {collection.factions.slice(0, 2).map(faction => (
               <Chip
                 key={faction.id}
                 icon={<FactionIcon sx={{ fontSize: '0.6rem' }} />}
                 label={faction.name}
-                size="small"
-                color="secondary"
-                variant="outlined"
+                size='small'
+                color='secondary'
+                variant='outlined'
                 sx={{ fontSize: '0.7rem' }}
               />
             ))}
             {collection.factions.length > 2 && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant='caption' color='text.secondary'>
                 +{collection.factions.length - 2} more factions
               </Typography>
             )}
@@ -144,14 +166,21 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
 
         {/* Tags */}
         {collection.tags && collection.tags.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              alignItems: 'center',
+            }}
+          >
             {collection.tags.slice(0, 2).map((tag, index) => (
               <Chip
                 key={index}
                 icon={<TagIcon sx={{ fontSize: '0.6rem' }} />}
                 label={tag}
-                size="small"
-                variant="outlined"
+                size='small'
+                variant='outlined'
                 sx={{
                   fontSize: '0.7rem',
                   backgroundColor: alpha(theme.palette.grey[500], 0.1),
@@ -159,7 +188,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
               />
             ))}
             {collection.tags.length > 2 && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant='caption' color='text.secondary'>
                 +{collection.tags.length - 2} more tags
               </Typography>
             )}
@@ -182,15 +211,15 @@ const SkeletonCard: React.FC = () => (
   >
     <CardContent sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Skeleton variant="circular" width={32} height={32} sx={{ mr: 1.5 }} />
-        <Skeleton variant="text" width={100} />
+        <Skeleton variant='circular' width={32} height={32} sx={{ mr: 1.5 }} />
+        <Skeleton variant='text' width={100} />
       </Box>
-      <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
-      <Skeleton variant="text" width="100%" sx={{ mb: 1 }} />
-      <Skeleton variant="text" width="60%" sx={{ mb: 2 }} />
+      <Skeleton variant='text' width='80%' sx={{ mb: 1 }} />
+      <Skeleton variant='text' width='100%' sx={{ mb: 1 }} />
+      <Skeleton variant='text' width='60%' sx={{ mb: 2 }} />
       <Box sx={{ display: 'flex', gap: 0.5 }}>
-        <Skeleton variant="rounded" width={60} height={24} />
-        <Skeleton variant="rounded" width={80} height={24} />
+        <Skeleton variant='rounded' width={60} height={24} />
+        <Skeleton variant='rounded' width={80} height={24} />
       </Box>
     </CardContent>
   </Card>
@@ -214,24 +243,32 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     const fetchCollections = async () => {
       try {
         setLoading(true);
-        const response = await CollectionService.getPublicCollections(1, limit, {
-          // Sort by creation date (most recent first) - this happens by default in the API
-        });
-        
-        // Filter to only show collections from users with public profiles and public collections
-        const publicCollections = response.data.filter(collection => 
-          collection.user && 
-          collection.gameSystem && 
-          collection.isPublic === true
+        const response = await CollectionService.getPublicCollections(
+          1,
+          limit,
+          {
+            // Sort by creation date (most recent first) - this happens by default in the API
+          }
         );
-        
+
+        // Filter to only show collections from users with public profiles and public collections
+        const publicCollections = response.data.filter(
+          collection =>
+            collection.user &&
+            collection.gameSystem &&
+            collection.isPublic === true
+        );
+
         setCollections(publicCollections);
-        
+
         // Calculate max scroll based on number of collections
         const cardWidth = 320; // minWidth + margin
         const containerWidth = 1200; // Approximate container width
         const visibleCards = Math.floor(containerWidth / cardWidth);
-        const totalScrollableWidth = Math.max(0, (publicCollections.length - visibleCards) * cardWidth);
+        const totalScrollableWidth = Math.max(
+          0,
+          (publicCollections.length - visibleCards) * cardWidth
+        );
         setMaxScroll(totalScrollableWidth);
       } catch (err) {
         console.error('Failed to fetch collections:', err);
@@ -246,7 +283,12 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
 
   // Auto-scroll effect
   useEffect(() => {
-    if (isPaused || isUserInteracting || collections.length === 0 || maxScroll === 0) {
+    if (
+      isPaused ||
+      isUserInteracting ||
+      collections.length === 0 ||
+      maxScroll === 0
+    ) {
       return;
     }
 
@@ -262,12 +304,19 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     }, autoScrollInterval);
 
     return () => clearInterval(interval);
-  }, [isPaused, isUserInteracting, collections.length, autoScrollInterval, scrollStep, maxScroll]);
+  }, [
+    isPaused,
+    isUserInteracting,
+    collections.length,
+    autoScrollInterval,
+    scrollStep,
+    maxScroll,
+  ]);
 
   const scrollLeft = () => {
     setIsUserInteracting(true);
     setScrollPosition(prev => Math.max(0, prev - scrollStep));
-    
+
     // Reset user interaction after a delay to resume auto-scroll
     setTimeout(() => setIsUserInteracting(false), 5000);
   };
@@ -275,7 +324,7 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
   const scrollRight = () => {
     setIsUserInteracting(true);
     setScrollPosition(prev => Math.min(maxScroll, prev + scrollStep));
-    
+
     // Reset user interaction after a delay to resume auto-scroll
     setTimeout(() => setIsUserInteracting(false), 5000);
   };

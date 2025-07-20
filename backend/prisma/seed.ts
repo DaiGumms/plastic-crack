@@ -567,7 +567,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[0].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Competitive', 'Painted', 'Space Marines', 'Ultramarines', 'Battle Company'],
+        tags: [
+          'Competitive',
+          'Painted',
+          'Space Marines',
+          'Ultramarines',
+          'Battle Company',
+        ],
         ...(spaceMarinesFaction && {
           factions: {
             connect: [{ id: spaceMarinesFaction.id }],
@@ -624,7 +630,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[1].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Tournament', 'Competitive', 'Iron Hands', 'Meta', 'Space Marines'],
+        tags: [
+          'Tournament',
+          'Competitive',
+          'Iron Hands',
+          'Meta',
+          'Space Marines',
+        ],
         ...(ironHandsFaction && {
           factions: {
             connect: [{ id: ironHandsFaction.id }],
@@ -663,7 +675,13 @@ async function main() {
         isPublic: true, // Changed from false to true so it shows in public collections
         userId: createdUsers[2].id,
         gameSystemId: ageOfSigmar.id,
-        tags: ['Beginner', 'Learning', 'Stormcast', 'First Army', 'Age of Sigmar'],
+        tags: [
+          'Beginner',
+          'Learning',
+          'Stormcast',
+          'First Army',
+          'Age of Sigmar',
+        ],
         factions: {
           connect: [{ id: stormcastFaction.id }],
         },
@@ -699,7 +717,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[3].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Vintage', 'Rogue Trader', 'Classic', 'Collector', 'Space Marines'],
+        tags: [
+          'Vintage',
+          'Rogue Trader',
+          'Classic',
+          'Collector',
+          'Space Marines',
+        ],
         ...(vintageSpaceMarinesFaction && {
           factions: {
             connect: [{ id: vintageSpaceMarinesFaction.id }],
@@ -717,7 +741,8 @@ async function main() {
         userId: createdUsers[3].id,
         customName: 'Captain Vintage',
         paintingStatus: 'COMPLETED',
-        notes: 'Original 1987 Terminator Captain - painted with classic techniques',
+        notes:
+          'Original 1987 Terminator Captain - painted with classic techniques',
         purchaseDate: new Date('1987-03-15'),
         tags: ['Vintage', 'Classic', 'Historical'],
       },
@@ -741,12 +766,14 @@ async function main() {
     const kevinModel = await prisma.userModel.create({
       data: {
         modelId:
-          masterModels.find(m => m.name === 'Chaos Lord')?.id || masterModels[0].id,
+          masterModels.find(m => m.name === 'Chaos Lord')?.id ||
+          masterModels[0].id,
         collectionId: kevinCollection.id,
         userId: createdUsers[4].id,
         customName: 'Chaos Lord Morteus the Converted',
         paintingStatus: 'COMPLETED',
-        notes: 'Heavily kitbashed with parts from 5 different kits. Custom daemon weapon.',
+        notes:
+          'Heavily kitbashed with parts from 5 different kits. Custom daemon weapon.',
         purchaseDate: new Date('2024-01-10'),
         tags: ['Kitbashed', 'Custom', 'Chaos', 'Green Stuff'],
       },
@@ -754,7 +781,7 @@ async function main() {
   }
 
   // Additional collections for more test data
-  
+
   // Marcus (Chaos Cultist) Collections
   if (createdUsers[5] && chaosFaction && masterModels.length > 0) {
     // Get Chaos Space Marines faction
@@ -783,7 +810,7 @@ async function main() {
       data: {
         name: 'Death Guard Plague Marines',
         description:
-          'Nurgle\'s chosen warriors. Weathered and rusted to perfection with realistic battle damage.',
+          "Nurgle's chosen warriors. Weathered and rusted to perfection with realistic battle damage.",
         isPublic: true,
         userId: createdUsers[5].id,
         gameSystemId: warhammer40k.id,
@@ -802,7 +829,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[6].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Eldar', 'Craftworld', 'Iyanden', 'Wraithguard', 'Spirit Stones'],
+        tags: [
+          'Eldar',
+          'Craftworld',
+          'Iyanden',
+          'Wraithguard',
+          'Spirit Stones',
+        ],
       },
     });
 
@@ -938,7 +971,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[9].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Genestealer Cult', 'Industrial', 'Mining', 'Hidden', 'Infection'],
+        tags: [
+          'Genestealer Cult',
+          'Industrial',
+          'Mining',
+          'Hidden',
+          'Infection',
+        ],
         ...(genestealerCultFaction && {
           factions: {
             connect: [{ id: genestealerCultFaction.id }],
@@ -949,7 +988,7 @@ async function main() {
   }
 
   // Additional collections for existing users to increase variety
-  
+
   // Alex's second collection
   if (createdUsers[0] && stormcastFaction) {
     const alexCollection2 = await prisma.collection.create({
@@ -965,7 +1004,7 @@ async function main() {
     });
   }
 
-  // Sarah's second collection  
+  // Sarah's second collection
   if (createdUsers[1] && masterModels.length > 0) {
     const sarahCollection2 = await prisma.collection.create({
       data: {
@@ -975,7 +1014,13 @@ async function main() {
         isPublic: true,
         userId: createdUsers[1].id,
         gameSystemId: warhammer40k.id,
-        tags: ['Imperial Knights', 'House Raven', 'War Machines', 'Honor', 'Black'],
+        tags: [
+          'Imperial Knights',
+          'House Raven',
+          'War Machines',
+          'Honor',
+          'Black',
+        ],
       },
     });
   }

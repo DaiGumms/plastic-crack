@@ -24,7 +24,9 @@ import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ImageInput } from '../ui/ImageInput';
-import GameSystemService, { type Faction } from '../../services/gameSystemService';
+import GameSystemService, {
+  type Faction,
+} from '../../services/gameSystemService';
 import type {
   Collection,
   CreateCollectionData,
@@ -115,7 +117,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
     });
 
     setTags(collection?.tags || []);
-    
+
     // Convert collection factions to GameSystemService faction format
     const convertedFactions = (collection?.factions || []).map(faction => ({
       id: faction.id,
@@ -125,7 +127,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       isActive: faction.isActive,
       sortOrder: 0,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     }));
     setSelectedFactions(convertedFactions);
   }, [collection, reset, getDefaultGameSystem]);
@@ -139,7 +141,9 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       }
 
       try {
-        const factions = await GameSystemService.getFactions(collection.gameSystem.id);
+        const factions = await GameSystemService.getFactions(
+          collection.gameSystem.id
+        );
         setAvailableFactions(factions);
       } catch (error) {
         console.error('Failed to load factions:', error);
@@ -192,7 +196,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       isActive: faction.isActive,
       sortOrder: 0,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     }));
     setSelectedFactions(convertedFactions);
     setNewTag('');
@@ -368,7 +372,8 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
             )}
 
             {/* Factions */}
-            {(isEditing && collection?.gameSystem) || (!isEditing && availableFactions.length > 0) ? (
+            {(isEditing && collection?.gameSystem) ||
+            (!isEditing && availableFactions.length > 0) ? (
               <Autocomplete
                 multiple
                 options={availableFactions}
@@ -376,27 +381,27 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                 onChange={(_, newValue) => {
                   setSelectedFactions(newValue);
                 }}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={option => option.name}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => {
                     const { key, ...tagProps } = getTagProps({ index });
                     return (
                       <Chip
                         key={key}
-                        variant="outlined"
+                        variant='outlined'
                         label={option.name}
-                        size="small"
+                        size='small'
                         {...tagProps}
                       />
                     );
                   })
                 }
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
-                    label="Factions"
-                    placeholder="Select factions (optional)..."
-                    helperText="Choose factions associated with this collection"
+                    label='Factions'
+                    placeholder='Select factions (optional)...'
+                    helperText='Choose factions associated with this collection'
                     disabled={loading}
                   />
                 )}

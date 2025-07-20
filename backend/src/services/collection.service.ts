@@ -78,11 +78,12 @@ export class CollectionService {
           userId,
           tags: data.tags || [],
           imageUrl: data.imageUrl,
-          ...(data.factionIds && data.factionIds.length > 0 && {
-            factions: {
-              connect: data.factionIds.map(id => ({ id })),
-            },
-          }),
+          ...(data.factionIds &&
+            data.factionIds.length > 0 && {
+              factions: {
+                connect: data.factionIds.map(id => ({ id })),
+              },
+            }),
         },
         include: {
           user: {
@@ -169,8 +170,9 @@ export class CollectionService {
     }
 
     // Store tag filters separately for case-insensitive processing
-    const tagFilters = filters.tags && filters.tags.length > 0 ? filters.tags : null;
-    
+    const tagFilters =
+      filters.tags && filters.tags.length > 0 ? filters.tags : null;
+
     // Remove tags from the main where clause for now
     // We'll filter by tags after the query for case-insensitive matching
     // if (filters.tags && filters.tags.length > 0) {
@@ -273,8 +275,8 @@ export class CollectionService {
     // Apply case-insensitive tag filtering if tags were specified
     if (tagFilters) {
       collectionsWithStats = collectionsWithStats.filter(collection => {
-        return tagFilters.some(filterTag => 
-          collection.tags.some(collectionTag => 
+        return tagFilters.some(filterTag =>
+          collection.tags.some(collectionTag =>
             collectionTag.toLowerCase().includes(filterTag.toLowerCase())
           )
         );
@@ -638,12 +640,17 @@ export class CollectionService {
   /**
    * Search for users by username for autocomplete
    */
-  async searchUsers(query: string, limit: number = 10): Promise<Array<{
-    id: string;
-    username: string;
-    displayName: string | null;
-    profileImageUrl: string | null;
-  }>> {
+  async searchUsers(
+    query: string,
+    limit: number = 10
+  ): Promise<
+    Array<{
+      id: string;
+      username: string;
+      displayName: string | null;
+      profileImageUrl: string | null;
+    }>
+  > {
     if (!query || query.trim().length === 0) {
       return [];
     }

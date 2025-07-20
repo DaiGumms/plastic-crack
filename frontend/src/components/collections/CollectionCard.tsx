@@ -256,18 +256,22 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         {/* Factions */}
         {collection.factions && collection.factions.length > 0 && (
           <Box sx={{ mb: 1.5 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{ display: 'block', mb: 0.5 }}
+            >
               Factions
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {collection.factions.slice(0, 3).map((faction) => (
+              {collection.factions.slice(0, 3).map(faction => (
                 <Chip
                   key={faction.id}
                   icon={<FactionIcon sx={{ fontSize: '0.7rem' }} />}
                   label={faction.name}
-                  size="small"
-                  color="secondary"
-                  variant="outlined"
+                  size='small'
+                  color='secondary'
+                  variant='outlined'
                   sx={{ fontSize: '0.75rem' }}
                 />
               ))}
@@ -286,7 +290,11 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         {/* Tags */}
         {collection.tags && collection.tags.length > 0 && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{ display: 'block', mb: 0.5 }}
+            >
               Tags
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

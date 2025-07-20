@@ -524,9 +524,8 @@ router.get(
     try {
       const collectionId = req.params.id;
 
-      const collection = await collectionService.getCollectionById(
-        collectionId
-      );
+      const collection =
+        await collectionService.getCollectionById(collectionId);
 
       if (!collection) {
         throw new AppError('Collection not found', 404);
@@ -547,7 +546,7 @@ router.get(
           photos: model.photos?.slice(0, 1), // Only show first photo
           createdAt: model.createdAt,
           // Remove sensitive fields like purchase price, notes, etc.
-        }))
+        })),
       };
 
       res.json({
