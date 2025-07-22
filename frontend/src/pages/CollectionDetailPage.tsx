@@ -76,6 +76,7 @@ export const CollectionDetailPage: React.FC = () => {
   const [libraryModels, setLibraryModels] = useState<LibraryModel[]>([]);
   const [loadingLibraryModels, setLoadingLibraryModels] = useState(false);
   const [addingModel, setAddingModel] = useState<string | null>(null);
+  const [addModelError, setAddModelError] = useState<string | null>(null);
   const [expandedFactions, setExpandedFactions] = useState<Set<string>>(
     new Set()
   );
@@ -162,6 +163,7 @@ export const CollectionDetailPage: React.FC = () => {
 
   const handleAddModel = () => {
     setShowAddModelDialog(true);
+    setAddModelError(null);
   };
 
   const handleEditModel = () => {
@@ -869,6 +871,12 @@ export const CollectionDetailPage: React.FC = () => {
             placeholder='Search by model name...'
           />
 
+          {addModelError && (
+            <Alert severity='error' sx={{ mb: 2 }}>
+              {addModelError}
+            </Alert>
+          )}
+
           {loadingLibraryModels ? (
             <Box display='flex' justifyContent='center' p={3}>
               <CircularProgress />
@@ -977,7 +985,14 @@ export const CollectionDetailPage: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowAddModelDialog(false)}>Close</Button>
+          <Button
+            onClick={() => {
+              setShowAddModelDialog(false);
+              setAddModelError(null);
+            }}
+          >
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 
