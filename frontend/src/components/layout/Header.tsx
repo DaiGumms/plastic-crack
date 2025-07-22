@@ -82,7 +82,7 @@ export const Header = () => {
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
     { label: 'Collections', path: '/collections', icon: <Collections /> },
-    { label: 'Mobile App', path: '/mobile-app', icon: <PhoneAndroid /> },
+    
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
@@ -92,6 +92,7 @@ export const Header = () => {
   ];
 
   const comingSoonItems = [
+    { label: 'Mobile App', path: '/mobile-app', icon: <PhoneAndroid /> },
     { label: 'Price Tracking', path: '/price-tracking', icon: <TrendingUp /> },
     { label: 'AI Features', path: '/ai-features', icon: <AutoAwesome /> },
     { label: 'Help & Mentorship', path: '/help-mentorship', icon: <School /> },
