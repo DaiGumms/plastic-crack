@@ -79,7 +79,6 @@ export const CollectionDetailPage: React.FC = () => {
   const [expandedFactions, setExpandedFactions] = useState<Set<string>>(
     new Set()
   );
-  const [addModelError, setAddModelError] = useState<string | null>(null);
 
   const {
     data: collection,

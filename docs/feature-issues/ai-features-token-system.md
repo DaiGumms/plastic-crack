@@ -1,30 +1,43 @@
 # Feature: AI Features and Token System
 
 ## Overview
-Comprehensive AI-powered features that enhance the user experience through intelligent recommendations, creative assistance, and automated content generation. The system includes paintscheme recommendations based on user descriptions, AI-generated nicknames for models and collections, and a token-based monetization system that allows users to purchase credits for AI requests.
+
+Comprehensive AI-powered features that enhance the user experience through intelligent
+recommendations, creative assistance, and automated content generation. The system includes
+paintscheme recommendations based on user descriptions, AI-generated nicknames for models and
+collections, and a token-based monetization system that allows users to purchase credits for AI
+requests.
 
 ## Priority
-**Priority**: High (Revenue Generation & Differentiation)
-**Estimated Story Points**: 32
-**Implementation Time**: 8-10 sprints
-**Dependencies**: User authentication, collection system, premium subscription system
+
+**Priority**: High (Revenue Generation & Differentiation) **Estimated Story Points**: 32
+**Implementation Time**: 8-10 sprints **Dependencies**: User authentication, collection system,
+premium subscription system
 
 ## User Stories
 
 ### Epic 1: AI Paintscheme Recommendations (12 points)
-- **As a user**, I want to describe my vision for a paintscheme so I can get AI-generated color recommendations
-- **As a user**, I want to specify faction themes and moods so I can get contextually appropriate suggestions
-- **As a user**, I want to see visual examples of recommended paintschemes so I can visualize the results
+
+- **As a user**, I want to describe my vision for a paintscheme so I can get AI-generated color
+  recommendations
+- **As a user**, I want to specify faction themes and moods so I can get contextually appropriate
+  suggestions
+- **As a user**, I want to see visual examples of recommended paintschemes so I can visualize the
+  results
 - **As a user**, I want to save AI-generated paintschemes so I can reference them later
 - **As a user**, I want to share successful AI paintschemes so I can inspire the community
 
 ### Epic 2: AI Nickname Generation (8 points)
-- **As a user**, I want AI to suggest creative nicknames for my models so I can add personality to my collection
-- **As a user**, I want AI to generate thematic collection names so I can organize my armies creatively
+
+- **As a user**, I want AI to suggest creative nicknames for my models so I can add personality to
+  my collection
+- **As a user**, I want AI to generate thematic collection names so I can organize my armies
+  creatively
 - **As a user**, I want to specify themes and personalities so the AI generates appropriate names
 - **As a user**, I want to regenerate names until I find one I like so I have creative control
 
 ### Epic 3: Token System and Monetization (12 points)
+
 - **As a user**, I want to purchase AI tokens so I can access premium AI features
 - **As a user**, I want to see my token balance so I can manage my AI usage
 - **As a user**, I want different AI features to cost different amounts so I can prioritize my usage
@@ -165,6 +178,7 @@ ALTER TABLE collections ADD COLUMN ai_theme_tags VARCHAR(50)[];
 ### API Endpoints
 
 #### AI Paintscheme Recommendations
+
 - `POST /api/ai/paintschemes/generate` - Generate paintscheme recommendations
 - `GET /api/ai/paintschemes` - List user's generated paintschemes
 - `GET /api/ai/paintschemes/{id}` - Get specific paintscheme details
@@ -173,12 +187,14 @@ ALTER TABLE collections ADD COLUMN ai_theme_tags VARCHAR(50)[];
 - `GET /api/ai/paintschemes/public` - Browse public paintschemes
 
 #### AI Nickname Generation
+
 - `POST /api/ai/nicknames/generate` - Generate nickname suggestions
 - `GET /api/ai/nicknames/history` - Get user's nickname generation history
 - `POST /api/ai/nicknames/{id}/select` - Select and apply a nickname
 - `POST /api/ai/nicknames/regenerate` - Regenerate new options
 
 #### Token Management
+
 - `GET /api/tokens/balance` - Get user's current token balance
 - `GET /api/tokens/transactions` - Get transaction history
 - `POST /api/tokens/purchase` - Purchase token package
@@ -186,6 +202,7 @@ ALTER TABLE collections ADD COLUMN ai_theme_tags VARCHAR(50)[];
 - `POST /api/tokens/claim-daily` - Claim daily free tokens
 
 #### AI System Management
+
 - `GET /api/ai/features/costs` - Get current AI feature costs
 - `GET /api/ai/usage/stats` - Get user's AI usage statistics
 - `PUT /api/ai/preferences` - Update AI preferences
@@ -256,6 +273,7 @@ interface AIPreferencesProps {
 ## Implementation Phases
 
 ### Phase 1: Core AI Infrastructure (2-3 sprints)
+
 1. **AI Service Integration**
    - Set up AI model endpoints and authentication
    - Implement basic request/response handling
@@ -267,6 +285,7 @@ interface AIPreferencesProps {
    - Basic purchase flow integration
 
 ### Phase 2: AI Paintscheme Recommendations (3-4 sprints)
+
 1. **Paintscheme Generation**
    - Natural language processing for user descriptions
    - Color palette generation and visualization
@@ -278,6 +297,7 @@ interface AIPreferencesProps {
    - Public sharing and discovery
 
 ### Phase 3: AI Nickname Generation (2-3 sprints)
+
 1. **Nickname Generation Engine**
    - Theme-based name generation
    - Personality trait integration
@@ -289,6 +309,7 @@ interface AIPreferencesProps {
    - Theme customization options
 
 ### Phase 4: Advanced Features and Optimization (1-2 sprints)
+
 1. **Advanced AI Features**
    - User preference learning
    - Improved recommendation accuracy
@@ -302,17 +323,20 @@ interface AIPreferencesProps {
 ## Mobile Integration Considerations
 
 ### Offline Capabilities
+
 - Cache generated paintschemes for offline viewing
 - Store token balance and transaction history locally
 - Queue AI requests when offline for processing when connected
 
 ### Mobile-Specific Features
+
 - Camera integration for color analysis and paintscheme inspiration
 - Push notifications for completed AI processing
 - Touch-optimized color palette selection
 - Voice input for paintscheme descriptions
 
 ### Performance Optimization
+
 - Progressive loading of AI results
 - Image optimization for color palettes
 - Efficient token balance synchronization
@@ -321,6 +345,7 @@ interface AIPreferencesProps {
 ## Acceptance Criteria
 
 ### AI Paintscheme Recommendations
+
 - [ ] Users can describe desired paintschemes in natural language
 - [ ] AI generates contextually appropriate color palettes and techniques
 - [ ] Generated paintschemes can be saved and applied to models
@@ -328,6 +353,7 @@ interface AIPreferencesProps {
 - [ ] Paintscheme generation costs tokens and respects user balance
 
 ### AI Nickname Generation
+
 - [ ] AI generates creative, thematic nicknames for models and collections
 - [ ] Users can specify themes and personality traits for customization
 - [ ] Nickname regeneration provides fresh alternatives
@@ -335,6 +361,7 @@ interface AIPreferencesProps {
 - [ ] Nickname generation integrates with token system
 
 ### Token System
+
 - [ ] Users can purchase token packages through integrated payment system
 - [ ] Token balance is accurately tracked and updated in real-time
 - [ ] AI feature costs are clearly displayed before use
@@ -342,6 +369,7 @@ interface AIPreferencesProps {
 - [ ] Daily free tokens encourage regular engagement
 
 ### System Integration
+
 - [ ] AI features integrate seamlessly with existing model and collection management
 - [ ] Premium subscription system properly gates AI feature access
 - [ ] Performance monitoring tracks AI model response times and accuracy
@@ -350,18 +378,21 @@ interface AIPreferencesProps {
 ## Success Metrics
 
 ### Engagement Metrics
+
 - **AI Feature Adoption**: 60% of premium users try AI features within first week
 - **Token Purchase Rate**: 25% of AI users purchase additional tokens
 - **Feature Retention**: 70% of AI users continue using features after 30 days
 - **Generation Volume**: 1000+ AI requests per day at scale
 
 ### Revenue Metrics
+
 - **Token Revenue**: $10,000+ monthly revenue from token sales
 - **Average Spend**: $15 average monthly spend per AI user
 - **Conversion Rate**: 30% conversion from free to paid AI usage
 - **Premium Upgrade**: 40% of AI users upgrade to premium subscriptions
 
 ### Quality Metrics
+
 - **User Satisfaction**: >85% satisfaction with AI-generated content
 - **Usage Success**: >90% of AI generations result in user action (save/apply)
 - **Processing Time**: <30 seconds average AI response time
@@ -370,12 +401,14 @@ interface AIPreferencesProps {
 ## Dependencies
 
 ### Internal Systems
+
 - User authentication and premium subscription system
 - Collection and model management system
 - Payment processing integration
 - Mobile app framework and offline capabilities
 
 ### External Services
+
 - OpenAI GPT API or similar for text generation
 - Stability AI or similar for image generation
 - Color palette analysis services
@@ -385,12 +418,14 @@ interface AIPreferencesProps {
 ## Privacy and Security Considerations
 
 ### Data Protection
+
 - User descriptions and AI inputs are encrypted
 - AI-generated content respects intellectual property
 - Token transaction data is securely stored
 - User preferences and history have privacy controls
 
 ### AI Ethics
+
 - Clear disclosure of AI-generated content
 - Respect for Games Workshop and other IP holders
 - Appropriate content filtering for generated names
@@ -399,18 +434,21 @@ interface AIPreferencesProps {
 ## Future Enhancements
 
 ### Advanced AI Features
+
 - Image-based paintscheme analysis and recommendations
 - 3D model visualization with AI paintschemes
 - AI-powered army composition suggestions
 - Automated battle report generation
 
 ### Enhanced Monetization
+
 - AI subscription tiers with different features
 - Bulk token discounts for power users
 - AI marketplace for sharing premium content
 - Professional AI tools for commission artists
 
 ### Integration Expansion
+
 - AI integration with tutorial creation
 - Smart inventory management suggestions
 - AI-powered community matching
@@ -418,4 +456,6 @@ interface AIPreferencesProps {
 
 ---
 
-This AI features and token system will provide significant value to users while creating a sustainable revenue stream through innovative AI-powered hobby tools and a fair, transparent token-based monetization model.
+This AI features and token system will provide significant value to users while creating a
+sustainable revenue stream through innovative AI-powered hobby tools and a fair, transparent
+token-based monetization model.

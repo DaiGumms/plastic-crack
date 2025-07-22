@@ -23,6 +23,12 @@ import { CollectionsPage } from './pages/CollectionsPage';
 import { CollectionDetailPage } from './pages/CollectionDetailPage';
 import ModelsPage from './pages/ModelsPage';
 import UploadTestingPage from './pages/UploadTestingPage';
+import { PriceTrackingPage } from './pages/PriceTrackingPage';
+import { AIFeaturesPage } from './pages/AIFeaturesPage';
+import { HelpMentorshipPage } from './pages/HelpMentorshipPage';
+import { BattleReportsGamingPage } from './pages/BattleReportsGamingPage';
+import { WishlistSystemPage } from './pages/WishlistSystemPage';
+import { PaintingSystemPage } from './pages/PaintingSystemPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -136,6 +142,54 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/price-tracking'
+                  element={
+                    <ProtectedRoute>
+                      <PriceTrackingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/ai-features'
+                  element={
+                    <ProtectedRoute>
+                      <AIFeaturesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/help-mentorship'
+                  element={
+                    <ProtectedRoute>
+                      <HelpMentorshipPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/battle-reports'
+                  element={
+                    <ProtectedRoute>
+                      <BattleReportsGamingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/wishlist'
+                  element={
+                    <ProtectedRoute>
+                      <WishlistSystemPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/painting'
+                  element={
+                    <ProtectedRoute>
+                      <PaintingSystemPage />
                     </ProtectedRoute>
                   }
                 />

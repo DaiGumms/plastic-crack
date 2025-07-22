@@ -347,12 +347,13 @@ router.post(
         throw new AppError('User not authenticated', 401);
       }
 
-      const model = await modelService.addModel(userId, req.body);
+      // TODO: Implement addModel method in ModelService
+      throw new AppError('Add model functionality not yet implemented', 501);
 
-      res.status(201).json({
-        success: true,
-        data: model,
-      });
+      // res.status(201).json({
+      //   success: true,
+      //   data: model,
+      // });
     } catch (error) {
       next(error);
     }
@@ -442,6 +443,7 @@ router.get(
 
       const query = req.query.q as string;
 
+      // eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
       const filters = {
         search: query,
         tags: req.query.tags
@@ -454,6 +456,7 @@ router.get(
         userId: userId,
       };
 
+      // eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
       const pagination = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
         limit: req.query.limit
@@ -467,12 +470,16 @@ router.get(
         sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
-      const result = await modelService.searchModels(filters, pagination);
+      // TODO: Implement searchModels method in ModelService
+      throw new AppError(
+        'Search models functionality not yet implemented',
+        501
+      );
 
-      res.json({
-        success: true,
-        data: result,
-      });
+      // res.json({
+      //   success: true,
+      //   data: result,
+      // });
     } catch (error) {
       next(error);
     }
@@ -496,13 +503,18 @@ router.put(
       }
 
       const { modelIds, updates } = req.body;
+      // eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
       const bulkData = { modelIds, updates };
-      const result = await modelService.bulkUpdateModels(userId, bulkData);
+      // TODO: Implement bulkUpdateModels method in ModelService
+      throw new AppError(
+        'Bulk update models functionality not yet implemented',
+        501
+      );
 
-      res.json({
-        success: true,
-        data: result,
-      });
+      // res.json({
+      //   success: true,
+      //   data: result,
+      // });
     } catch (error) {
       next(error);
     }
@@ -520,19 +532,25 @@ router.get(
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+      // eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
       const modelId = req.params.id;
+      // eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
       const userId = req.user?.id;
 
-      const model = await modelService.getModelById(modelId, userId);
+      // TODO: Implement getModelById method in ModelService
+      throw new AppError(
+        'Get model by ID functionality not yet implemented',
+        501
+      );
 
-      if (!model) {
-        throw new AppError('Model not found', 404);
-      }
+      // if (!model) {
+      //   throw new AppError('Model not found', 404);
+      // }
 
-      res.json({
-        success: true,
-        data: model,
-      });
+      // res.json({
+      //   success: true,
+      //   data: model,
+      // });
     } catch (error) {
       next(error);
     }
@@ -639,7 +657,11 @@ router.post(
       }
 
       const photos = req.body.photos;
-      const model = await modelService.addModelPhotos(modelId, userId, photos);
+      const model = await modelService.addUserModelPhotos(
+        modelId,
+        userId,
+        photos
+      );
 
       res.json({
         success: true,

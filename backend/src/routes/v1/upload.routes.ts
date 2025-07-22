@@ -178,9 +178,11 @@ router.post(
           height: originalResult.dimensions?.height,
         };
 
-        await modelService.addModelPhotos(metadata.modelId, metadata.userId, [
-          photoData,
-        ]);
+        await modelService.addUserModelPhotos(
+          metadata.modelId,
+          metadata.userId,
+          [photoData]
+        );
       }
 
       res.status(201).json({

@@ -30,6 +30,14 @@ import {
   PersonAdd,
   Collections,
   Category,
+  TrendingUp,
+  ExpandMore,
+  Schedule,
+  AutoAwesome,
+  School,
+  SportsEsports,
+  BookmarkBorder,
+  Palette,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -41,6 +49,8 @@ export const Header = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [comingSoonAnchorEl, setComingSoonAnchorEl] =
+    useState<null | HTMLElement>(null);
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -60,6 +70,14 @@ export const Header = () => {
     setMobileDrawerOpen(!mobileDrawerOpen);
   };
 
+  const handleComingSoonMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setComingSoonAnchorEl(event.currentTarget);
+  };
+
+  const handleComingSoonMenuClose = () => {
+    setComingSoonAnchorEl(null);
+  };
+
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
     { label: 'Collections', path: '/collections', icon: <Collections /> },
@@ -69,6 +87,19 @@ export const Header = () => {
           { label: 'Models', path: '/models', icon: <Category /> },
         ]
       : []),
+  ];
+
+  const comingSoonItems = [
+    { label: 'Price Tracking', path: '/price-tracking', icon: <TrendingUp /> },
+    { label: 'AI Features', path: '/ai-features', icon: <AutoAwesome /> },
+    { label: 'Help & Mentorship', path: '/help-mentorship', icon: <School /> },
+    {
+      label: 'Battle Reports & Gaming',
+      path: '/battle-reports',
+      icon: <SportsEsports />,
+    },
+    { label: 'Wishlist System', path: '/wishlist', icon: <BookmarkBorder /> },
+    { label: 'Painting System', path: '/painting', icon: <Palette /> },
   ];
 
   const authItems = isAuthenticated
@@ -101,6 +132,44 @@ export const Header = () => {
           </ListItem>
         ))}
       </List>
+
+      {/* Coming Soon Section - Only for authenticated users */}
+      {isAuthenticated && (
+        <>
+          <Divider />
+          <List>
+            <ListItem sx={{ py: 1 }}>
+              <ListItemIcon>
+                <Schedule />
+              </ListItemIcon>
+              <ListItemText
+                primary='Coming Soon'
+                primaryTypographyProps={{
+                  variant: 'subtitle2',
+                  color: 'text.secondary',
+                  fontWeight: 'medium',
+                }}
+              />
+            </ListItem>
+            {comingSoonItems.map(item => (
+              <ListItem
+                key={item.path}
+                component={Link}
+                to={item.path}
+                onClick={handleMobileDrawerToggle}
+                sx={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  pl: 4,
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ))}
+          </List>
+        </>
+      )}
 
       {!isAuthenticated && (
         <>
@@ -201,6 +270,41 @@ export const Header = () => {
                   {item.label}
                 </Button>
               ))}
+
+              {/* Coming Soon Dropdown - Only for authenticated users */}
+              {isAuthenticated && (
+                <>
+                  <Button
+                    color='inherit'
+                    startIcon={<Schedule />}
+                    endIcon={<ExpandMore />}
+                    onClick={handleComingSoonMenuOpen}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Coming Soon
+                  </Button>
+                  <Menu
+                    anchorEl={comingSoonAnchorEl}
+                    open={Boolean(comingSoonAnchorEl)}
+                    onClose={handleComingSoonMenuClose}
+                    transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+                  >
+                    {comingSoonItems.map(item => (
+                      <MenuItem
+                        key={item.path}
+                        component={Link}
+                        to={item.path}
+                        onClick={handleComingSoonMenuClose}
+                        sx={{ minWidth: 160 }}
+                      >
+                        {item.icon}
+                        <Box sx={{ ml: 1 }}>{item.label}</Box>
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </>
+              )}
             </Box>
           )}
 

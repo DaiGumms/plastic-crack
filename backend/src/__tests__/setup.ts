@@ -27,11 +27,10 @@ afterAll(async () => {
 
 async function cleanupDatabaseBetweenTests() {
   try {
-    // Clean up test data that should not persist between tests
-    // But preserve main test users created in beforeAll
-    await prisma.modelTag.deleteMany({});
-    await prisma.modelPhoto.deleteMany({});
-    await prisma.modelLike.deleteMany({});
+    // Clean up tables in dependency order
+    await prisma.userModelTag.deleteMany({});
+    await prisma.userModelPhoto.deleteMany({});
+    await prisma.userModelLike.deleteMany({});
     await prisma.model.deleteMany({});
     await prisma.collection.deleteMany({});
     await prisma.userRelationship.deleteMany({});
@@ -73,9 +72,9 @@ async function cleanupDatabaseBetweenTests() {
 async function cleanupDatabase() {
   try {
     // Delete all test data in correct order to respect foreign key constraints
-    await prisma.modelTag.deleteMany({});
-    await prisma.modelPhoto.deleteMany({});
-    await prisma.modelLike.deleteMany({});
+    await prisma.userModelTag.deleteMany({});
+    await prisma.userModelPhoto.deleteMany({});
+    await prisma.userModelLike.deleteMany({});
     await prisma.model.deleteMany({});
     await prisma.collection.deleteMany({});
     await prisma.userRelationship.deleteMany({});

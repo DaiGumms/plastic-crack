@@ -197,14 +197,7 @@ export class UserService {
         },
       });
 
-      // Map profileImageUrl to avatarUrl for frontend compatibility
-      const { profileImageUrl, ...userWithoutProfileImage } = updatedUser;
-      const finalProfile = {
-        ...userWithoutProfileImage,
-        avatarUrl: profileImageUrl,
-      };
-
-      return finalProfile;
+      return updatedUser;
     } catch (error) {
       if (process.env.NODE_ENV !== 'test') {
         // eslint-disable-next-line no-console
@@ -416,7 +409,7 @@ export class UserService {
       const [totalCollections, totalModelLikes, followerCount, followingCount] =
         await Promise.all([
           prisma.collection.count({ where: { userId } }),
-          prisma.modelLike.count({ where: { userId } }),
+          prisma.userModelLike.count({ where: { userId } }),
           prisma.userRelationship.count({ where: { followingId: userId } }),
           prisma.userRelationship.count({ where: { followerId: userId } }),
         ]);
