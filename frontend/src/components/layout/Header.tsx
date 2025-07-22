@@ -38,6 +38,7 @@ import {
   SportsEsports,
   BookmarkBorder,
   Palette,
+  PhoneAndroid,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -81,6 +82,7 @@ export const Header = () => {
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
     { label: 'Collections', path: '/collections', icon: <Collections /> },
+    { label: 'Mobile App', path: '/mobile-app', icon: <PhoneAndroid /> },
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },

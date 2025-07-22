@@ -29,6 +29,7 @@ import { HelpMentorshipPage } from './pages/HelpMentorshipPage';
 import { BattleReportsGamingPage } from './pages/BattleReportsGamingPage';
 import { WishlistSystemPage } from './pages/WishlistSystemPage';
 import { PaintingSystemPage } from './pages/PaintingSystemPage';
+import { MobileAppPage } from './pages/MobileAppPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ function App() {
                 {/* Public Routes */}
                 <Route path='/' element={<HomePage />} />
                 <Route path='/beta-interest' element={<BetaInterestPage />} />
+                <Route path='/mobile-app' element={<MobileAppPage />} />
                 <Route path='/user/:userId' element={<PublicProfilePage />} />
                 <Route path='/test-upload' element={<UploadTestingPage />} />
 
