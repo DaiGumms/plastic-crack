@@ -11,6 +11,11 @@ import { getRedisClient } from './redis';
 export const createSessionStore = () => {
   const redisClient = getRedisClient();
 
+  if (!redisClient || !redisClient.isOpen) {
+    // Return undefined if Redis is not available
+    return undefined;
+  }
+
   // Create Redis store instance - connect-redis v9 syntax
   const store = new RedisStore({
     client: redisClient,
@@ -44,7 +49,14 @@ export const sessionConfig: session.SessionOptions = {
  */
 export const initializeSession = () => {
   const store = createSessionStore();
-  sessionConfig.store = store;
+  
+  // If Redis is not available, use memory store (not recommended for production)
+  if (!store) {
+    // eslint-disable-next-line no-console
+    console.warn('⚠️ Redis not available, using memory session store (not recommended for production)');
+  }
+  
+  sessionConfig.store = store; // Will be undefined if Redis not available
 
   return session(sessionConfig);
 };

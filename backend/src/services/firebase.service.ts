@@ -78,6 +78,19 @@ class FirebaseService {
       return this.app;
     }
 
+    // Production environment with Application Default Credentials (Cloud Run)
+    if (process.env.NODE_ENV === 'production' && !config.firebase.serviceAccount.privateKey) {
+      this.app = initializeApp({
+        projectId: config.firebase.serviceAccount.projectId,
+        storageBucket: config.firebase.storageBucket,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('🔥 Firebase initialized with Application Default Credentials (ADC)');
+      this.initialized = true;
+      return this.app;
+    }
+
     if (
       !config.firebase.serviceAccount.projectId ||
       !config.firebase.serviceAccount.privateKey ||

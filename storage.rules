@@ -1,18 +1,12 @@
 rules_version = '2';
 
-// Firebase Storage Security Rules for Local Emulator
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow authenticated uploads only
-    match /users/{userId}/{allPaths=**} {
-      allow read: if true; // Public read for CDN functionality
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Allow read access to all files for local testing
     match /{allPaths=**} {
-      allow read: if true;
-      allow write: if true; // Allow all writes in local testing
+      allow read, write: if false;
     }
   }
 }

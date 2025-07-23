@@ -90,20 +90,48 @@ app.use(requestValidator);
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Health check endpoint
-app.get('/health', async (req, res) => {
-  const redisHealth = await checkRedisHealth();
-
+// Simple health check endpoint (no dependencies)
+app.get('/ping', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '0.1.0',
-    environment: config.nodeEnv,
     uptime: process.uptime(),
-    services: {
-      redis: redisHealth,
-    },
   });
+});
+
+// Health check endpoint
+app.get('/health', async (req, res) => {
+  try {
+    const redisHealth = await checkRedisHealth();
+
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '0.1.0',
+      environment: config.nodeEnv,
+      uptime: process.uptime(),
+      services: {
+        redis: redisHealth,
+      },
+    });
+  } catch (error) {
+    // Return healthy status even if Redis fails - app can work without Redis
+    // eslint-disable-next-line no-console
+    console.warn('Health check Redis error:', error instanceof Error ? error.message : String(error));
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '0.1.0',
+      environment: config.nodeEnv,
+      uptime: process.uptime(),
+      services: {
+        redis: {
+          status: 'unhealthy',
+          message: 'Redis unavailable - app running without cache',
+        },
+      },
+    });
+  }
 });
 
 // CSRF token endpoint

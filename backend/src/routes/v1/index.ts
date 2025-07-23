@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { prisma } from '../../lib/database';
 import authRoutes from '../auth.routes';
 
 import { collectionRoutes } from './collection.routes';
@@ -21,26 +22,38 @@ if (process.env.NODE_ENV === 'development') {
   router.use('/redis', redisRoutes);
 }
 
-// Authentication routes
-router.use('/auth', authRoutes);
+// Database-dependent routes (only if database is available)
+if (prisma) {
+  // Authentication routes
+  router.use('/auth', authRoutes);
 
-// User profile routes
-router.use('/users', userRoutes);
+  // User profile routes
+  router.use('/users', userRoutes);
 
-// Collection management routes
-router.use('/collections', collectionRoutes);
+  // Collection management routes
+  router.use('/collections', collectionRoutes);
 
-// Game system routes
-router.use('/game-systems', gameSystemRoutes);
+  // Game system routes
+  router.use('/game-systems', gameSystemRoutes);
 
-// Library model routes (read-only catalog)
-router.use('/library/models', libraryModelRoutes);
+  // Library model routes (read-only catalog)
+  router.use('/library/models', libraryModelRoutes);
 
-// Model management routes (user models)
-router.use('/models', modelRoutes);
+  // Model management routes (user models)
+  router.use('/models', modelRoutes);
 
-// File upload routes
-router.use('/upload', uploadRoutes);
+  // Upload routes (require database for model photos)
+  router.use('/upload', uploadRoutes);
+} else {
+  // Database not available - provide informational message
+  router.get('/status', (req, res) => {
+    res.json({
+      message: 'API running without database connectivity',
+      availableEndpoints: ['health', 'ping'],
+      timestamp: new Date().toISOString(),
+    });
+  });
+}
 
 // Placeholder for future routes
 router.get('/', (req, res) => {
@@ -51,15 +64,18 @@ router.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/api/v1/health',
-      auth: '/api/v1/auth',
-      users: '/api/v1/users',
-      collections: '/api/v1/collections',
-      gameSystems: '/api/v1/game-systems',
-      libraryModels: '/api/v1/library/models',
-      models: '/api/v1/models',
+      ...(prisma && {
+        auth: '/api/v1/auth',
+        users: '/api/v1/users',
+        collections: '/api/v1/collections',
+        gameSystems: '/api/v1/game-systems',
+        libraryModels: '/api/v1/library/models',
+        models: '/api/v1/models',
+        upload: '/api/v1/upload',
+      }),
       ...(process.env.NODE_ENV === 'development' && { redis: '/api/v1/redis' }),
-      // Future endpoints will be listed here
     },
+    databaseStatus: prisma ? 'connected' : 'not available',
   });
 });
 

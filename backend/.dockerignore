@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.nyc_output
+coverage
+.env
+.env.local
+.env.test
+.env.production
+.git
+.gitignore
+README.md
+Dockerfile*
+.dockerignore
+uploads/*
+!uploads/.gitkeep
+.firebaserc
+cloudbuild.yaml

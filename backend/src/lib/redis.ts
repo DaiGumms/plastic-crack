@@ -74,6 +74,13 @@ export const createRedisClient = (): RedisClientType => {
  * Connect to Redis
  */
 export const connectRedis = async (): Promise<void> => {
+  // Skip Redis connection in production if no REDIS_URL is provided
+  if (process.env.NODE_ENV === 'production' && !process.env.REDIS_URL) {
+    // eslint-disable-next-line no-console
+    console.log('⚠️ Skipping Redis connection in production (no REDIS_URL provided)');
+    return;
+  }
+
   if (!redisClient) {
     createRedisClient();
   }
@@ -85,7 +92,7 @@ export const connectRedis = async (): Promise<void> => {
       console.log('Successfully connected to Redis');
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to connect to Redis:', error);
+      console.error('Failed to connect to Redis:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -102,7 +109,7 @@ export const disconnectRedis = async (): Promise<void> => {
       console.log('Disconnected from Redis');
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Error disconnecting from Redis:', error);
+      console.error('Error disconnecting from Redis:', error instanceof Error ? error.message : String(error));
       throw error;
     } finally {
       redisClient = null;
@@ -207,10 +214,10 @@ export class CacheService {
     }
 
     try {
-      return JSON.parse(value) as T;
+      return JSON.parse(value as string) as T;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Error parsing cached value:', error);
+      console.error('Error parsing cached value:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }

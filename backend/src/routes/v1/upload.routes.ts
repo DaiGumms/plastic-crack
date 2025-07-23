@@ -1,32 +1,13 @@
 /**
  * Upload Routes
- * RESTful API endpoints for file uploads and image process        c        const photoData = {
-          fileName: result.fileName,
-          originalUrl: result.url,
-          description: metadata.description,
-          isPrimary: false, // First photo could be primary, but let user decide
-          fileSize: result.size,
-          width: result.dimensions?.width,
-          height: result.dimensions?.height,
-        };
-
-        await modelService.addUserModelPhotos(metadata.modelId, metadata.userId, [photoData]);ata = {
-          fileName: result.fileName,
-          originalUrl: result.url,
-          description: metadata.description,
-          isPrimary: false, // First photo could be primary, but let user decide
-          fileSize: result.size,
-          width: result.dimensions?.width,
-          height: result.dimensions?.height,
-        };
-
-        await modelService.addUserModelPhotos(metadata.modelId, metadata.userId, [photoData]);lements Issue #25 acceptance criteria
+ * RESTful API endpoints for file uploads and image processing
+ * Implements Issue #25 acceptance criteria
  */
 
 import { Router, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 
-import { PrismaClient } from '../../generated/prisma';
+import { prisma } from '../../lib/database';
 import { authenticateToken } from '../../middleware/auth.middleware';
 import { AppError } from '../../middleware/errorHandler';
 import { ModelService } from '../../services/model.service';
@@ -34,8 +15,7 @@ import { uploadService } from '../../services/upload.service';
 import { AuthenticatedRequest } from '../../types/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
-const modelService = new ModelService(prisma);
+const modelService = prisma ? new ModelService(prisma) : null;
 
 /**
  * Validation middleware
