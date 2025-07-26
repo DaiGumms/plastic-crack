@@ -7,6 +7,7 @@ export interface GameSystem {
   shortName: string;
   description?: string;
   publisher?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -39,7 +39,7 @@ export const RegisterPage: React.FC = () => {
         py: 4,
       }}
     >
-      <Container maxWidth="sm">
+      <Container maxWidth='sm'>
         <Card
           sx={{
             textAlign: 'center',
@@ -62,8 +62,8 @@ export const RegisterPage: React.FC = () => {
 
             {/* Title */}
             <Typography
-              variant="h4"
-              component="h1"
+              variant='h4'
+              component='h1'
               gutterBottom
               sx={{
                 fontWeight: 700,
@@ -78,40 +78,40 @@ export const RegisterPage: React.FC = () => {
 
             {/* Message */}
             <Typography
-              variant="h6"
-              color="text.secondary"
+              variant='h6'
+              color='text.secondary'
               sx={{ mb: 4, lineHeight: 1.6 }}
             >
               We're currently in closed beta testing
             </Typography>
 
             <Typography
-              variant="body1"
-              color="text.secondary"
+              variant='body1'
+              color='text.secondary'
               sx={{ mb: 4, lineHeight: 1.6 }}
             >
-              New account registration is temporarily disabled while we perfect 
-              the Plastic Crack experience with our beta testers. Join our beta 
+              New account registration is temporarily disabled while we perfect
+              the Plastic Crack experience with our beta testers. Join our beta
               waitlist to be notified when registration reopens!
             </Typography>
 
             {/* Beta Alert */}
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mb: 4, 
+            <Alert
+              severity='info'
+              sx={{
+                mb: 4,
                 textAlign: 'left',
                 '& .MuiAlert-message': {
-                  width: '100%'
-                }
+                  width: '100%',
+                },
               }}
             >
-              <Typography variant="body2" sx={{ mb: 1 }}>
+              <Typography variant='body2' sx={{ mb: 1 }}>
                 <strong>Closed Beta Program</strong>
               </Typography>
-              <Typography variant="body2">
-                We're working with a select group of beta testers to ensure 
-                Plastic Crack meets the high standards the Warhammer community 
+              <Typography variant='body2'>
+                We're working with a select group of beta testers to ensure
+                Plastic Crack meets the high standards the Warhammer community
                 deserves. Registration will reopen for everyone soon!
               </Typography>
             </Alert>
@@ -128,9 +128,9 @@ export const RegisterPage: React.FC = () => {
             >
               <Button
                 component={Link}
-                to="/beta-interest"
-                variant="contained"
-                size="large"
+                to='/beta-interest'
+                variant='contained'
+                size='large'
                 startIcon={<InterestIcon />}
                 sx={{
                   px: 4,
@@ -145,9 +145,9 @@ export const RegisterPage: React.FC = () => {
 
               <Button
                 component={Link}
-                to="/login"
-                variant="outlined"
-                size="large"
+                to='/login'
+                variant='outlined'
+                size='large'
                 sx={{
                   px: 4,
                   py: 1.5,
@@ -161,18 +161,18 @@ export const RegisterPage: React.FC = () => {
             </Box>
 
             {/* Auto-redirect notice */}
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant='caption' color='text.secondary'>
               You'll be redirected to the beta waitlist in a few seconds...
             </Typography>
 
             {/* Manual navigation */}
             <Box sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-              <Typography variant="body2" color="text.secondary">
-                <Link 
-                  to="/" 
-                  style={{ 
-                    color: theme.palette.primary.main, 
-                    textDecoration: 'none' 
+              <Typography variant='body2' color='text.secondary'>
+                <Link
+                  to='/'
+                  style={{
+                    color: theme.palette.primary.main,
+                    textDecoration: 'none',
                   }}
                 >
                   ← Back to Home

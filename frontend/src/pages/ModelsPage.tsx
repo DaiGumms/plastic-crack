@@ -25,6 +25,11 @@ import {
   libraryModelService,
   type LibraryModelFilters,
 } from '../services/libraryModelService';
+import {
+  gameSystemService,
+  type GameSystem,
+  type Faction,
+} from '../services/gameSystemService';
 import CollectionService from '../services/collectionService';
 import { modelService } from '../services/modelService';
 
@@ -32,6 +37,8 @@ const ModelsPage: React.FC = () => {
   const [models, setModels] = useState<LibraryModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [gameSystems, setGameSystems] = useState<GameSystem[]>([]);
+  const [factions, setFactions] = useState<Faction[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
 
   // Filter state
@@ -48,12 +55,25 @@ const ModelsPage: React.FC = () => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        // Load all user collections (use large limit to get all)
-        const collectionsResponse = await CollectionService.getMyCollections(
-          1,
-          100
-        );
-        setCollections(collectionsResponse.data);
+        const [gameSystemsData, collectionsData] = await Promise.all([
+          gameSystemService.getGameSystems(),
+          CollectionService.getMyCollections(1, 100),
+        ]);
+
+        setGameSystems(gameSystemsData);
+        setCollections(collectionsData.data);
+
+        // Load factions for all game systems
+        const allFactions: Faction[] = [];
+        for (const gameSystem of gameSystemsData) {
+          try {
+            const factionsData = await gameSystemService.getFactions(gameSystem.id);
+            allFactions.push(...factionsData);
+          } catch (err) {
+            console.warn(`Failed to load factions for ${gameSystem.name}:`, err);
+          }
+        }
+        setFactions(allFactions);
       } catch (err) {
         console.error('Error loading initial data:', err);
         setError('Failed to load initial data. Please refresh the page.');
@@ -68,10 +88,7 @@ const ModelsPage: React.FC = () => {
   // Function to reload collections
   const reloadCollections = useCallback(async () => {
     try {
-      const collectionsResponse = await CollectionService.getMyCollections(
-        1,
-        100
-      );
+      const collectionsResponse = await CollectionService.getMyCollections(1, 100);
       setCollections(collectionsResponse.data);
     } catch (err) {
       console.error('Error reloading collections:', err);
@@ -99,18 +116,14 @@ const ModelsPage: React.FC = () => {
       const pageSize = 100; // Use maximum allowed by backend
       let hasMoreData = true;
 
-      // Keep fetching until we get all models
       while (hasMoreData) {
         const response: PaginatedResponse<LibraryModel> =
           await libraryModelService.getModels(currentPage, pageSize, filters);
 
         allModels = [...allModels, ...response.data];
 
-        // Check if we've loaded all models
-        hasMoreData =
-          response.data.length === pageSize &&
-          allModels.length < response.pagination.total;
-
+        // Check if there are more pages
+        hasMoreData = response.pagination.page < response.pagination.totalPages;
         currentPage++;
       }
 
@@ -155,24 +168,24 @@ const ModelsPage: React.FC = () => {
     try {
       setAddingToCollection(true);
 
-      // Use the proper method to add library model to collection
       await modelService.addLibraryModelToCollection(
         selectedModel,
         selectedCollection
       );
 
-      console.log(`Added ${selectedModel.name} to collection successfully!`);
+      console.log(
+        `Added ${selectedModel.name} to collection ${selectedCollection}`
+      );
 
-      // Close dialog and reset state
+      // Show success message
+      // You might want to use a notification system here
+
       setAddDialogOpen(false);
       setSelectedModel(null);
       setSelectedCollection('');
-
-      // Refresh collections to show updated counts
-      await reloadCollections();
     } catch (err) {
       console.error('Error adding model to collection:', err);
-      // TODO: Show error notification to user
+      // Handle error
     } finally {
       setAddingToCollection(false);
     }
@@ -183,30 +196,7 @@ const ModelsPage: React.FC = () => {
     setAddDialogOpen(false);
     setSelectedModel(null);
     setSelectedCollection('');
-    // Refresh collections in case user created one in another tab
-    reloadCollections();
   };
-
-  // Extract unique game systems and factions from models
-  const gameSystems = React.useMemo(() => {
-    const uniqueSystems = new Map();
-    models.forEach(model => {
-      if (model.gameSystem) {
-        uniqueSystems.set(model.gameSystem.id, model.gameSystem);
-      }
-    });
-    return Array.from(uniqueSystems.values());
-  }, [models]);
-
-  const factions = React.useMemo(() => {
-    const uniqueFactions = new Map();
-    models.forEach(model => {
-      if (model.faction) {
-        uniqueFactions.set(model.faction.id, model.faction);
-      }
-    });
-    return Array.from(uniqueFactions.values());
-  }, [models]);
 
   return (
     <Container maxWidth='xl' sx={{ py: 3 }}>
@@ -248,11 +238,17 @@ const ModelsPage: React.FC = () => {
         </Stack>
       </Box>
 
+      {/* Error Message */}
+      {error && (
+        <Alert severity='error' sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       {/* Models List */}
       <LibraryModelList
         models={models}
         loading={loading}
-        error={error}
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         onAddToCollection={handleAddToCollection}
@@ -270,96 +266,46 @@ const ModelsPage: React.FC = () => {
       >
         <DialogTitle>Add "{selectedModel?.name}" to Collection</DialogTitle>
         <DialogContent>
-          {(() => {
-            // Debug logging
-            console.log('Selected model:', selectedModel);
-            console.log('Available collections:', collections);
-            console.log('Model game system ID:', selectedModel?.gameSystem?.id);
-            collections.forEach(c =>
-              console.log(
-                'Collection:',
-                c.name,
-                'Game System ID:',
-                c.gameSystemId
-              )
-            );
+          {collections.length === 0 ? (
+            <Alert severity='info' sx={{ mt: 1 }}>
+              You need to create a collection first before adding models.
+              <Button component={RouterLink} to='/collections' sx={{ ml: 1 }}>
+                Go to Collections
+              </Button>
+            </Alert>
+          ) : (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
+                Choose which collection to add this model to:
+              </Typography>
 
-            // Filter collections to only show those that match the model's game system
-            const compatibleCollections = collections.filter(
-              collection =>
-                collection.gameSystemId === selectedModel?.gameSystem?.id
-            );
-
-            if (collections.length === 0) {
-              return (
-                <Alert severity='info' sx={{ mt: 1 }}>
-                  You need to create a collection first before adding models.
+              <Stack spacing={1} sx={{ mt: 2 }}>
+                {collections.map(collection => (
                   <Button
-                    component={RouterLink}
-                    to='/collections'
-                    sx={{ ml: 1 }}
+                    key={collection.id}
+                    variant={
+                      selectedCollection === collection.id
+                        ? 'contained'
+                        : 'outlined'
+                    }
+                    onClick={() => setSelectedCollection(collection.id)}
+                    sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
                   >
-                    Go to Collections
-                  </Button>
-                </Alert>
-              );
-            }
-
-            if (compatibleCollections.length === 0) {
-              return (
-                <Alert severity='warning' sx={{ mt: 1 }}>
-                  You don't have any collections for{' '}
-                  <strong>
-                    {selectedModel?.gameSystem?.name || 'this game system'}
-                  </strong>
-                  . Create a collection for this game system first.
-                  <Button
-                    component={RouterLink}
-                    to='/collections'
-                    sx={{ ml: 1 }}
-                  >
-                    Create Collection
-                  </Button>
-                </Alert>
-              );
-            }
-
-            return (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant='body2' color='text.secondary' gutterBottom>
-                  Choose which{' '}
-                  <strong>{selectedModel?.gameSystem?.name}</strong> collection
-                  to add this model to:
-                </Typography>
-
-                <Stack spacing={1} sx={{ mt: 2 }}>
-                  {compatibleCollections.map(collection => (
-                    <Button
-                      key={collection.id}
-                      variant={
-                        selectedCollection === collection.id
-                          ? 'contained'
-                          : 'outlined'
-                      }
-                      onClick={() => setSelectedCollection(collection.id)}
-                      sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                    >
-                      <Box>
-                        <Typography variant='subtitle2'>
-                          {collection.name}
+                    <Box>
+                      <Typography variant='subtitle2'>
+                        {collection.name}
+                      </Typography>
+                      {collection.description && (
+                        <Typography variant='caption' color='text.secondary'>
+                          {collection.description}
                         </Typography>
-                        {collection.description && (
-                          <Typography variant='caption' color='text.secondary'>
-                            {collection.description}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Button>
-                  ))}
-                </Stack>
-              </Box>
-            );
-          })()}
+                      )}
+                    </Box>
+                  </Button>
+                ))}
+              </Stack>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelAddToCollection}>Cancel</Button>
@@ -369,10 +315,7 @@ const ModelsPage: React.FC = () => {
             disabled={
               !selectedCollection ||
               addingToCollection ||
-              collections.length === 0 ||
-              collections.filter(
-                c => c.gameSystemId === selectedModel?.gameSystem?.id
-              ).length === 0
+              collections.length === 0
             }
             startIcon={addingToCollection ? undefined : <AddIcon />}
           >

@@ -72,7 +72,12 @@ export const BetaInterestPage: React.FC = () => {
       description: 'Core collection management and basic features',
       date: 'Q1 2025',
       status: 'current',
-      features: ['Collection Tracking', 'Model Database', 'Basic Profile', 'Photo Upload']
+      features: [
+        'Collection Tracking',
+        'Model Database',
+        'Basic Profile',
+        'Photo Upload',
+      ],
     },
     {
       phase: 'Phase 2',
@@ -80,7 +85,11 @@ export const BetaInterestPage: React.FC = () => {
       description: 'AI-powered features and smart recommendations',
       date: 'Q2 2025',
       status: 'upcoming',
-      features: ['AI Painting Assistance', 'Smart Categorization', 'Color Palette Generation']
+      features: [
+        'AI Painting Assistance',
+        'Smart Categorization',
+        'Color Palette Generation',
+      ],
     },
     {
       phase: 'Phase 3',
@@ -88,7 +97,11 @@ export const BetaInterestPage: React.FC = () => {
       description: 'Community features and social interaction',
       date: 'Q3 2025',
       status: 'planned',
-      features: ['Following System', 'Community Galleries', 'Collaboration Tools']
+      features: [
+        'Following System',
+        'Community Galleries',
+        'Collaboration Tools',
+      ],
     },
     {
       phase: 'Phase 4',
@@ -96,7 +109,7 @@ export const BetaInterestPage: React.FC = () => {
       description: 'Full public release with premium features',
       date: 'Q4 2025',
       status: 'planned',
-      features: ['Mobile App', 'Premium Subscriptions', 'Advanced Analytics']
+      features: ['Mobile App', 'Premium Subscriptions', 'Advanced Analytics'],
     },
   ];
 
@@ -146,28 +159,33 @@ export const BetaInterestPage: React.FC = () => {
                 color='text.secondary'
                 sx={{ maxWidth: 600, mx: 'auto', lineHeight: 1.6, mb: 2 }}
               >
-                Get early access to the ultimate Warhammer collection management platform
+                Get early access to the ultimate Warhammer collection management
+                platform
               </Typography>
-              
+
               {/* Beta Progress */}
               <Card sx={{ maxWidth: 500, mx: 'auto', mb: 4 }}>
                 <CardContent sx={{ py: 2 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    gutterBottom
+                  >
                     Beta Progress
                   </Typography>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={65} 
-                    sx={{ 
-                      height: 8, 
+                  <LinearProgress
+                    variant='determinate'
+                    value={65}
+                    sx={{
+                      height: 8,
                       borderRadius: 4,
                       mb: 1,
                       '& .MuiLinearProgress-bar': {
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`
-                      }
-                    }} 
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                      },
+                    }}
                   />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant='caption' color='text.secondary'>
                     65% Complete - Core Features Ready
                   </Typography>
                 </CardContent>
@@ -276,12 +294,15 @@ export const BetaInterestPage: React.FC = () => {
               }}
             >
               {roadmapItems.map((item, index) => (
-                <Card 
+                <Card
                   key={index}
-                  variant="outlined" 
+                  variant='outlined'
                   sx={{
                     height: '100%',
-                    border: item.status === 'current' ? `2px solid ${theme.palette.primary.main}` : undefined,
+                    border:
+                      item.status === 'current'
+                        ? `2px solid ${theme.palette.primary.main}`
+                        : undefined,
                     transition: 'all 0.3s ease-in-out',
                     '&:hover': {
                       transform: 'translateY(-2px)',
@@ -296,45 +317,53 @@ export const BetaInterestPage: React.FC = () => {
                           display: 'inline-flex',
                           p: 1,
                           borderRadius: 1,
-                          backgroundColor: item.status === 'current' ? 
-                            alpha(theme.palette.primary.main, 0.1) : 
-                            item.status === 'upcoming' ? 
-                            alpha(theme.palette.secondary.main, 0.1) : 
-                            alpha(theme.palette.grey[500], 0.1),
-                          color: item.status === 'current' ? 
-                            theme.palette.primary.main : 
-                            item.status === 'upcoming' ? 
-                            theme.palette.secondary.main : 
-                            theme.palette.grey[500],
+                          backgroundColor:
+                            item.status === 'current'
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : item.status === 'upcoming'
+                                ? alpha(theme.palette.secondary.main, 0.1)
+                                : alpha(theme.palette.grey[500], 0.1),
+                          color:
+                            item.status === 'current'
+                              ? theme.palette.primary.main
+                              : item.status === 'upcoming'
+                                ? theme.palette.secondary.main
+                                : theme.palette.grey[500],
                           mr: 2,
                         }}
                       >
-                        {item.status === 'current' ? <Build /> : 
-                         item.status === 'upcoming' ? <Schedule /> : 
-                         <Launch />}
+                        {item.status === 'current' ? (
+                          <Build />
+                        ) : item.status === 'upcoming' ? (
+                          <Schedule />
+                        ) : (
+                          <Launch />
+                        )}
                       </Box>
                       <Box>
-                        <Typography variant="h6" component="div">
+                        <Typography variant='h6' component='div'>
                           {item.phase}: {item.title}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           {item.date}
                         </Typography>
                       </Box>
                     </Box>
-                    
-                    <Typography color="text.secondary" sx={{ mb: 2 }}>
+
+                    <Typography color='text.secondary' sx={{ mb: 2 }}>
                       {item.description}
                     </Typography>
-                    
+
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                       {item.features.map((feature, fIndex) => (
-                        <Chip 
-                          key={fIndex} 
-                          label={feature} 
-                          size="small" 
-                          variant="outlined"
-                          color={item.status === 'current' ? 'primary' : 'default'}
+                        <Chip
+                          key={fIndex}
+                          label={feature}
+                          size='small'
+                          variant='outlined'
+                          color={
+                            item.status === 'current' ? 'primary' : 'default'
+                          }
                           sx={{ fontSize: '0.75rem' }}
                         />
                       ))}
@@ -360,24 +389,29 @@ export const BetaInterestPage: React.FC = () => {
             {[
               {
                 question: 'When will the beta start?',
-                answer: 'Beta access will begin rolling out in Q1 2025. We\'ll be granting access in waves to ensure the best possible experience for all testers.'
+                answer:
+                  "Beta access will begin rolling out in Q1 2025. We'll be granting access in waves to ensure the best possible experience for all testers.",
               },
               {
                 question: 'How long will the beta last?',
-                answer: 'The closed beta is expected to run for 6-9 months, allowing us to thoroughly test and refine all features before public launch.'
+                answer:
+                  'The closed beta is expected to run for 6-9 months, allowing us to thoroughly test and refine all features before public launch.',
               },
               {
                 question: 'Will my beta data be preserved?',
-                answer: 'Yes! All collections, photos, and data you create during the beta will be preserved when we launch publicly.'
+                answer:
+                  'Yes! All collections, photos, and data you create during the beta will be preserved when we launch publicly.',
               },
               {
                 question: 'What features will be available in beta?',
-                answer: 'Beta will include core collection management, photo uploads, basic AI features, and community tools. New features will be added throughout the beta period.'
+                answer:
+                  'Beta will include core collection management, photo uploads, basic AI features, and community tools. New features will be added throughout the beta period.',
               },
               {
                 question: 'How can I provide feedback?',
-                answer: 'Beta testers will have access to exclusive Discord channels, in-app feedback tools, and direct communication with our development team.'
-              }
+                answer:
+                  'Beta testers will have access to exclusive Discord channels, in-app feedback tools, and direct communication with our development team.',
+              },
             ].map((faq, index) => (
               <Accordion key={index}>
                 <AccordionSummary
@@ -385,12 +419,10 @@ export const BetaInterestPage: React.FC = () => {
                   aria-controls={`panel${index}a-content`}
                   id={`panel${index}a-header`}
                 >
-                  <Typography variant="h6">{faq.question}</Typography>
+                  <Typography variant='h6'>{faq.question}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Typography color="text.secondary">
-                    {faq.answer}
-                  </Typography>
+                  <Typography color='text.secondary'>{faq.answer}</Typography>
                 </AccordionDetails>
               </Accordion>
             ))}
@@ -410,12 +442,13 @@ export const BetaInterestPage: React.FC = () => {
                 What to Expect
               </Typography>
               <Typography color='text.secondary' sx={{ mb: 2 }}>
-                Beta access will be granted in waves starting in Q1 2025.
-                We'll send you an email when it's your turn to join!
+                Beta access will be granted in waves starting in Q1 2025. We'll
+                send you an email when it's your turn to join!
               </Typography>
               <Typography variant='body2' color='text.secondary'>
                 Beta testing will run for approximately 6-9 months before our
-                public launch, giving you exclusive access to shape the future of Plastic Crack.
+                public launch, giving you exclusive access to shape the future
+                of Plastic Crack.
               </Typography>
             </Box>
           )}

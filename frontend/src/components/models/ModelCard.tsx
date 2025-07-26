@@ -145,7 +145,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
               objectFit: 'cover',
             }}
             image={primaryImageUrl}
-            alt={model.name}
+            alt={model.customName || model.model?.name || 'Model image'}
           />
         ) : (
           <Box
@@ -228,25 +228,25 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             WebkitBoxOrient: 'vertical',
           }}
         >
-          {model.name}
+          {model.customName || model.model?.name || 'Unnamed Model'}
         </Typography>
 
         {/* Game System & Faction */}
         <Box sx={{ mb: 1 }}>
-          {model.gameSystem && (
+          {model.model?.gameSystem && (
             <Typography
               variant='caption'
               color='text.secondary'
               display='block'
             >
-              {model.gameSystem.name}
-              {model.faction && ` • ${model.faction.name}`}
+              {model.model.gameSystem.name}
+              {model.model?.faction && ` • ${model.model.faction.name}`}
             </Typography>
           )}
         </Box>
 
         {/* Model Description */}
-        {model.description && (
+        {model.model?.description && (
           <Typography
             variant='body2'
             color='text.secondary'
@@ -259,7 +259,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {model.description}
+            {model.model?.description}
           </Typography>
         )}
 
@@ -275,9 +275,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({
 
         {/* Model Stats */}
         <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-          {model.pointsCost && (
+          {(model.customPointsCost || model.model?.pointsCost) && (
             <Typography variant='caption' color='text.secondary'>
-              {model.pointsCost} pts
+              {model.customPointsCost || model.model?.pointsCost} pts
             </Typography>
           )}
           {model.purchasePrice && (

@@ -49,7 +49,9 @@ export interface PublicUserProfile {
 
 export class UserService {
   // Helper method to transform UserProfile for frontend compatibility
-  private static transformUserProfileForFrontend(user: UserProfile): UserProfile & { avatarUrl?: string | null } {
+  private static transformUserProfileForFrontend(
+    user: UserProfile
+  ): UserProfile & { avatarUrl?: string | null } {
     return {
       ...user,
       avatarUrl: user.profileImageUrl,

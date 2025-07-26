@@ -73,7 +73,7 @@ function TabPanel(props: TabPanelProps) {
 
   return (
     <div
-      role="tabpanel"
+      role='tabpanel'
       hidden={value !== index}
       id={`settings-tabpanel-${index}`}
       aria-labelledby={`settings-tab-${index}`}
@@ -88,7 +88,7 @@ export const SettingsPage: React.FC = () => {
   const { user, updateUser } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Profile form state
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +101,7 @@ export const SettingsPage: React.FC = () => {
     bio: '',
   });
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  
+
   // Privacy settings state (disabled for now)
   const [privacySettings] = useState<PrivacySettings>({
     showEmail: false,
@@ -249,7 +249,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth='lg' sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Button
@@ -259,11 +259,11 @@ export const SettingsPage: React.FC = () => {
         >
           Back to Home
         </Button>
-        
-        <Typography variant="h4" component="h1" gutterBottom>
+
+        <Typography variant='h4' component='h1' gutterBottom>
           Account Settings
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant='body1' color='text.secondary'>
           Manage your account preferences and security settings
         </Typography>
       </Box>
@@ -286,32 +286,32 @@ export const SettingsPage: React.FC = () => {
           <Tabs
             value={activeTab}
             onChange={handleTabChange}
-            aria-label="account settings tabs"
-            variant="scrollable"
-            scrollButtons="auto"
+            aria-label='account settings tabs'
+            variant='scrollable'
+            scrollButtons='auto'
           >
-            <Tab 
-              label="Account" 
-              icon={<PersonIcon />} 
-              iconPosition="start"
+            <Tab
+              label='Account'
+              icon={<PersonIcon />}
+              iconPosition='start'
               sx={{ minHeight: 64 }}
             />
-            <Tab 
-              label="Security" 
-              icon={<SecurityIcon />} 
-              iconPosition="start"
+            <Tab
+              label='Security'
+              icon={<SecurityIcon />}
+              iconPosition='start'
               sx={{ minHeight: 64 }}
             />
-            <Tab 
-              label="Notifications" 
-              icon={<NotificationsIcon />} 
-              iconPosition="start"
+            <Tab
+              label='Notifications'
+              icon={<NotificationsIcon />}
+              iconPosition='start'
               sx={{ minHeight: 64 }}
             />
-            <Tab 
-              label="Data & Privacy" 
-              icon={<DataIcon />} 
-              iconPosition="start"
+            <Tab
+              label='Data & Privacy'
+              icon={<DataIcon />}
+              iconPosition='start'
               sx={{ minHeight: 64 }}
             />
           </Tabs>
@@ -321,10 +321,10 @@ export const SettingsPage: React.FC = () => {
           {/* Account Tab */}
           <TabPanel value={activeTab} index={0}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant='h6' gutterBottom>
                 Profile Information
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
                 Manage your basic account information and profile details.
               </Typography>
 
@@ -355,12 +355,12 @@ export const SettingsPage: React.FC = () => {
                   </IconButton>
                 </Box>
                 <Box>
-                  <Typography variant='h6'>
-                    {getDisplayName()}
-                  </Typography>
+                  <Typography variant='h6'>{getDisplayName()}</Typography>
                   <Typography variant='body2' color='text.secondary'>
                     Member since{' '}
-                    {new Date(user?.createdAt || Date.now()).toLocaleDateString()}
+                    {new Date(
+                      user?.createdAt || Date.now()
+                    ).toLocaleDateString()}
                   </Typography>
                 </Box>
               </Box>
@@ -379,7 +379,9 @@ export const SettingsPage: React.FC = () => {
                   <TextField
                     fullWidth
                     label='First Name'
-                    value={isEditing ? formData.firstName : user?.firstName || ''}
+                    value={
+                      isEditing ? formData.firstName : user?.firstName || ''
+                    }
                     onChange={handleInputChange('firstName')}
                     disabled={!isEditing || isLoading}
                     required={isEditing}
@@ -454,7 +456,11 @@ export const SettingsPage: React.FC = () => {
                     <Button
                       variant='contained'
                       startIcon={
-                        isLoading ? <CircularProgress size={20} /> : <SaveIcon />
+                        isLoading ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <SaveIcon />
+                        )
                       }
                       onClick={handleSave}
                       disabled={isLoading}
@@ -465,9 +471,10 @@ export const SettingsPage: React.FC = () => {
                 )}
               </Box>
 
-              <Alert severity="info" sx={{ mt: 3 }}>
-                <Typography variant="body2">
-                  <strong>Coming in Phase 3:</strong> Username changes and additional account management features.
+              <Alert severity='info' sx={{ mt: 3 }}>
+                <Typography variant='body2'>
+                  <strong>Coming in Phase 3:</strong> Username changes and
+                  additional account management features.
                 </Typography>
               </Alert>
             </Box>
@@ -476,16 +483,16 @@ export const SettingsPage: React.FC = () => {
           {/* Security Tab */}
           <TabPanel value={activeTab} index={1}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant='h6' gutterBottom>
                 Security Settings
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
                 Manage your account security and privacy preferences.
               </Typography>
 
               {/* Password & Authentication */}
               <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant='subtitle1' gutterBottom>
                   Authentication
                 </Typography>
                 <List>
@@ -494,38 +501,38 @@ export const SettingsPage: React.FC = () => {
                       <PasswordIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Password"
-                      secondary="Change your account password"
+                      primary='Password'
+                      secondary='Change your account password'
                     />
-                    <Button variant="outlined" size="small" disabled>
+                    <Button variant='outlined' size='small' disabled>
                       Change Password
                     </Button>
                   </ListItem>
-                  
+
                   <Divider />
-                  
+
                   <ListItem>
                     <ListItemIcon>
                       <SecurityIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Two-Factor Authentication"
-                      secondary="Add an extra layer of security to your account"
+                      primary='Two-Factor Authentication'
+                      secondary='Add an extra layer of security to your account'
                     />
-                    <Chip label="Not Available" size="small" color="default" />
+                    <Chip label='Not Available' size='small' color='default' />
                   </ListItem>
-                  
+
                   <Divider />
-                  
+
                   <ListItem>
                     <ListItemIcon>
                       <InfoIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Login History"
-                      secondary="View recent login activity"
+                      primary='Login History'
+                      secondary='View recent login activity'
                     />
-                    <Button variant="outlined" size="small" disabled>
+                    <Button variant='outlined' size='small' disabled>
                       View History
                     </Button>
                   </ListItem>
@@ -534,20 +541,25 @@ export const SettingsPage: React.FC = () => {
 
               {/* Privacy Controls */}
               <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant='subtitle1' gutterBottom>
                   Privacy Controls
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant='body2'
+                  color='text.secondary'
+                  sx={{ mb: 2 }}
+                >
                   Control what information is visible on your public profile
                 </Typography>
 
                 <Alert severity='info' sx={{ mb: 3 }}>
-                  Privacy settings are currently disabled during the beta period. These controls will be activated in the next update.
+                  Privacy settings are currently disabled during the beta
+                  period. These controls will be activated in the next update.
                 </Alert>
 
                 {/* Profile Information Visibility */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" fontWeight="medium" gutterBottom>
+                  <Typography variant='body2' fontWeight='medium' gutterBottom>
                     Profile Information
                   </Typography>
 
@@ -600,7 +612,7 @@ export const SettingsPage: React.FC = () => {
 
                 {/* Social Features */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" fontWeight="medium" gutterBottom>
+                  <Typography variant='body2' fontWeight='medium' gutterBottom>
                     Social Features
                   </Typography>
 
@@ -642,7 +654,7 @@ export const SettingsPage: React.FC = () => {
 
                 {/* Collection Visibility */}
                 <Box>
-                  <Typography variant="body2" fontWeight="medium" gutterBottom>
+                  <Typography variant='body2' fontWeight='medium' gutterBottom>
                     Collection Statistics
                   </Typography>
 
@@ -670,9 +682,11 @@ export const SettingsPage: React.FC = () => {
                 </Box>
               </Box>
 
-              <Alert severity="warning" sx={{ mt: 3 }}>
-                <Typography variant="body2">
-                  <strong>Phase 3 Implementation:</strong> Password change, two-factor authentication, login history, and active privacy controls will be available in the next major update.
+              <Alert severity='warning' sx={{ mt: 3 }}>
+                <Typography variant='body2'>
+                  <strong>Phase 3 Implementation:</strong> Password change,
+                  two-factor authentication, login history, and active privacy
+                  controls will be available in the next major update.
                 </Typography>
               </Alert>
             </Box>
@@ -681,56 +695,58 @@ export const SettingsPage: React.FC = () => {
           {/* Notifications Tab */}
           <TabPanel value={activeTab} index={2}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant='h6' gutterBottom>
                 Notification Preferences
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
                 Control how and when you receive notifications.
               </Typography>
 
               <Paper sx={{ p: 3, backgroundColor: 'grey.50' }}>
-                <Typography variant="h6" gutterBottom color="text.secondary">
+                <Typography variant='h6' gutterBottom color='text.secondary'>
                   Notification Categories
                 </Typography>
-                
+
                 <List>
                   <ListItem>
                     <ListItemText
-                      primary="Account Activity"
-                      secondary="Login alerts, password changes, and security notifications"
+                      primary='Account Activity'
+                      secondary='Login alerts, password changes, and security notifications'
                     />
-                    <Chip label="System Default" size="small" />
+                    <Chip label='System Default' size='small' />
                   </ListItem>
-                  
+
                   <ListItem>
                     <ListItemText
-                      primary="Collection Updates"
-                      secondary="New models, collection changes, and inventory alerts"
+                      primary='Collection Updates'
+                      secondary='New models, collection changes, and inventory alerts'
                     />
-                    <Chip label="Future Feature" size="small" color="default" />
+                    <Chip label='Future Feature' size='small' color='default' />
                   </ListItem>
-                  
+
                   <ListItem>
                     <ListItemText
-                      primary="Social Activity"
-                      secondary="Follows, likes, comments, and community interactions"
+                      primary='Social Activity'
+                      secondary='Follows, likes, comments, and community interactions'
                     />
-                    <Chip label="Future Feature" size="small" color="default" />
+                    <Chip label='Future Feature' size='small' color='default' />
                   </ListItem>
-                  
+
                   <ListItem>
                     <ListItemText
-                      primary="Marketing & Updates"
-                      secondary="Product updates, feature announcements, and newsletters"
+                      primary='Marketing & Updates'
+                      secondary='Product updates, feature announcements, and newsletters'
                     />
-                    <Chip label="Future Feature" size="small" color="default" />
+                    <Chip label='Future Feature' size='small' color='default' />
                   </ListItem>
                 </List>
               </Paper>
 
-              <Alert severity="info" sx={{ mt: 3 }}>
-                <Typography variant="body2">
-                  <strong>Beta Period:</strong> During the closed beta, notification settings will use system defaults. Full customization will be available at public launch.
+              <Alert severity='info' sx={{ mt: 3 }}>
+                <Typography variant='body2'>
+                  <strong>Beta Period:</strong> During the closed beta,
+                  notification settings will use system defaults. Full
+                  customization will be available at public launch.
                 </Typography>
               </Alert>
             </Box>
@@ -739,10 +755,10 @@ export const SettingsPage: React.FC = () => {
           {/* Data & Privacy Tab */}
           <TabPanel value={activeTab} index={3}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant='h6' gutterBottom>
                 Data & Privacy
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
                 Manage your data and privacy settings.
               </Typography>
 
@@ -752,44 +768,53 @@ export const SettingsPage: React.FC = () => {
                     <DataIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Data Export"
-                    secondary="Download a copy of your data"
+                    primary='Data Export'
+                    secondary='Download a copy of your data'
                   />
-                  <Button variant="outlined" size="small" disabled>
+                  <Button variant='outlined' size='small' disabled>
                     Export Data
                   </Button>
                 </ListItem>
-                
+
                 <Divider />
-                
+
                 <ListItem>
                   <ListItemIcon>
-                    <DeleteIcon color="error" />
+                    <DeleteIcon color='error' />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Delete Account"
-                    secondary="Permanently delete your account and all data"
+                    primary='Delete Account'
+                    secondary='Permanently delete your account and all data'
                     sx={{
                       '& .MuiListItemText-primary': {
-                        color: 'error.main'
-                      }
+                        color: 'error.main',
+                      },
                     }}
                   />
-                  <Button variant="outlined" color="error" size="small" disabled>
+                  <Button
+                    variant='outlined'
+                    color='error'
+                    size='small'
+                    disabled
+                  >
                     Delete Account
                   </Button>
                 </ListItem>
               </List>
 
-              <Alert severity="error" sx={{ mt: 3 }}>
-                <Typography variant="body2">
-                  <strong>Important:</strong> Data export and account deletion features will be implemented before public launch to ensure full GDPR compliance.
+              <Alert severity='error' sx={{ mt: 3 }}>
+                <Typography variant='body2'>
+                  <strong>Important:</strong> Data export and account deletion
+                  features will be implemented before public launch to ensure
+                  full GDPR compliance.
                 </Typography>
               </Alert>
 
-              <Alert severity="info" sx={{ mt: 2 }}>
-                <Typography variant="body2">
-                  <strong>Beta Testing:</strong> During the beta period, if you need to delete your account or export your data, please contact our support team directly.
+              <Alert severity='info' sx={{ mt: 2 }}>
+                <Typography variant='body2'>
+                  <strong>Beta Testing:</strong> During the beta period, if you
+                  need to delete your account or export your data, please
+                  contact our support team directly.
                 </Typography>
               </Alert>
             </Box>
@@ -799,9 +824,12 @@ export const SettingsPage: React.FC = () => {
 
       {/* Footer */}
       <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           Need help? Contact us at{' '}
-          <Link to="mailto:support@plasticcrack.com" style={{ color: 'inherit' }}>
+          <Link
+            to='mailto:support@plasticcrack.com'
+            style={{ color: 'inherit' }}
+          >
             support@plasticcrack.com
           </Link>
         </Typography>

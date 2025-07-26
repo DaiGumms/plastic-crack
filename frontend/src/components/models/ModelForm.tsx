@@ -43,7 +43,14 @@ const modelSchema = yup.object({
   collectionId: yup.string().required('Collection is required'),
   paintingStatus: yup
     .string()
-    .oneOf(['UNPAINTED', 'IN_PROGRESS', 'COMPLETED'])
+    .oneOf([
+      'UNPAINTED',
+      'PRIMED',
+      'BASE_COATED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'SHOWCASE',
+    ])
     .optional(),
   pointsCost: yup.number().optional().min(0, 'Points cost must be positive'),
   notes: yup.string().optional(),
@@ -130,20 +137,21 @@ const ModelForm: React.FC<ModelFormProps> = ({
     if (open) {
       if (model) {
         reset({
-          name: model.name,
-          description: model.description || '',
-          gameSystemId: model.gameSystemId,
-          factionId: model.factionId || '',
+          name: model.customName || model.model?.name || '',
+          description: model.model?.description || '',
+          gameSystemId: model.model?.gameSystemId || '',
+          factionId: model.model?.factionId || '',
           collectionId: model.collectionId,
           paintingStatus: model.paintingStatus,
-          pointsCost: model.pointsCost || undefined,
+          pointsCost:
+            model.customPointsCost || model.model?.pointsCost || undefined,
           notes: model.notes || '',
           purchasePrice: model.purchasePrice || undefined,
           purchaseDate: model.purchaseDate || undefined,
           isPublic: model.isPublic,
         });
         setTags(model.tags || []);
-        setSelectedGameSystemId(model.gameSystemId);
+        setSelectedGameSystemId(model.model?.gameSystemId || '');
       } else {
         reset({
           name: '',
@@ -271,8 +279,11 @@ const ModelForm: React.FC<ModelFormProps> = ({
                           disabled={loading}
                         >
                           <MenuItem value='UNPAINTED'>Unpainted</MenuItem>
+                          <MenuItem value='PRIMED'>Primed</MenuItem>
+                          <MenuItem value='BASE_COATED'>Base Coated</MenuItem>
                           <MenuItem value='IN_PROGRESS'>In Progress</MenuItem>
                           <MenuItem value='COMPLETED'>Completed</MenuItem>
+                          <MenuItem value='SHOWCASE'>Showcase</MenuItem>
                         </Select>
                       </FormControl>
                     )}

@@ -259,7 +259,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         )}
 
         {/* Factions and Tags - Combined for space efficiency */}
-        {((collection.factions && collection.factions.length > 0) || 
+        {((collection.factions && collection.factions.length > 0) ||
           (collection.tags && collection.tags.length > 0)) && (
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -281,15 +281,17 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
                   label={tag}
                   size='small'
                   variant='outlined'
-                  sx={{ 
+                  sx={{
                     fontSize: '0.75rem',
                     backgroundColor: alpha(theme.palette.grey[500], 0.05),
                   }}
                 />
               ))}
-              {((collection.factions?.length || 0) + (collection.tags?.length || 0)) > 4 && (
+              {(collection.factions?.length || 0) +
+                (collection.tags?.length || 0) >
+                4 && (
                 <Chip
-                  label={`+${((collection.factions?.length || 0) + (collection.tags?.length || 0)) - 4} more`}
+                  label={`+${(collection.factions?.length || 0) + (collection.tags?.length || 0) - 4} more`}
                   size='small'
                   variant='outlined'
                   sx={{ fontSize: '0.75rem', color: 'text.secondary' }}

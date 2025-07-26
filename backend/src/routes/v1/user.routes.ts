@@ -262,15 +262,15 @@ router.patch(
       }
 
       const { avatarUrl } = req.body;
-      
+
       // Debug logging
       // eslint-disable-next-line no-console
       console.log('🔍 Avatar update request:', {
         userId: req.user.id,
         avatarUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       const updatedProfile = await UserService.updateUserProfile(req.user.id, {
         avatarUrl,
       });
@@ -279,7 +279,7 @@ router.patch(
       console.log('✅ Avatar updated successfully:', {
         userId: req.user.id,
         newProfileImageUrl: updatedProfile.profileImageUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       res.json({
@@ -291,9 +291,9 @@ router.patch(
       console.error('❌ Avatar update failed:', {
         userId: req.user?.id,
         error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       const message =
         error instanceof Error ? error.message : 'Failed to update avatar';
       res.status(400).json({ message });

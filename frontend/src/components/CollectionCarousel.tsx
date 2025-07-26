@@ -58,7 +58,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
       }}
     >
       <CardContent
-        sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}
+        sx={{
+          p: 2.5,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
         {/* Header with user info - made more compact */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
@@ -132,7 +137,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
         {/* Condensed metadata section */}
         <Box sx={{ mt: 'auto' }}>
           {/* Factions and Tags combined in one row */}
-          {((collection.factions && collection.factions.length > 0) || 
+          {((collection.factions && collection.factions.length > 0) ||
             (collection.tags && collection.tags.length > 0)) && (
             <Box
               sx={{
@@ -154,7 +159,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
                   sx={{ fontSize: '0.65rem', height: 18 }}
                 />
               )}
-              
+
               {/* Show one tag if space allows */}
               {collection.tags && collection.tags.length > 0 && (
                 <Chip
@@ -169,11 +174,21 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
                   }}
                 />
               )}
-              
+
               {/* Show count of additional items */}
-              {((collection.factions?.length || 0) + (collection.tags?.length || 0)) > 2 && (
-                <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.65rem' }}>
-                  +{((collection.factions?.length || 0) + (collection.tags?.length || 0)) - 2} more
+              {(collection.factions?.length || 0) +
+                (collection.tags?.length || 0) >
+                2 && (
+                <Typography
+                  variant='caption'
+                  color='text.secondary'
+                  sx={{ fontSize: '0.65rem' }}
+                >
+                  +
+                  {(collection.factions?.length || 0) +
+                    (collection.tags?.length || 0) -
+                    2}{' '}
+                  more
                 </Typography>
               )}
             </Box>
@@ -202,13 +217,13 @@ const SkeletonCard: React.FC = () => (
       </Box>
       <Skeleton variant='text' width='90%' sx={{ mb: 1 }} />
       <Skeleton variant='text' width='70%' sx={{ mb: 1.5 }} />
-      
+
       {/* Description skeleton - 4 lines */}
       <Skeleton variant='text' width='100%' sx={{ mb: 0.5 }} />
       <Skeleton variant='text' width='95%' sx={{ mb: 0.5 }} />
       <Skeleton variant='text' width='88%' sx={{ mb: 0.5 }} />
       <Skeleton variant='text' width='75%' sx={{ mb: 2 }} />
-      
+
       <Box sx={{ display: 'flex', gap: 0.5, mt: 'auto' }}>
         <Skeleton variant='rounded' width={60} height={18} />
         <Skeleton variant='rounded' width={50} height={18} />
