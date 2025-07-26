@@ -5,6 +5,8 @@ catalog, manage, and showcase their miniature collections. Available as both a m
 (iOS/Android) and web application, the platform provides tools for inventory management, collection
 tracking, AI-powered recommendations, price comparison, and rich social community features.
 
+*Updated: Production deployment ready with Google Cloud Run backend.*
+
 ## Project Overview
 
 Plastic Crack enables users to:
