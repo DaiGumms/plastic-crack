@@ -4,10 +4,10 @@ import rateLimit from 'express-rate-limit';
 // Skip rate limiting if explicitly disabled for testing
 const skip = () => process.env.SKIP_RATE_LIMITING === 'true';
 
-// Rate limiter for authentication endpoints
+// Rate limiter for authentication endpoints (more lenient for /me and /refresh)
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs for auth endpoints
+  max: 50, // Increased from 5 to 50 for authenticated user endpoints
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes',
@@ -18,6 +18,25 @@ export const authRateLimit = rateLimit({
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many authentication attempts, please try again later.',
+      retryAfter: '15 minutes',
+    });
+  },
+});
+
+// More lenient rate limiter for authenticated user endpoints like /me and /refresh
+export const userRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Allow more requests for authenticated users
+  message: {
+    error: 'Too many requests, please try again later.',
+    retryAfter: '15 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip,
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      error: 'Too many requests, please try again later.',
       retryAfter: '15 minutes',
     });
   },

@@ -52,7 +52,6 @@ describe('Frontend Constants', () => {
       LOGIN: '/login',
       REGISTER: '/register',
       DASHBOARD: '/dashboard',
-      PROFILE: '/profile',
       SETTINGS: '/settings',
     };
 
@@ -60,7 +59,6 @@ describe('Frontend Constants', () => {
     expect(ROUTES.LOGIN).toBe('/login');
     expect(ROUTES.REGISTER).toBe('/register');
     expect(ROUTES.DASHBOARD).toBe('/dashboard');
-    expect(ROUTES.PROFILE).toBe('/profile');
     expect(ROUTES.SETTINGS).toBe('/settings');
   });
 });

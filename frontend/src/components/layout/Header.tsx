@@ -82,7 +82,7 @@ export const Header = () => {
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
     { label: 'Collections', path: '/collections', icon: <Collections /> },
-    
+
     ...(isAuthenticated
       ? [
           { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
@@ -343,7 +343,7 @@ export const Header = () => {
                   >
                     <MenuItem
                       component={Link}
-                      to='/profile'
+                      to='/settings'
                       onClick={handleUserMenuClose}
                     >
                       <Person sx={{ mr: 1 }} />

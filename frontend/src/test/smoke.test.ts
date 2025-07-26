@@ -27,11 +27,11 @@ describe('Route Configuration', () => {
   it('verifies dashboard route structure', () => {
     // Simple test to verify route paths are correct
     const dashboardPath = '/dashboard';
-    const profilePath = '/profile';
+    const settingsPath = '/settings';
     const settingsPath = '/settings';
 
     expect(dashboardPath).toMatch(/^\/dashboard$/);
-    expect(profilePath).toMatch(/^\/profile$/);
+    expect(settingsPath).toMatch(/^\/settings$/);
     expect(settingsPath).toMatch(/^\/settings$/);
   });
 });

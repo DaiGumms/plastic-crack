@@ -117,7 +117,10 @@ app.get('/health', async (req, res) => {
   } catch (error) {
     // Return healthy status even if Redis fails - app can work without Redis
     // eslint-disable-next-line no-console
-    console.warn('Health check Redis error:', error instanceof Error ? error.message : String(error));
+    console.warn(
+      'Health check Redis error:',
+      error instanceof Error ? error.message : String(error)
+    );
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),

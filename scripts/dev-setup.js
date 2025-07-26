@@ -158,14 +158,30 @@ async function setupDatabase() {
     log(migrateResult.output);
   }
 
-  // Seed database
-  log('Seeding database...');
-  const seedResult = execCommand('npm run db:seed');
-  if (!seedResult.success) {
-    logWarning('Database seeding may have failed, but continuing...');
-    log(seedResult.output);
+  // Use smart seeding script
+  log('Running intelligent database seeding...');
+  let seedFlags = '--automated'; // Default to automated mode for dev setup
+
+  // Check for specific flags passed to dev-setup
+  if (process.argv.includes('--force-reseed')) {
+    seedFlags = '--force-reset';
+  } else if (process.argv.includes('--add-to-existing')) {
+    seedFlags = '--add-to-existing';
+  } else if (process.argv.includes('--skip-seed')) {
+    seedFlags = '--skip-seed';
+  }
+
+  const smartSeedResult = execCommand(
+    `node scripts/smart-seed.js ${seedFlags}`
+  );
+  if (!smartSeedResult.success) {
+    logWarning('Smart seeding script encountered issues, but continuing...');
+    log(smartSeedResult.output);
+    if (smartSeedResult.stderr) {
+      log(smartSeedResult.stderr);
+    }
   } else {
-    logSuccess('Database seeded successfully');
+    logSuccess('Database setup completed with smart seeding');
   }
 
   logSuccess('Database setup complete');
@@ -207,6 +223,23 @@ async function main() {
     );
     log('===============================================');
     log('');
+
+    // Show available options
+    if (process.argv.includes('--help') || process.argv.includes('-h')) {
+      log('Available options:');
+      log('  --force-reseed    : Reset database and reseed with fresh data');
+      log(
+        '  --add-to-existing : Add seed data to existing database (may create duplicates)'
+      );
+      log('  --skip-seed       : Skip database seeding entirely');
+      log('  --help, -h        : Show this help message');
+      log('');
+      log(
+        'Default behavior: Skip seeding if data exists, seed if database is empty'
+      );
+      log('');
+      return;
+    }
 
     await checkDockerServices();
     await installDependencies();

@@ -29,7 +29,10 @@ try {
   }
 } catch (error) {
   // eslint-disable-next-line no-console
-  console.error('❌ Failed to initialize database:', error instanceof Error ? error.message : String(error));
+  console.error(
+    '❌ Failed to initialize database:',
+    error instanceof Error ? error.message : String(error)
+  );
   prisma = null;
 }
 
@@ -45,7 +48,10 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Database connection failed:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'Database connection failed:',
+      error instanceof Error ? error.message : String(error)
+    );
     return false;
   }
 }

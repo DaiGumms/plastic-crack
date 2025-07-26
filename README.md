@@ -97,4 +97,49 @@ Plastic Crack enables users to:
 
 ## Getting Started
 
+### Quick Development Setup
+
+1. **Install dependencies:**
+
+   ```bash
+   npm run install:all
+   ```
+
+2. **Start Docker services:**
+
+   ```bash
+   npm run docker:up
+   ```
+
+3. **Set up development environment:**
+
+   ```bash
+   # Intelligent setup (checks for existing data)
+   npm run setup
+
+   # Force clean database with fresh seed data
+   npm run setup:force-reseed
+
+   # Skip seeding (use existing data)
+   npm run setup:skip-seed
+   ```
+
+4. **Check database status:**
+
+   ```bash
+   npm run db:status
+   ```
+
+5. **Start development servers:**
+   ```bash
+   npm run dev
+   ```
+
+### Database Management
+
+- `npm run db:status` - Check current database contents
+- `npm run db:seed:smart` - Interactive seeding with options
+- `npm run db:seed:force` - Force clean seed (no prompts)
+- `npm run db:seed:skip` - Skip seeding entirely
+
 Refer to the documentation in the `docs/` directory for detailed setup and development instructions.

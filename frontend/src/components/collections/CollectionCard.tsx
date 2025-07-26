@@ -11,6 +11,8 @@ import {
   MenuItem,
   Avatar,
   Tooltip,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -47,6 +49,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
   viewMode = 'grid',
 }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -245,26 +248,22 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: viewMode === 'grid' ? 3 : 2, // More lines in grid view
               WebkitBoxOrient: 'vertical',
+              lineHeight: 1.4,
+              minHeight: viewMode === 'grid' ? '4.2em' : '2.8em', // Reserve space
             }}
           >
             {collection.description}
           </Typography>
         )}
 
-        {/* Factions */}
-        {collection.factions && collection.factions.length > 0 && (
-          <Box sx={{ mb: 1.5 }}>
-            <Typography
-              variant='caption'
-              color='text.secondary'
-              sx={{ display: 'block', mb: 0.5 }}
-            >
-              Factions
-            </Typography>
+        {/* Factions and Tags - Combined for space efficiency */}
+        {((collection.factions && collection.factions.length > 0) || 
+          (collection.tags && collection.tags.length > 0)) && (
+          <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {collection.factions.slice(0, 3).map(faction => (
+              {collection.factions?.slice(0, 2).map(faction => (
                 <Chip
                   key={faction.id}
                   icon={<FactionIcon sx={{ fontSize: '0.7rem' }} />}
@@ -275,42 +274,22 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
                   sx={{ fontSize: '0.75rem' }}
                 />
               ))}
-              {collection.factions.length > 3 && (
-                <Chip
-                  label={`+${collection.factions.length - 3} more`}
-                  size='small'
-                  variant='outlined'
-                  sx={{ fontSize: '0.75rem', color: 'text.secondary' }}
-                />
-              )}
-            </Box>
-          </Box>
-        )}
-
-        {/* Tags */}
-        {collection.tags && collection.tags.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              variant='caption'
-              color='text.secondary'
-              sx={{ display: 'block', mb: 0.5 }}
-            >
-              Tags
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {collection.tags.slice(0, 3).map(tag => (
+              {collection.tags?.slice(0, 2).map(tag => (
                 <Chip
                   key={tag}
                   icon={<TagIcon sx={{ fontSize: '0.7rem' }} />}
                   label={tag}
                   size='small'
                   variant='outlined'
-                  sx={{ fontSize: '0.75rem' }}
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    backgroundColor: alpha(theme.palette.grey[500], 0.05),
+                  }}
                 />
               ))}
-              {collection.tags.length > 3 && (
+              {((collection.factions?.length || 0) + (collection.tags?.length || 0)) > 4 && (
                 <Chip
-                  label={`+${collection.tags.length - 3} more`}
+                  label={`+${((collection.factions?.length || 0) + (collection.tags?.length || 0)) - 4} more`}
                   size='small'
                   variant='outlined'
                   sx={{ fontSize: '0.75rem', color: 'text.secondary' }}

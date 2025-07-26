@@ -49,13 +49,15 @@ export const sessionConfig: session.SessionOptions = {
  */
 export const initializeSession = () => {
   const store = createSessionStore();
-  
+
   // If Redis is not available, use memory store (not recommended for production)
   if (!store) {
     // eslint-disable-next-line no-console
-    console.warn('⚠️ Redis not available, using memory session store (not recommended for production)');
+    console.warn(
+      '⚠️ Redis not available, using memory session store (not recommended for production)'
+    );
   }
-  
+
   sessionConfig.store = store; // Will be undefined if Redis not available
 
   return session(sessionConfig);

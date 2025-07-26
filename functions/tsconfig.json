@@ -13,9 +13,7 @@
     "types": ["node", "firebase-functions"]
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": [
     "node_modules",
     "../mobile",

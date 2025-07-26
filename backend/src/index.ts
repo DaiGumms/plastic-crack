@@ -22,9 +22,14 @@ const startServer = async (): Promise<void> => {
       .then(() => {
         console.log('✅ Redis connected successfully');
       })
-      .catch((redisError) => {
-        console.warn('⚠️ Redis connection failed, continuing without Redis:', redisError instanceof Error ? redisError.message : String(redisError));
-        console.log('🚀 Server will continue without Redis caching functionality');
+      .catch(redisError => {
+        console.warn(
+          '⚠️ Redis connection failed, continuing without Redis:',
+          redisError instanceof Error ? redisError.message : String(redisError)
+        );
+        console.log(
+          '🚀 Server will continue without Redis caching functionality'
+        );
       });
 
     // Graceful shutdown handling
@@ -40,7 +45,12 @@ const startServer = async (): Promise<void> => {
           await disconnectRedis();
           console.log('✅ Redis disconnected');
         } catch (redisError) {
-          console.warn('⚠️ Redis disconnect failed:', redisError instanceof Error ? redisError.message : String(redisError));
+          console.warn(
+            '⚠️ Redis disconnect failed:',
+            redisError instanceof Error
+              ? redisError.message
+              : String(redisError)
+          );
         }
 
         process.exit(0);

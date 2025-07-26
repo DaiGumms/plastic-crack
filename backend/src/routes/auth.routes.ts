@@ -6,6 +6,7 @@ import {
   authRateLimit,
   loginRateLimit,
   passwordResetRateLimit,
+  userRateLimit,
 } from '../middleware/rateLimiter';
 import { AuthService } from '../services/auth.service';
 import {
@@ -145,7 +146,7 @@ router.post(
 // GET /api/auth/me
 router.get(
   '/me',
-  authRateLimit,
+  userRateLimit, // Changed from authRateLimit to userRateLimit
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -189,7 +190,7 @@ router.get(
 // POST /api/auth/refresh
 router.post(
   '/refresh',
-  authRateLimit,
+  userRateLimit, // Changed from authRateLimit to userRateLimit
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
     try {

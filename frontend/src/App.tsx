@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { Layout } from './components/layout/Layout';
 import { NotificationContainer } from './components/ui/NotificationContainer';
@@ -16,7 +16,6 @@ import { BetaInterestPage } from './pages/BetaInterestPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { ProfilePage } from './pages/profile/ProfilePage';
 import { PublicProfilePage } from './pages/PublicProfilePage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { CollectionsPage } from './pages/CollectionsPage';
@@ -120,11 +119,7 @@ function App() {
                 />
                 <Route
                   path='/profile'
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to='/settings' replace />}
                 />
                 <Route path='/collections' element={<CollectionsPage />} />
                 <Route

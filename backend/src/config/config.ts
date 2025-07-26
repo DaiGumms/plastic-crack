@@ -100,7 +100,7 @@ const config: Config = {
       enabled:
         process.env.USE_FIREBASE_EMULATOR === 'true' ||
         process.env.NODE_ENV === 'development',
-      host: process.env.FIREBASE_EMULATOR_HOST || 'localhost:9199',
+      host: process.env.FIREBASE_EMULATOR_HOST || '127.0.0.1:9199',
     },
   },
   upload: {

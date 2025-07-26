@@ -42,6 +42,7 @@ interface AuthState {
   // Token management
   accessToken: string | null;
   refreshToken: string | null;
+  tokenExpiresAt: number | null; // Add token expiration timestamp
 
   // Actions
   setUser: (user: User | null) => void;
@@ -51,6 +52,10 @@ interface AuthState {
   setError: (error: string | null) => void;
   logout: () => Promise<void>;
   clearError: () => void;
+
+  // Token management helpers
+  isTokenExpiringSoon: () => boolean;
+  shouldRefreshToken: () => boolean;
 
   // Auth flow helpers
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -69,6 +74,7 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       accessToken: null,
       refreshToken: null,
+      tokenExpiresAt: null,
 
       // Basic setters
       setUser: (user: User | null) => {
@@ -88,9 +94,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setTokens: (accessToken: string, refreshToken: string) => {
+        // Calculate expiration time (JWT tokens expire in 7 days based on backend)
+        const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now
         set({
           accessToken,
           refreshToken,
+          tokenExpiresAt: expiresAt,
         });
       },
 
@@ -106,6 +115,22 @@ export const useAuthStore = create<AuthState>()(
         set({ error: null });
       },
 
+      // Token management helpers
+      isTokenExpiringSoon: () => {
+        const { tokenExpiresAt } = get();
+        if (!tokenExpiresAt) return false;
+        // Consider token expiring soon if less than 1 hour remaining
+        return Date.now() + 60 * 60 * 1000 > tokenExpiresAt;
+      },
+
+      shouldRefreshToken: () => {
+        const { accessToken, refreshToken, tokenExpiresAt } = get();
+        if (!accessToken || !refreshToken) return false;
+        if (!tokenExpiresAt) return true; // If no expiration data, assume we should refresh
+        // Refresh if token expires within 30 minutes
+        return Date.now() + 30 * 60 * 1000 > tokenExpiresAt;
+      },
+
       logout: async () => {
         try {
           // Try to logout from server
@@ -119,12 +144,14 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             accessToken: null,
             refreshToken: null,
+            tokenExpiresAt: null,
             error: null,
           });
           // Also clear from localStorage
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('auth-storage');
+          localStorage.removeItem('last_auth_check');
         }
       },
 
@@ -190,11 +217,13 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             accessToken: null,
             refreshToken: null,
+            tokenExpiresAt: null,
             error: null,
           });
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('auth-storage');
+          localStorage.removeItem('last_auth_check');
           return false;
         }
 
@@ -217,17 +246,19 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             accessToken: null,
             refreshToken: null,
+            tokenExpiresAt: null,
             error: null,
           });
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('auth-storage');
+          localStorage.removeItem('last_auth_check');
           return false;
         }
       },
 
       checkAuthStatus: async () => {
-        const { accessToken, setUser } = get();
+        const { accessToken, shouldRefreshToken, refreshAccessToken } = get();
 
         // If no token, just logout silently without server call
         if (!accessToken) {
@@ -236,6 +267,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             accessToken: null,
             refreshToken: null,
+            tokenExpiresAt: null,
             error: null,
           });
           localStorage.removeItem('access_token');
@@ -244,14 +276,35 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
+        // If token is expiring soon, refresh it first
+        if (shouldRefreshToken()) {
+          const refreshed = await refreshAccessToken();
+          if (!refreshed) {
+            return; // refreshAccessToken already handles cleanup on failure
+          }
+        }
+
+        // Only check with server occasionally, not on every mount
+        const lastCheck = localStorage.getItem('last_auth_check');
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        if (lastCheck && now - parseInt(lastCheck) < fiveMinutes) {
+          // Skip server check if we checked recently
+          return;
+        }
+
         try {
           const data = await authApiService.getCurrentUser();
-          setUser(data.user);
-          set({ isAuthenticated: true });
+          set({
+            user: data.user,
+            isAuthenticated: true,
+          });
+          localStorage.setItem('last_auth_check', now.toString());
         } catch (error) {
           console.error('Auth check failed:', error);
           // Try to refresh the token
-          const refreshed = await get().refreshAccessToken();
+          const refreshed = await refreshAccessToken();
           if (!refreshed) {
             // Silent logout without server call since tokens are invalid
             set({
@@ -259,19 +312,24 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               accessToken: null,
               refreshToken: null,
+              tokenExpiresAt: null,
               error: null,
             });
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('auth-storage');
+            localStorage.removeItem('last_auth_check');
             return;
           }
 
           // Retry getting user data with new token
           try {
             const retryData = await authApiService.getCurrentUser();
-            setUser(retryData.user);
-            set({ isAuthenticated: true });
+            set({
+              user: retryData.user,
+              isAuthenticated: true,
+            });
+            localStorage.setItem('last_auth_check', now.toString());
           } catch {
             // Silent logout without server call
             set({
@@ -279,11 +337,13 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               accessToken: null,
               refreshToken: null,
+              tokenExpiresAt: null,
               error: null,
             });
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('auth-storage');
+            localStorage.removeItem('last_auth_check');
           }
         }
       },
@@ -295,6 +355,7 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
+        tokenExpiresAt: state.tokenExpiresAt,
         isAuthenticated: state.isAuthenticated,
       }),
     }

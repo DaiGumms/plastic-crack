@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { useAppStore } from '../../store';
 import { useAuth } from '../../hooks/useAuth';
+import { tokenRefreshService } from '../../services/tokenRefreshService';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Initialize authentication status on app load
   useAuth();
+
+  // Start token refresh service
+  React.useEffect(() => {
+    tokenRefreshService.start();
+
+    return () => {
+      tokenRefreshService.stop();
+    };
+  }, []);
 
   React.useEffect(() => {
     if (isDarkMode) {

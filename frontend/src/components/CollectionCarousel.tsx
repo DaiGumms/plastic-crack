@@ -46,7 +46,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
       sx={{
         minWidth: 280,
         maxWidth: 320,
-        height: 200,
+        height: 240, // Increased height for better description space
         mr: 2,
         flexShrink: 0,
         transition: 'all 0.3s ease-in-out',
@@ -58,13 +58,13 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
       }}
     >
       <CardContent
-        sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}
+        sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}
       >
-        {/* Header with user info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        {/* Header with user info - made more compact */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
           <Avatar
             src={collection.user.profileImageUrl || undefined}
-            sx={{ width: 32, height: 32, mr: 1.5 }}
+            sx={{ width: 28, height: 28, mr: 1 }}
           >
             {collection.user.displayName?.[0] || collection.user.username[0]}
           </Avatar>
@@ -76,29 +76,41 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
                 display: 'block',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                fontSize: '0.7rem',
               }}
             >
               {collection.user.displayName || collection.user.username}
             </Typography>
           </Box>
+          {/* Game system chip in header for space efficiency */}
+          <Chip
+            label={collection.gameSystem.shortName}
+            size='small'
+            color='primary'
+            variant='outlined'
+            sx={{ fontSize: '0.65rem', height: 20 }}
+          />
         </Box>
 
-        {/* Collection name */}
+        {/* Collection name - allow 2 lines max */}
         <Typography
           variant='h6'
           component='h3'
           sx={{
             fontWeight: 600,
-            mb: 1,
+            mb: 1.5,
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.2,
+            fontSize: '1rem',
           }}
         >
           {collection.name}
         </Typography>
 
-        {/* Description */}
+        {/* Description - increased lines and improved styling */}
         <Typography
           variant='body2'
           color='text.secondary'
@@ -107,93 +119,66 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
             mb: 2,
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 4, // Increased from 2 to 4 lines
             WebkitBoxOrient: 'vertical',
             lineHeight: 1.4,
+            fontSize: '0.85rem',
+            minHeight: '4.7em', // Reserve space for 4 lines even if shorter
           }}
         >
-          {collection.description}
+          {collection.description || 'No description available'}
         </Typography>
 
-        {/* Game system */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 0.5,
-            alignItems: 'center',
-            mb: 1,
-          }}
-        >
-          <Chip
-            label={collection.gameSystem.shortName}
-            size='small'
-            color='primary'
-            variant='outlined'
-            sx={{ fontSize: '0.75rem' }}
-          />
+        {/* Condensed metadata section */}
+        <Box sx={{ mt: 'auto' }}>
+          {/* Factions and Tags combined in one row */}
+          {((collection.factions && collection.factions.length > 0) || 
+            (collection.tags && collection.tags.length > 0)) && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 0.4,
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
+              {/* Show only the first faction */}
+              {collection.factions && collection.factions.length > 0 && (
+                <Chip
+                  icon={<FactionIcon sx={{ fontSize: '0.6rem' }} />}
+                  label={collection.factions[0].name}
+                  size='small'
+                  color='secondary'
+                  variant='outlined'
+                  sx={{ fontSize: '0.65rem', height: 18 }}
+                />
+              )}
+              
+              {/* Show one tag if space allows */}
+              {collection.tags && collection.tags.length > 0 && (
+                <Chip
+                  icon={<TagIcon sx={{ fontSize: '0.6rem' }} />}
+                  label={collection.tags[0]}
+                  size='small'
+                  variant='outlined'
+                  sx={{
+                    fontSize: '0.65rem',
+                    height: 18,
+                    backgroundColor: alpha(theme.palette.grey[500], 0.08),
+                  }}
+                />
+              )}
+              
+              {/* Show count of additional items */}
+              {((collection.factions?.length || 0) + (collection.tags?.length || 0)) > 2 && (
+                <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.65rem' }}>
+                  +{((collection.factions?.length || 0) + (collection.tags?.length || 0)) - 2} more
+                </Typography>
+              )}
+            </Box>
+          )}
         </Box>
-
-        {/* Factions */}
-        {collection.factions && collection.factions.length > 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-              alignItems: 'center',
-              mb: 1,
-            }}
-          >
-            {collection.factions.slice(0, 2).map(faction => (
-              <Chip
-                key={faction.id}
-                icon={<FactionIcon sx={{ fontSize: '0.6rem' }} />}
-                label={faction.name}
-                size='small'
-                color='secondary'
-                variant='outlined'
-                sx={{ fontSize: '0.7rem' }}
-              />
-            ))}
-            {collection.factions.length > 2 && (
-              <Typography variant='caption' color='text.secondary'>
-                +{collection.factions.length - 2} more factions
-              </Typography>
-            )}
-          </Box>
-        )}
-
-        {/* Tags */}
-        {collection.tags && collection.tags.length > 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-              alignItems: 'center',
-            }}
-          >
-            {collection.tags.slice(0, 2).map((tag, index) => (
-              <Chip
-                key={index}
-                icon={<TagIcon sx={{ fontSize: '0.6rem' }} />}
-                label={tag}
-                size='small'
-                variant='outlined'
-                sx={{
-                  fontSize: '0.7rem',
-                  backgroundColor: alpha(theme.palette.grey[500], 0.1),
-                }}
-              />
-            ))}
-            {collection.tags.length > 2 && (
-              <Typography variant='caption' color='text.secondary'>
-                +{collection.tags.length - 2} more tags
-              </Typography>
-            )}
-          </Box>
-        )}
       </CardContent>
     </Card>
   );
@@ -204,22 +189,29 @@ const SkeletonCard: React.FC = () => (
     sx={{
       minWidth: 280,
       maxWidth: 320,
-      height: 200,
+      height: 240, // Match the new card height
       mr: 2,
       flexShrink: 0,
     }}
   >
-    <CardContent sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Skeleton variant='circular' width={32} height={32} sx={{ mr: 1.5 }} />
-        <Skeleton variant='text' width={100} />
+    <CardContent sx={{ p: 2.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+        <Skeleton variant='circular' width={28} height={28} sx={{ mr: 1 }} />
+        <Skeleton variant='text' width={80} sx={{ mr: 1 }} />
+        <Skeleton variant='rounded' width={40} height={20} />
       </Box>
-      <Skeleton variant='text' width='80%' sx={{ mb: 1 }} />
-      <Skeleton variant='text' width='100%' sx={{ mb: 1 }} />
-      <Skeleton variant='text' width='60%' sx={{ mb: 2 }} />
-      <Box sx={{ display: 'flex', gap: 0.5 }}>
-        <Skeleton variant='rounded' width={60} height={24} />
-        <Skeleton variant='rounded' width={80} height={24} />
+      <Skeleton variant='text' width='90%' sx={{ mb: 1 }} />
+      <Skeleton variant='text' width='70%' sx={{ mb: 1.5 }} />
+      
+      {/* Description skeleton - 4 lines */}
+      <Skeleton variant='text' width='100%' sx={{ mb: 0.5 }} />
+      <Skeleton variant='text' width='95%' sx={{ mb: 0.5 }} />
+      <Skeleton variant='text' width='88%' sx={{ mb: 0.5 }} />
+      <Skeleton variant='text' width='75%' sx={{ mb: 2 }} />
+      
+      <Box sx={{ display: 'flex', gap: 0.5, mt: 'auto' }}>
+        <Skeleton variant='rounded' width={60} height={18} />
+        <Skeleton variant='rounded' width={50} height={18} />
       </Box>
     </CardContent>
   </Card>

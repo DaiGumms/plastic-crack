@@ -48,6 +48,13 @@ export interface PublicUserProfile {
 }
 
 export class UserService {
+  // Helper method to transform UserProfile for frontend compatibility
+  private static transformUserProfileForFrontend(user: UserProfile): UserProfile & { avatarUrl?: string | null } {
+    return {
+      ...user,
+      avatarUrl: user.profileImageUrl,
+    };
+  }
   // Get user profile (authenticated user's own profile)
   static async getUserProfile(userId: string): Promise<UserProfile> {
     const user = await prisma.user.findUnique({
@@ -76,7 +83,7 @@ export class UserService {
       throw new Error('User not found');
     }
 
-    return user;
+    return this.transformUserProfileForFrontend(user);
   }
 
   // Get public user profile (for viewing other users)
@@ -197,7 +204,7 @@ export class UserService {
         },
       });
 
-      return updatedUser;
+      return this.transformUserProfileForFrontend(updatedUser);
     } catch (error) {
       if (process.env.NODE_ENV !== 'test') {
         // eslint-disable-next-line no-console
