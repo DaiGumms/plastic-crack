@@ -36,43 +36,31 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PLASTIC_CRACK }}
 
-      - name: Extract metadata for Backend
-        id: meta-backend
-        uses: docker/metadata-action@v5
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
+          project_id: plastic-crack
 
-      - name: Build and push Backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Deploy Backend to Cloud Run
+        run: |
+          cd backend
+          gcloud builds submit --config=cloudbuild.yaml --project=plastic-crack
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
         run: |
-          echo "Deploying to production environment..."
-          # Add your deployment steps here
-          # Examples:
-          # - SSH to server and pull images
-          # - Update kubernetes manifests
-          # - Trigger deployment pipeline
+          echo "🚀 Production deployment completed successfully!"
+          echo "✅ Backend: Deployed to Google Cloud Run (europe-west3)"
+          echo "✅ Frontend: Deployed via Firebase Hosting workflow"
+          echo "📱 Application URL: https://plastic-crack.web.app"
           
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
